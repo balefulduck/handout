@@ -1,0 +1,94 @@
+{
+  "strains": [
+    {
+      "id": 1,
+      "name": "Purple Haze Auto",
+      "type": "Sativa-dominant",
+      "thc": "18-22%",
+      "cbd": "<1%",
+      "flowering_time": 63,
+      "description": "Klassische Sativa mit süß-erdigen Aromen und energetisierender Wirkung. Ideal für kreative Tätigkeiten.",
+      "effects": ["Energetisierend", "Kreativ", "Fokussiert"]
+    },
+    {
+      "id": 2,
+      "name": "CBD Therapy",
+      "type": "Indica-dominant",
+      "thc": "5-8%",
+      "cbd": "8-12%",
+      "flowering_time": 56,
+      "description": "Medizinische Sorte mit ausgewogenem THC:CBD Verhältnis. Bekannt für ihre schmerzlindernde Wirkung.",
+      "effects": ["Entspannend", "Schmerzlindernd", "Ausgleichend"]
+    },
+    {
+      "id": 3,
+      "name": "Northern Lights Auto",
+      "type": "Indica-dominant",
+      "thc": "16-19%",
+      "cbd": "<1%",
+      "flowering_time": 60,
+      "description": "Robuste Autoflowering-Sorte mit klassischem Indica-Effekt. Perfekt für Anfänger.",
+      "effects": ["Entspannend", "Schlaffördernd", "Beruhigend"]
+    },
+    {
+      "id": 4,
+      "name": "Lemon Haze",
+      "type": "Sativa-dominant",
+      "thc": "20-24%",
+      "cbd": "<1%",
+      "flowering_time": 65,
+      "description": "Zitrusartige Sativa mit aufheiternder Wirkung. Bekannt für ihr charakteristisches Aroma.",
+      "effects": ["Euphorisch", "Sozial", "Kreativ"]
+    },
+    {
+      "id": 5,
+      "name": "Critical Mass CBD",
+      "type": "Hybrid",
+      "thc": "6-8%",
+      "cbd": "8-10%",
+      "flowering_time": 58,
+      "description": "Ausgewogene Hybrid-Sorte mit hohem CBD-Gehalt. Ideal für therapeutische Anwendungen.",
+      "effects": ["Ausgleichend", "Therapeutisch", "Mild"]
+    },
+    {
+      "id": 6,
+      "name": "Blue Dream",
+      "type": "Hybrid",
+      "thc": "17-21%",
+      "cbd": "<1%",
+      "flowering_time": 65,
+      "description": "Beliebte Hybrid-Sorte mit süßem Beerenaroma. Bietet eine ausgewogene Wirkung.",
+      "effects": ["Ausgewogen", "Stimmungsaufhellend", "Entspannend"]
+    },
+    {
+      "id": 7,
+      "name": "White Widow",
+      "type": "Hybrid",
+      "thc": "19-22%",
+      "cbd": "<1%",
+      "flowering_time": 63,
+      "description": "Klassischer Hybrid mit starker Wirkung. Bekannt für ihre kristalline Erscheinung.",
+      "effects": ["Potent", "Euphorisch", "Langanhaltend"]
+    },
+    {
+      "id": 8,
+      "name": "ACDC",
+      "type": "Sativa-dominant",
+      "thc": "1-6%",
+      "cbd": "16-24%",
+      "flowering_time": 70,
+      "description": "CBD-reiche Sorte mit minimaler psychoaktiver Wirkung. Ideal für medizinische Anwendungen.",
+      "effects": ["Therapeutisch", "Klar", "Schmerzlindernd"]
+    },
+    {
+      "id": 9,
+      "name": "Gelato",
+      "type": "Hybrid",
+      "thc": "20-25%",
+      "cbd": "<1%",
+      "flowering_time": 63,
+      "description": "Moderne Hybrid-Sorte mit süßem Dessertaroma. Bekannt für ihre starke und ausgewogene Wirkung.",
+      "effects": ["Entspannend", "Euphorisch", "Kreativ"]
+    }
+  ]
+}
