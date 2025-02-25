@@ -22,7 +22,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <main className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-teal">Dein Anbau-Guide</h1>
+ 
           <div className="text-right">
             <p className="text-sm text-gray-600">Willkommen zurück,</p>
             <p className="font-medium">{session?.user?.name || 'Workshop'}</p>
