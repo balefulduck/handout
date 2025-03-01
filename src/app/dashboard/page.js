@@ -2,9 +2,11 @@
 
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [selectedStrains, setSelectedStrains] = useState([]);
 
   useEffect(() => {
@@ -22,7 +24,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <main className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-teal">Dein Anbau-Guide</h1>
+ 
           <div className="text-right">
             <p className="text-sm text-gray-600">Willkommen zurück,</p>
             <p className="font-medium">{session?.user?.name || 'Workshop'}</p>
@@ -43,25 +45,35 @@ export default function DashboardPage() {
         </div>
 
         {/* Growth Phases */}
+         {/* Seedling phase */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-teal hover:shadow-xl transition-shadow">
             <h2 className="text-2xl font-semibold mb-4">Keimling</h2>
-            <p className="text-gray-600">Phase 1: Keimung und frühe Entwicklung</p>
-            <button className="mt-4 text-teal hover:text-teal-700">Mehr erfahren →</button>
+            <p className="text-gray-600">Phase 1: Keimung und erste Blätter</p>
+            <button 
+              onClick={() => router.push('/phases/seedling')}
+              className="mt-4 text-teal hover:text-teal-700">
+              Mehr erfahren →
+            </button>
           </div>
-          
+           {/* Vegetation Phase */}
           <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-lime hover:shadow-xl transition-shadow">
             <h2 className="text-2xl font-semibold mb-4">Vegetatives Wachstum</h2>
             <p className="text-gray-600">Phase 2: Wachstum und Entwicklung</p>
-            <button className="mt-4 text-lime hover:text-lime-700">Mehr erfahren →</button>
+            <button 
+              onClick={() => router.push('/phases/vegetation')}
+              className="mt-4 text-lime hover:text-lime-700">
+              Mehr erfahren →
+            </button>
           </div>
-          
+           {/* FLower Phase */}
           <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-orange hover:shadow-xl transition-shadow">
             <h2 className="text-2xl font-semibold mb-4">Blüte</h2>
             <p className="text-gray-600">Phase 3: Blütenbildung</p>
             <button className="mt-4 text-orange hover:text-orange-700">Mehr erfahren →</button>
           </div>
 
+             {/* Harvest */}
           <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-purple hover:shadow-xl transition-shadow">
             <h2 className="text-2xl font-semibold mb-4">Ernte</h2>
             <p className="text-gray-600">Phase 4: Ernte und Trocknung</p>
