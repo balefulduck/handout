@@ -60,7 +60,11 @@ export default function DashboardPage() {
           <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-lime hover:shadow-xl transition-shadow">
             <h2 className="text-2xl font-semibold mb-4">Vegetatives Wachstum</h2>
             <p className="text-gray-600">Phase 2: Wachstum und Entwicklung</p>
-            <button className="mt-4 text-lime hover:text-lime-700">Mehr erfahren →</button>
+            <button 
+              onClick={() => router.push('/phases/vegetation')}
+              className="mt-4 text-lime hover:text-lime-700">
+              Mehr erfahren →
+            </button>
           </div>
            {/* FLower Phase */}
           <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-orange hover:shadow-xl transition-shadow">
