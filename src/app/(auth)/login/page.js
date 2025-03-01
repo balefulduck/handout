@@ -13,10 +13,30 @@ export default function LoginPage() {
     const formData = new FormData(e.currentTarget);
     
     try {
+      // Log pre-login state
+      await fetch('/api/debug/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'pre_login',
+          username: formData.get('username')
+        })
+      });
+
       const res = await signIn('credentials', {
         username: formData.get('username'),
         password: formData.get('password'),
         redirect: false,
+      });
+
+      // Log post-login state
+      await fetch('/api/debug/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'post_login',
+          response: res
+        })
       });
 
       if (res.error) {
@@ -24,10 +44,38 @@ export default function LoginPage() {
         return;
       }
 
-      // Redirect based on onboarding status
-      const destination = res.onboarding_completed ? '/dashboard' : '/onboarding';
-      router.push(destination);
+      if (res.ok) {
+        // Log pre-redirect state
+        await fetch('/api/debug/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event: 'pre_redirect'
+          })
+        });
+
+        // Let the middleware handle the redirect
+        router.refresh();
+
+        // Log post-refresh state
+        await fetch('/api/debug/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event: 'post_refresh'
+          })
+        });
+      }
     } catch (error) {
+      // Log any errors
+      await fetch('/api/debug/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'error',
+          error: error.message
+        })
+      });
       setError('Ein Fehler ist aufgetreten');
     }
   };
