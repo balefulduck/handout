@@ -18,7 +18,7 @@ export default function HarvestPhase() {
             <div className="space-y-1">
               <div className="flex items-center gap-1.5">
                 <PiThermometerSimple className="text-lg text-purple" />
-                <span className="text-sm">18-21°C</span>
+                <span className="text-sm">16-21°C</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <PiThermometerSimple className="text-lg text-purple/70" />
@@ -33,14 +33,6 @@ export default function HarvestPhase() {
             <span className="text-sm font-medium">10-14 Tage</span>
           </div>
 
-          {/* Moisture Card */}
-          <div className="bg-white rounded-xl shadow p-3 flex flex-col items-center justify-center">
-            <WiHumidity className="text-lg text-purple mb-1" />
-            <div className="text-center">
-              <div className="text-xs font-medium text-gray-600">Feuchtigkeit</div>
-              <div className="text-sm">60-65%</div>
-            </div>
-          </div>
 
           {/* Process Card - Full Width */}
           <div className="bg-white rounded-xl shadow p-3 border-l-2 border-purple col-span-2 sm:col-span-3">

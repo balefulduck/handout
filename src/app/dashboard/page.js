@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { Disclosure, Transition } from '@headlessui/react';
 import { ChevronUpIcon } from '@heroicons/react/24/solid';
+import Image from 'next/image';
 
 import ContextMenu from '@/components/ContextMenu';
 import SeedlingPhase from '@/components/phases/SeedlingPhase';
@@ -48,20 +49,21 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Disclosure defaultOpen={true}>
+      <Disclosure defaultOpen={false}>
         {({ open }) => (
           <>
             <div className="sticky top-0 z-10 bg-white shadow-md">
               <Disclosure.Button className="flex w-full justify-between items-center px-4 py-2 text-left focus:outline-none focus-visible:ring focus-visible:ring-opacity-75">
-                <div className="flex items-center space-x-4">
-                  <div>
+            
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
                     <p className="text-sm text-gray-600">Willkommen zurück,</p>
                     <p className="font-medium">{session?.user?.name || 'Workshop'}</p>
                   </div>
+                  <ChevronUpIcon
+                    className={`${open ? '' : 'transform rotate-180'} w-5 h-5 text-gray-500 transition-transform duration-200`}
+                  />
                 </div>
-                <ChevronUpIcon
-                  className={`${open ? 'transform rotate-180' : ''} w-5 h-5 text-gray-500 transition-transform duration-200`}
-                />
               </Disclosure.Button>
 
               <Transition
@@ -74,12 +76,11 @@ export default function DashboardPage() {
               >
                 <Disclosure.Panel className="px-4 pb-4">
                   <div className="mt-4">
-                    <h2 className="text-2xl font-semibold mb-4">Deine ausgewählten Sorten</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <h2 className="text-2xl font-semibold mb-4">Deine Pflanzen</h2>
+                    <div className="grid grid-cols-3 gap-4">
                       {selectedStrains.map((strain) => (
                         <div key={strain.id} className="bg-gray-50 rounded-lg p-4">
                           <h3 className="font-semibold">{strain.name}</h3>
-                          <p className="text-sm text-gray-600">{strain.type}</p>
                         </div>
                       ))}
                     </div>
@@ -113,9 +114,7 @@ export default function DashboardPage() {
 
         {/* Emergency Help Section */}
         <div className="mt-8 bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500 hover:shadow-xl transition-shadow">
-          <h2 className="text-2xl font-semibold text-red-500 mb-4">Notfall-Hilfe</h2>
-          <p className="text-gray-600">Schnelle Hilfe bei Problemen mit deinen Pflanzen</p>
-          <button className="mt-4 text-red-500 hover:text-red-700">Hilfe bekommen →</button>
+          <h2 className="text-2xl font-semibold text-red-500 mb-4">Dr. Cannabis - Notfall-Hilfe</h2>
         </div>
       </main>
     </div>

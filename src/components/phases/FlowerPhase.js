@@ -53,10 +53,7 @@ export default function FlowerPhase() {
                 <span>Dauer:</span>
                 <span className="text-gray-600">8-12 Wochen</span>
               </div>
-              <div className="flex items-center gap-1">
-                <span>Fokus:</span>
-                <span className="text-gray-600">Blütenentwicklung</span>
-              </div>
+              
             </div>
           </div>
         </div>
