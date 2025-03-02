@@ -2,14 +2,19 @@
 
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Disclosure, Transition } from '@headlessui/react';
 import { ChevronUpIcon } from '@heroicons/react/24/solid';
 
+import ContextMenu from '@/components/ContextMenu';
+import SeedlingPhase from '@/components/phases/SeedlingPhase';
+import VegetationPhase from '@/components/phases/VegetationPhase';
+import FlowerPhase from '@/components/phases/FlowerPhase';
+import HarvestPhase from '@/components/phases/HarvestPhase';
+
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const router = useRouter();
   const [selectedStrains, setSelectedStrains] = useState([]);
+  const [activePhase, setActivePhase] = useState(null);
 
   useEffect(() => {
     const fetchStrains = async () => {
@@ -21,6 +26,25 @@ export default function DashboardPage() {
     };
     fetchStrains();
   }, []);
+
+  const handlePhaseSelect = (phase) => {
+    setActivePhase(activePhase === phase ? null : phase);
+  };
+
+  const renderPhaseContent = () => {
+    switch (activePhase) {
+      case 'seedling':
+        return <SeedlingPhase />;
+      case 'vegetation':
+        return <VegetationPhase />;
+      case 'flower':
+        return <FlowerPhase />;
+      case 'harvest':
+        return <HarvestPhase />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -67,29 +91,24 @@ export default function DashboardPage() {
         )}
       </Disclosure>
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <ContextMenu activePhase={activePhase} onPhaseSelect={handlePhaseSelect} />
 
-        {/* Growth Phases */}
-         {/* Seedling phase */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          <div onClick={() => router.push('/phases/seedling')} className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-teal hover:shadow-xl transition-shadow">
-            <h2 className="text-2xl font-semibold mb-4">Keimlingsphase</h2>
-          </div>
-
-           {/* Vegetation Phase */}
-          <div onClick={() => router.push('/phases/vegetation')} className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-lime hover:shadow-xl transition-shadow">
-            <h2 className="text-2xl font-semibold mb-4">Vegetatives Wachstum</h2>
-          </div>
-          
-           {/* FLower Phase */}
-          <div onClick={() => router.push('/phases/flower')} className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-orange hover:shadow-xl transition-shadow">
-            <h2 className="text-2xl font-semibold mb-4">Blütephase</h2>
-          </div>
-
-             {/* Harvest */}
-          <div onClick={() => router.push('/phases/harvest')} className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-purple hover:shadow-xl transition-shadow">
-            <h2 className="text-2xl font-semibold mb-4">Ernte</h2>
-          </div>
+      <main className="max-w-7xl mx-auto px-4 py-8 pb-24">
+        {/* Phase Content */}
+        <div className="mb-8">
+          <Transition
+            show={activePhase !== null}
+            enter="transition-opacity duration-200"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="transition-opacity duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div>
+              {renderPhaseContent()}
+            </div>
+          </Transition>
         </div>
 
         {/* Emergency Help Section */}
