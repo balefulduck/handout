@@ -112,10 +112,7 @@ export default function DashboardPage() {
           </Transition>
         </div>
 
-        {/* Emergency Help Section */}
-        <div className="mt-8 bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500 hover:shadow-xl transition-shadow">
-          <h2 className="text-2xl font-semibold text-red-500 mb-4">Dr. Cannabis - Notfall-Hilfe</h2>
-        </div>
+      
       </main>
     </div>
   );

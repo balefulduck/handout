@@ -5,11 +5,34 @@ import { WiHumidity } from "react-icons/wi";
 import { PiPlantBold } from "react-icons/pi";
 import { LuSunMedium } from "react-icons/lu";
 import { GiPlantSeed, GiGrowth, GiFlowerPot, GiScythe } from "react-icons/gi";
+import { useRouter, usePathname } from 'next/navigation';
 
 export default function ContextMenu({ activePhase, onPhaseSelect }) {
+  const router = useRouter();
+  const pathname = usePathname();
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-white shadow-lg border-t border-gray-200">
       <div className="max-w-7xl mx-auto px-4">
+        <div className="grid grid-cols-3 divide-x divide-gray-200 border-b border-gray-200">
+          <button
+            onClick={() => router.push('/dashboard')}
+            className={`flex items-center justify-center py-1.5 transition-colors ${pathname === '/dashboard' ? 'bg-teal/50 text-gray-900' : 'text-gray-600 hover:bg-teal/10'}`}
+          >
+            <span className="text-sm font-medium">Daten</span>
+          </button>
+          <button
+            onClick={() => router.push('/plants')}
+            className={`flex items-center justify-center py-1.5 transition-colors ${pathname === '/plants' ? 'bg-teal/50 text-gray-900' : 'text-gray-600 hover:bg-teal/10'}`}
+          >
+            <span className="text-sm font-medium">Pflanzen</span>
+          </button>
+          <button
+            onClick={() => router.push('/help')}
+            className={`flex items-center justify-center py-1.5 transition-colors ${pathname === '/help' ? 'bg-teal/50 text-gray-900' : 'text-gray-600 hover:bg-teal/10'}`}
+          >
+            <span className="text-sm font-medium">Erste Hilfe</span>
+          </button>
+        </div>
         <div className="grid grid-cols-4 divide-x divide-gray-200">
           <button
             onClick={() => onPhaseSelect('seedling')}
