@@ -19,6 +19,9 @@ export default function Home() {
         <h1 className="text-4xl font-bold text-teal-600 mb-2">
           Willkommen beim Grow-Workshop
         </h1>
+        <p className="text-3xl font-light text-teal-500">
+          Basic
+        </p>
         <div className="mt-8">
           <Link 
             href="/login" 
@@ -27,9 +30,7 @@ export default function Home() {
             Tippe hier um zu beginnen
           </Link>
         </div>
-        <p className="text-3xl font-light text-teal-500">
-          Basic
-        </p>
+     
       </div>
 
     </main>
