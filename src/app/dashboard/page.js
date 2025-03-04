@@ -48,7 +48,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <Disclosure defaultOpen={false}>
         {({ open }) => (
           <>
@@ -76,14 +76,7 @@ export default function DashboardPage() {
               >
                 <Disclosure.Panel className="px-4 pb-4">
                   <div className="mt-4">
-                    <h2 className="text-2xl font-semibold mb-4">Deine Pflanzen</h2>
-                    <div className="grid grid-cols-3 gap-4">
-                      {selectedStrains.map((strain) => (
-                        <div key={strain.id} className="bg-gray-50 rounded-lg p-4">
-                          <h3 className="font-semibold">{strain.name}</h3>
-                        </div>
-                      ))}
-                    </div>
+                    
                   </div>
                 </Disclosure.Panel>
               </Transition>

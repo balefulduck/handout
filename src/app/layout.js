@@ -16,7 +16,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="de">
-      <body className={`${jura.variable} font-jura min-h-screen bg-gray-50`}>
+      <body className={`${jura.variable} font-jura min-h-screen`} style={{ background: `linear-gradient(45deg, #e98b00 0%, #2dabb6 100%)` }}>
         <Providers>{children}</Providers>
       </body>
     </html>

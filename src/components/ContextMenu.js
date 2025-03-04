@@ -5,6 +5,8 @@ import { WiHumidity } from "react-icons/wi";
 import { PiPlantBold } from "react-icons/pi";
 import { LuSunMedium } from "react-icons/lu";
 import { GiPlantSeed, GiGrowth, GiFlowerPot, GiScythe } from "react-icons/gi";
+import { BsChatDots, BsPlusLg } from "react-icons/bs";
+import { FaFirstAid } from "react-icons/fa";
 import { useRouter, usePathname } from 'next/navigation';
 
 export default function ContextMenu({ activePhase, onPhaseSelect }) {
@@ -33,39 +35,73 @@ export default function ContextMenu({ activePhase, onPhaseSelect }) {
             <span className="text-sm font-medium">Erste Hilfe</span>
           </button>
         </div>
-        <div className="grid grid-cols-4 divide-x divide-gray-200">
-          <button
-            onClick={() => onPhaseSelect('seedling')}
-            className={`flex flex-col items-center gap-1 py-3 transition-colors ${activePhase === 'seedling' ? 'text-teal' : 'text-gray-600 hover:text-teal'}`}
-          >
-            <GiPlantSeed className="text-2xl" />
-            <span className="text-sm">Keimling</span>
-          </button>
+        {pathname === '/dashboard' && (
+          <div className="grid grid-cols-4 divide-x divide-gray-200">
+            <button
+              onClick={() => onPhaseSelect('seedling')}
+              className={`flex flex-col items-center gap-1 py-3 transition-colors ${activePhase === 'seedling' ? 'text-teal' : 'text-gray-600 hover:text-teal'}`}
+            >
+              <GiPlantSeed className="text-2xl" />
+              <span className="text-sm">Keimling</span>
+            </button>
 
-          <button
-            onClick={() => onPhaseSelect('vegetation')}
-            className={`flex flex-col items-center gap-1 py-3 transition-colors ${activePhase === 'vegetation' ? 'text-lime' : 'text-gray-600 hover:text-lime'}`}
-          >
-            <GiGrowth className="text-2xl" />
-            <span className="text-sm">Vegetation</span>
-          </button>
+            <button
+              onClick={() => onPhaseSelect('vegetation')}
+              className={`flex flex-col items-center gap-1 py-3 transition-colors ${activePhase === 'vegetation' ? 'text-lime' : 'text-gray-600 hover:text-lime'}`}
+            >
+              <GiGrowth className="text-2xl" />
+              <span className="text-sm">Vegetation</span>
+            </button>
 
-          <button
-            onClick={() => onPhaseSelect('flower')}
-            className={`flex flex-col items-center gap-1 py-3 transition-colors ${activePhase === 'flower' ? 'text-orange' : 'text-gray-600 hover:text-orange'}`}
-          >
-            <GiFlowerPot className="text-2xl" />
-            <span className="text-sm">Blüte</span>
-          </button>
+            <button
+              onClick={() => onPhaseSelect('flower')}
+              className={`flex flex-col items-center gap-1 py-3 transition-colors ${activePhase === 'flower' ? 'text-orange' : 'text-gray-600 hover:text-orange'}`}
+            >
+              <GiFlowerPot className="text-2xl" />
+              <span className="text-sm">Blüte</span>
+            </button>
 
-          <button
-            onClick={() => onPhaseSelect('harvest')}
-            className={`flex flex-col items-center gap-1 py-3 transition-colors ${activePhase === 'harvest' ? 'text-purple' : 'text-gray-600 hover:text-purple'}`}
-          >
-            <GiScythe className="text-2xl" />
-            <span className="text-sm">Ernte</span>
-          </button>
-        </div>
+            <button
+              onClick={() => onPhaseSelect('harvest')}
+              className={`flex flex-col items-center gap-1 py-3 transition-colors ${activePhase === 'harvest' ? 'text-purple' : 'text-gray-600 hover:text-purple'}`}
+            >
+              <GiScythe className="text-2xl" />
+              <span className="text-sm">Ernte</span>
+            </button>
+          </div>
+        )}
+
+        {pathname === '/help' && (
+          <div className="grid grid-cols-2 divide-x divide-gray-200">
+            <button
+              onClick={() => {/* TODO: Implement Discord integration */}}
+              className="flex flex-col items-center gap-1 py-3 transition-colors text-gray-600 hover:text-blue-500"
+            >
+              <BsChatDots className="text-2xl" />
+              <span className="text-sm">Discord</span>
+            </button>
+
+            <button
+              onClick={() => {/* TODO: Implement Dr. Cannabis help */}}
+              className="flex flex-col items-center gap-1 py-3 transition-colors text-gray-600 hover:text-red-500"
+            >
+              <FaFirstAid className="text-2xl" />
+              <span className="text-sm">Dr. Cannabis Hilfe</span>
+            </button>
+          </div>
+        )}
+
+        {pathname === '/plants' && (
+          <div className="grid grid-cols-1 divide-x divide-gray-200">
+            <button
+              onClick={() => {/* TODO: Implement new plant functionality */}}
+              className="flex flex-col items-center gap-1 py-3 transition-colors text-gray-600 hover:text-green-500"
+            >
+              <BsPlusLg className="text-2xl" />
+              <span className="text-sm">Neue Pflanze</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,7 @@
 'use client';
 
+import ContextMenu from '@/components/ContextMenu';
+
 export default function HelpPage() {
   const troubleshootingItems = [
     {
@@ -29,7 +31,8 @@ export default function HelpPage() {
   ];
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <>
+    <div className="p-6 pb-32 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Hilfe & Problemlösung</h1>
       
       <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8">
@@ -72,5 +75,7 @@ export default function HelpPage() {
         </ul>
       </div>
     </div>
+    <ContextMenu />
+    </>
   );
 }

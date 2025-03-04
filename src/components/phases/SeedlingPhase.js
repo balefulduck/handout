@@ -6,7 +6,7 @@ import { LuSunMedium } from "react-icons/lu";
 
 export default function SeedlingPhase() {
   return (
-    <div className="bg-gray-50 py-4 px-3">
+    <div className="py-4 px-3">
       <div className="max-w-3xl mx-auto">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {/* Climate Card */}
