@@ -15,7 +15,7 @@ import HarvestPhase from '@/components/phases/HarvestPhase';
 export default function DashboardPage() {
   const { data: session } = useSession();
   const [selectedStrains, setSelectedStrains] = useState([]);
-  const [activePhase, setActivePhase] = useState(null);
+  const [activePhase, setActivePhase] = useState('seedling'); //Make seedling phase default
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
