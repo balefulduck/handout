@@ -87,14 +87,14 @@ export default function AdminPage() {
       <input
         type="text"
         placeholder="Name"
-        className="w-full p-2 border rounded"
+        className="w-full p-2 border rounded focus:border-custom-orange focus:ring-1 focus:ring-custom-orange"focus:border-custom-orange focus:ring-1 focus:ring-custom-orange"
         value={strain.name}
         onChange={(e) => strain.id ? 
           setEditingStrain({ ...strain, name: e.target.value }) :
           setNewStrain({ ...strain, name: e.target.value })}
       />
       <select
-        className="w-full p-2 border rounded"
+        className="w-full p-2 border rounded focus:border-custom-orange focus:ring-1 focus:ring-custom-orange"
         value={strain.type}
         onChange={(e) => strain.id ?
           setEditingStrain({ ...strain, type: e.target.value }) :
@@ -108,7 +108,7 @@ export default function AdminPage() {
       <input
         type="text"
         placeholder="THC %"
-        className="w-full p-2 border rounded"
+        className="w-full p-2 border rounded focus:border-custom-orange focus:ring-1 focus:ring-custom-orange"
         value={strain.thc}
         onChange={(e) => strain.id ?
           setEditingStrain({ ...strain, thc: e.target.value }) :
@@ -117,7 +117,7 @@ export default function AdminPage() {
       <input
         type="text"
         placeholder="CBD %"
-        className="w-full p-2 border rounded"
+        className="w-full p-2 border rounded focus:border-custom-orange focus:ring-1 focus:ring-custom-orange"
         value={strain.cbd}
         onChange={(e) => strain.id ?
           setEditingStrain({ ...strain, cbd: e.target.value }) :
@@ -126,7 +126,7 @@ export default function AdminPage() {
       <input
         type="number"
         placeholder="Flowering Time (days)"
-        className="w-full p-2 border rounded"
+        className="w-full p-2 border rounded focus:border-custom-orange focus:ring-1 focus:ring-custom-orange"
         value={strain.flowering_time}
         onChange={(e) => strain.id ?
           setEditingStrain({ ...strain, flowering_time: parseInt(e.target.value) }) :
@@ -134,7 +134,7 @@ export default function AdminPage() {
       />
       <textarea
         placeholder="Description"
-        className="w-full p-2 border rounded"
+        className="w-full p-2 border rounded focus:border-custom-orange focus:ring-1 focus:ring-custom-orange"
         rows="3"
         value={strain.description}
         onChange={(e) => strain.id ?
@@ -144,20 +144,20 @@ export default function AdminPage() {
       <input
         type="text"
         placeholder="Effects (comma-separated)"
-        className="w-full p-2 border rounded"
+        className="w-full p-2 border rounded focus:border-custom-orange focus:ring-1 focus:ring-custom-orange"
         value={strain.effects.join(', ')}
         onChange={(e) => handleEffectsChange(e.target.value, strain)}
       />
       <div className="flex gap-2">
         <button
-          className="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700"
+          className="px-4 py-2 text-white bg-custom-orange rounded hover:bg-custom-orange/90"
           onClick={() => onSave(strain)}
         >
           {strain.id ? 'Save Changes' : 'Add Strain'}
         </button>
         {onCancel && (
           <button
-            className="px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300"
+            className="px-4 py-2 text-custom-orange bg-custom-orange/10 rounded hover:bg-custom-orange/20"
             onClick={onCancel}
           >
             Cancel
@@ -169,16 +169,16 @@ export default function AdminPage() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">Strain Management</h1>
+      <h1 className="text-3xl font-bold font-aptos mb-8">Strain Management</h1>
       
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Add New Strain</h2>
+      <div className="bg-custom-orange text-white rounded-lg shadow-md p-6 mb-8">
+        <h2 className="text-xl font-bold font-aptos mb-4">Add New Strain</h2>
         <StrainForm strain={newStrain} onSave={handleSave} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {strains.map(strain => (
-          <div key={strain.id} className="bg-white rounded-lg shadow-md p-6">
+          <div key={strain.id} className="bg-custom-orange text-white rounded-lg shadow-md p-6">
             {editingStrain?.id === strain.id ? (
               <StrainForm
                 strain={editingStrain}
@@ -187,18 +187,18 @@ export default function AdminPage() {
               />
             ) : (
               <>
-                <h3 className="text-xl font-semibold mb-4">{strain.name}</h3>
-                <div className="space-y-2 text-gray-600">
-                  <p><span className="font-medium">Type:</span> {strain.type}</p>
-                  <p><span className="font-medium">THC:</span> {strain.thc}</p>
-                  <p><span className="font-medium">CBD:</span> {strain.cbd}</p>
-                  <p><span className="font-medium">Flowering Time:</span> {strain.flowering_time} days</p>
-                  <p><span className="font-medium">Description:</span> {strain.description}</p>
-                  <p><span className="font-medium">Effects:</span> {strain.effects.join(', ')}</p>
+                <h3 className="text-xl font-bold font-aptos mb-4">{strain.name}</h3>
+                <div className="space-y-2 text-white/80">
+                  <p><span className="font-semibold text-white/90">Type:</span> {strain.type}</p>
+                  <p><span className="font-semibold text-white/90">THC:</span> {strain.thc}</p>
+                  <p><span className="font-semibold text-white/90">CBD:</span> {strain.cbd}</p>
+                  <p><span className="font-semibold text-white/90">Flowering Time:</span> {strain.flowering_time} days</p>
+                  <p><span className="font-semibold text-white/90">Description:</span> {strain.description}</p>
+                  <p><span className="font-semibold text-white/90">Effects:</span> {strain.effects.join(', ')}</p>
                 </div>
                 <div className="flex gap-2 mt-4">
                   <button
-                    className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
+                    className="px-4 py-2 text-custom-orange bg-white rounded hover:bg-white/90"
                     onClick={() => setEditingStrain(strain)}
                   >
                     Edit

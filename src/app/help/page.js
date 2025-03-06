@@ -33,9 +33,9 @@ export default function HelpPage() {
   return (
     <>
     <div className="p-6 pb-32 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Hilfe & Problemlösung</h1>
+      <h1 className="text-2xl font-bold mb-6 font-aptos">Hilfe & Problemlösung</h1>
       
-      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8">
+      <div className="bg-custom-orange/10 border-l-4 border-custom-orange p-4 mb-8">
         <p className="text-lg mb-2">
           Verfärbte oder verformte Blätter können Anzeichen für Probleme sein.
         </p>
@@ -48,26 +48,26 @@ export default function HelpPage() {
         {troubleshootingItems.map((item) => (
           <div 
             key={item.id} 
-            className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow"
+            className="bg-custom-orange text-white rounded-lg shadow p-6 hover:shadow-md transition-shadow"
           >
-            <h3 className="text-xl font-semibold mb-2">{item.problem}</h3>
+            <h3 className="text-xl font-bold font-aptos mb-2">{item.problem}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <h4 className="font-medium text-gray-700 mb-1">Mögliche Ursache:</h4>
-                <p className="text-gray-600">{item.cause}</p>
+                <h4 className="font-semibold text-white/90 mb-1">Mögliche Ursache:</h4>
+                <p className="text-white/80">{item.cause}</p>
               </div>
               <div>
-                <h4 className="font-medium text-gray-700 mb-1">Lösung:</h4>
-                <p className="text-gray-600">{item.solution}</p>
+                <h4 className="font-semibold text-white/90 mb-1">Lösung:</h4>
+                <p className="text-white/80">{item.solution}</p>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-        <h2 className="text-lg font-semibold mb-2">Allgemeine Tipps:</h2>
-        <ul className="list-disc pl-5 space-y-2">
+      <div className="mt-8 p-4 bg-custom-orange text-white rounded-lg">
+        <h2 className="text-lg font-bold font-aptos mb-2">Allgemeine Tipps:</h2>
+        <ul className="list-disc pl-5 space-y-2 text-white/90">
           <li>Überprüfe regelmäßig die Blätter auf Anzeichen von Problemen</li>
           <li>Halte ein Pflanzentagebuch für besseres Monitoring</li>
           <li>Stelle sicher, dass die Belüftung ausreichend ist</li>
