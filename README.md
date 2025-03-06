@@ -2,9 +2,9 @@
 
 ## Link zur Beta- / Ansichtsversion: 
 
-https://www.drc420.team
+#### https://www.drc420.team
 
-Hier können Sie die App live anschauen. 
+Hier könnt Ihr die App live anschauen. 
 Bitte nutzt aktuell den fest hinterlegten Nutzer **'workshop'** und das Passwort **'drc'**.
 
 ## 🎯 Projekt Vision
