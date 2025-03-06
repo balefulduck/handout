@@ -43,13 +43,10 @@ Das obige Diagramm zeigt den Kernprozess der Benutzerführung durch unsere Anwen
 flowchart LR
     A[Design System] --> B[Farben]
     A --> C[Typografie]
-    A --> D[Komponenten]
     B --> E[Primär: #4F46E5]
     B --> F[Sekundär: #10B981]
-    C --> G[Überschriften: Inter]
-    C --> H[Fließtext: System UI]
-    D --> I[Schaltflächen]
-    D --> J[Karten]
+    C --> G[Überschriften: Jura]
+    C --> H[Fließtext: Jura]
 ```
 
 ### Technischer Stack
