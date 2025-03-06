@@ -57,24 +57,24 @@ export default function DashboardPage() {
       <Disclosure defaultOpen={false}>
         {({ open }) => (
           <>
-            <div className="sticky top-0 z-10 bg-white shadow-md">
+            <div className="sticky top-0 z-10 bg-custom-orange shadow-md text-white">
               <Disclosure.Button className="flex w-full justify-between items-center px-4 py-2 text-left focus:outline-none focus-visible:ring focus-visible:ring-opacity-75">
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <p className="text-sm text-gray-600">Willkommen zurück,</p>
+                    <p className="text-sm text-white/80">Willkommen zurück,</p>
                     <button 
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         setShowLogoutModal(true);
                       }}
-                      className="font-medium hover:text-gray-700 transition-colors"
+                      className="font-medium hover:text-white/80 transition-colors"
                     >
                       {session?.user?.name || 'Workshop'}
                     </button>
                   </div>
                   <ChevronUpIcon
-                    className={`${open ? '' : 'transform rotate-180'} w-5 h-5 text-gray-500 transition-transform duration-200`}
+                    className={`${open ? '' : 'transform rotate-180'} w-5 h-5 text-white transition-transform duration-200`}
                   />
                 </div>
               </Disclosure.Button>

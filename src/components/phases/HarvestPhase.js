@@ -10,10 +10,10 @@ export default function HarvestPhase() {
       <div className="max-w-3xl mx-auto">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {/* Temperature Card */}
-          <div className="bg-white rounded-xl shadow p-3 border-l-2 border-purple col-span-1">
+          <div className="bg-custom-orange text-white rounded-xl shadow p-3 border-l-2 border-white col-span-1">
             <div className="flex items-center gap-2 mb-1.5">
-              <PiThermometerSimple className="text-lg text-purple" />
-              <span className="text-lg font-medium underline">Temperatur</span>
+              <PiThermometerSimple className="text-lg text-icon-lime" />
+              <span className="text-lg font-bold">Temperatur</span>
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-1.5">
@@ -26,10 +26,10 @@ export default function HarvestPhase() {
           </div>
 
           {/* Humidity Card */}
-          <div className="bg-white rounded-xl shadow p-3 border-l-2 border-purple col-span-1">
+          <div className="bg-custom-orange text-white rounded-xl shadow p-3 border-l-2 border-white col-span-1">
             <div className="flex items-center gap-2 mb-1.5">
-              <WiHumidity className="text-lg text-purple" />
-              <span className="text-lg font-medium underline">Luftfeuchtigkeit</span>
+              <WiHumidity className="text-lg text-icon-olive" />
+              <span className="text-lg font-bold">Luftfeuchtigkeit</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-sm">45 - 55% RH</span>
@@ -37,10 +37,10 @@ export default function HarvestPhase() {
           </div>
 
           {/* Drying Time Card */}
-          <div className="bg-white rounded-xl shadow p-3">
+          <div className="bg-custom-orange text-white rounded-xl shadow p-3">
             <div className="flex items-center gap-2 mb-1.5">
-              <PiPlantBold className="text-lg text-purple" />
-              <span className="text-lg font-medium underline">Trocknungszeit</span>
+              <PiPlantBold className="text-lg text-icon-purple" />
+              <span className="text-lg font-bold">Trocknungszeit</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-sm">10 - 14 Tage</span>
@@ -48,19 +48,19 @@ export default function HarvestPhase() {
           </div>
 
           {/* Process Card */}
-          <div className="bg-white rounded-xl shadow p-3 border-l-2 border-purple col-span-2 sm:col-span-3">
+          <div className="bg-custom-orange text-white rounded-xl shadow p-3 border-l-2 border-white col-span-2 sm:col-span-3">
             <div className="flex items-center gap-2 mb-1.5">
-              <PiPlantBold className="text-lg text-purple" />
-              <span className="text-lg font-medium underline">Ernteprozess</span>
+              <PiPlantBold className="text-lg text-icon-purple" />
+              <span className="text-lg font-bold">Ernteprozess</span>
             </div>
             <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
               <div className="flex items-center gap-1">
                 <span>Schnitt:</span>
-                <span className="text-gray-600">Große Blätter entfernen</span>
+                <span className="text-white/80">Große Blätter entfernen</span>
               </div>
               <div className="flex items-center gap-1">
                 <span>Trocknung:</span>
-                <span className="text-gray-600">Kopfüber aufhängen</span>
+                <span className="text-white/80">Kopfüber aufhängen</span>
               </div>
             </div>
           </div>

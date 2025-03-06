@@ -10,10 +10,10 @@ export default function SeedlingPhase() {
       <div className="max-w-3xl mx-auto">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {/* Temperature Card */}
-          <div className="bg-white rounded-xl shadow p-3 border-l-2 border-teal col-span-1">
+          <div className="bg-custom-orange text-white rounded-xl shadow p-3 border-l-2 border-white col-span-1">
             <div className="flex items-center gap-2 mb-1.5">
-              <PiThermometerSimple className="text-lg text-teal" />
-              <span className="text-lg font-medium underline">Temperatur</span>
+              <PiThermometerSimple className="text-lg text-white" />
+              <span className="text-lg font-bold">Temperatur</span>
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-1.5">
@@ -28,10 +28,10 @@ export default function SeedlingPhase() {
           </div>
 
           {/* Humidity Card */}
-          <div className="bg-white rounded-xl shadow p-3 border-l-2 border-teal col-span-1">
+          <div className="bg-custom-orange text-white rounded-xl shadow p-3 border-l-2 border-white col-span-1">
             <div className="flex items-center gap-2 mb-1.5">
-              <WiHumidity className="text-lg text-teal" />
-              <span className="text-lg font-medium underline">Luftfeuchtigkeit</span>
+              <WiHumidity className="text-lg text-white" />
+              <span className="text-lg font-bold">Luftfeuchtigkeit</span>
             </div>
             <div className="flex items-center gap-1.5">
            
@@ -40,10 +40,10 @@ export default function SeedlingPhase() {
           </div>
 
           {/* Light Schedule Card */}
-          <div className="bg-white rounded-xl shadow p-3">
+          <div className="bg-custom-orange text-white rounded-xl shadow p-3">
             <div className="flex items-center gap-2 mb-1.5">
-              <LuSunMedium className="text-lg text-amber-500" />
-              <span className="text-lg font-medium underline">Lichtzyklus</span>
+              <LuSunMedium className="text-lg text-white" />
+              <span className="text-lg font-bold">Lichtzyklus</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-sm">18 / 6</span>
@@ -51,10 +51,10 @@ export default function SeedlingPhase() {
           </div>
 
           {/* pH Value Card */}
-          <div className="bg-white rounded-xl shadow p-3">
+          <div className="bg-custom-orange text-white rounded-xl shadow p-3">
             <div className="flex items-center gap-2 mb-1.5">
-              <PiTestTubeFill className="text-lg text-teal" />
-              <span className="text-lg font-medium underline">pH Wert</span>
+              <PiTestTubeFill className="text-lg text-icon-olive" />
+              <span className="text-lg font-bold">pH Wert</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-sm">5.8 - 6.8</span>
@@ -62,10 +62,10 @@ export default function SeedlingPhase() {
           </div>
 
           {/* Pot Sizes Card */}
-          <div className="bg-white rounded-xl shadow p-3 border-l-2 border-teal col-span-2 sm:col-span-3">
+          <div className="bg-custom-orange text-white rounded-xl shadow p-3 border-l-2 border-white col-span-2 sm:col-span-3">
             <div className="flex items-center gap-2 mb-1.5">
-              <PiPlantBold className="text-lg text-teal" />
-              <span className="text-lg font-medium underline">Topfgrößen</span>
+              <PiPlantBold className="text-lg text-icon-purple" />
+              <span className="text-lg font-bold">Topfgrößen</span>
             </div>
             <p className="mb-5"><strong>Photoperiodische Sorten</strong> sollten in 0,25 - 1 L Töpfe gepflanzt und nach vollständiger Durchwurzelung in ein Endgefäß mit einem Fassungsvermögen zwischen
               9 und 25 Litern transplantiert werden.
