@@ -13,8 +13,8 @@ export default function FlowerPhase() {
           <div className="rounded-xl shadow overflow-hidden col-span-1">
             <div className="bg-custom-orange p-3">
               <div className="flex items-center gap-2">
-                <PiThermometerSimple className="text-lg text-white" />
-                <span className="text-lg font-bold text-white">Temperatur</span>
+                <PiThermometerSimple className="text-base text-white" />
+                <span className="text-base font-bold text-white">Temperatur</span>
               </div>
             </div>
             <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
@@ -33,8 +33,8 @@ export default function FlowerPhase() {
           <div className="rounded-xl shadow overflow-hidden col-span-1">
             <div className="bg-custom-orange p-3">
               <div className="flex items-center gap-2">
-                <WiHumidity className="text-lg text-white" />
-                <span className="text-lg font-bold text-white">Luftfeuchtigkeit</span>
+                <WiHumidity className="text-base text-white" />
+                <span className="text-base font-bold text-white">Luftfeuchtigkeit</span>
               </div>
             </div>
             <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
@@ -48,8 +48,8 @@ export default function FlowerPhase() {
           <div className="rounded-xl shadow overflow-hidden">
             <div className="bg-custom-orange p-3">
               <div className="flex items-center gap-2">
-                <LuSunMedium className="text-lg text-white" />
-                <span className="text-lg font-bold text-white">Lichtzyklus</span>
+                <LuSunMedium className="text-base text-white" />
+                <span className="text-base font-bold text-white">Lichtzyklus</span>
               </div>
             </div>
             <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
@@ -63,8 +63,8 @@ export default function FlowerPhase() {
           <div className="rounded-xl shadow overflow-hidden">
             <div className="bg-custom-orange p-3">
               <div className="flex items-center gap-2">
-                <PiTestTubeFill className="text-lg text-white" />
-                <span className="text-lg font-bold text-white">pH Wert</span>
+                <PiTestTubeFill className="text-base text-white" />
+                <span className="text-base font-bold text-white">pH Wert</span>
               </div>
             </div>
             <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
@@ -78,8 +78,8 @@ export default function FlowerPhase() {
           <div className="rounded-xl shadow overflow-hidden col-span-2 sm:col-span-3">
             <div className="bg-custom-orange p-3">
               <div className="flex items-center gap-2">
-                <PiPlantBold className="text-lg text-white" />
-                <span className="text-lg font-bold text-white">Blütephase</span>
+                <PiPlantBold className="text-base text-white" />
+                <span className="text-base font-bold text-white">Blütephase</span>
               </div>
             </div>
             <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
