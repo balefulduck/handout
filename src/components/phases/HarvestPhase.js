@@ -10,57 +10,73 @@ export default function HarvestPhase() {
       <div className="max-w-3xl mx-auto">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {/* Temperature Card */}
-          <div className="bg-custom-orange text-white rounded-xl shadow p-3 border-l-2 border-white col-span-1">
-            <div className="flex items-center gap-2 mb-1.5">
-              <PiThermometerSimple className="text-lg text-icon-lime" />
-              <span className="text-lg font-bold">Temperatur</span>
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm">16 - 21°C</span>
+          <div className="rounded-xl shadow overflow-hidden col-span-1">
+            <div className="bg-custom-orange p-3">
+              <div className="flex items-center gap-2">
+                <PiThermometerSimple className="text-lg text-white" />
+                <span className="text-lg font-bold text-white">Temperatur</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm">Gute Luftzirkulation</span>
+            </div>
+            <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm text-gray-700">16 - 21°C</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm text-gray-700">Gute Luftzirkulation</span>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Humidity Card */}
-          <div className="bg-custom-orange text-white rounded-xl shadow p-3 border-l-2 border-white col-span-1">
-            <div className="flex items-center gap-2 mb-1.5">
-              <WiHumidity className="text-lg text-icon-olive" />
-              <span className="text-lg font-bold">Luftfeuchtigkeit</span>
+          <div className="rounded-xl shadow overflow-hidden col-span-1">
+            <div className="bg-custom-orange p-3">
+              <div className="flex items-center gap-2">
+                <WiHumidity className="text-lg text-white" />
+                <span className="text-lg font-bold text-white">Luftfeuchtigkeit</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-sm">45 - 55% RH</span>
+            <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm text-gray-700">45 - 55% RH</span>
+              </div>
             </div>
           </div>
 
           {/* Drying Time Card */}
-          <div className="bg-custom-orange text-white rounded-xl shadow p-3">
-            <div className="flex items-center gap-2 mb-1.5">
-              <PiPlantBold className="text-lg text-icon-purple" />
-              <span className="text-lg font-bold">Trocknungszeit</span>
+          <div className="rounded-xl shadow overflow-hidden">
+            <div className="bg-custom-orange p-3">
+              <div className="flex items-center gap-2">
+                <PiPlantBold className="text-lg text-white" />
+                <span className="text-lg font-bold text-white">Trocknungszeit</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-sm">10 - 14 Tage</span>
+            <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm text-gray-700">10 - 14 Tage</span>
+              </div>
             </div>
           </div>
 
           {/* Process Card */}
-          <div className="bg-custom-orange text-white rounded-xl shadow p-3 border-l-2 border-white col-span-2 sm:col-span-3">
-            <div className="flex items-center gap-2 mb-1.5">
-              <PiPlantBold className="text-lg text-icon-purple" />
-              <span className="text-lg font-bold">Ernteprozess</span>
-            </div>
-            <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
-              <div className="flex items-center gap-1">
-                <span>Schnitt:</span>
-                <span className="text-white/80">Große Blätter entfernen</span>
+          <div className="rounded-xl shadow overflow-hidden col-span-2 sm:col-span-3">
+            <div className="bg-custom-orange p-3">
+              <div className="flex items-center gap-2">
+                <PiPlantBold className="text-lg text-white" />
+                <span className="text-lg font-bold text-white">Ernteprozess</span>
               </div>
-              <div className="flex items-center gap-1">
-                <span>Trocknung:</span>
-                <span className="text-white/80">Kopfüber aufhängen</span>
+            </div>
+            <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
+              <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-700">
+                <div className="flex items-center gap-1">
+                  <span>Schnitt:</span>
+                  <span>Große Blätter entfernen</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span>Trocknung:</span>
+                  <span>Kopfüber aufhängen</span>
+                </div>
               </div>
             </div>
           </div>

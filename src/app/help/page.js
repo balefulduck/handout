@@ -48,31 +48,39 @@ export default function HelpPage() {
         {troubleshootingItems.map((item) => (
           <div 
             key={item.id} 
-            className="bg-custom-orange text-white rounded-lg shadow p-6 hover:shadow-md transition-shadow"
+            className="rounded-lg shadow overflow-hidden"
           >
-            <h3 className="text-xl font-bold font-aptos mb-2">{item.problem}</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <h4 className="font-semibold text-white/90 mb-1">Mögliche Ursache:</h4>
-                <p className="text-white/80">{item.cause}</p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-white/90 mb-1">Lösung:</h4>
-                <p className="text-white/80">{item.solution}</p>
+            <div className="bg-custom-orange p-4">
+              <h3 className="text-xl font-bold font-aptos text-white">{item.problem}</h3>
+            </div>
+            <div className="p-6 border-x border-b border-custom-orange/20 rounded-b-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-1">Mögliche Ursache:</h4>
+                  <p className="text-gray-700">{item.cause}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-1">Lösung:</h4>
+                  <p className="text-gray-700">{item.solution}</p>
+                </div>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-8 p-4 bg-custom-orange text-white rounded-lg">
-        <h2 className="text-lg font-bold font-aptos mb-2">Allgemeine Tipps:</h2>
-        <ul className="list-disc pl-5 space-y-2 text-white/90">
-          <li>Überprüfe regelmäßig die Blätter auf Anzeichen von Problemen</li>
-          <li>Halte ein Pflanzentagebuch für besseres Monitoring</li>
-          <li>Stelle sicher, dass die Belüftung ausreichend ist</li>
-          <li>Kontrolliere regelmäßig pH-Wert und Nährstoffversorgung</li>
-        </ul>
+      <div className="mt-8 rounded-lg shadow overflow-hidden">
+        <div className="bg-custom-orange p-4">
+          <h2 className="text-lg font-bold font-aptos text-white">Allgemeine Tipps:</h2>
+        </div>
+        <div className="p-4 border-x border-b border-custom-orange/20 rounded-b-lg">
+          <ul className="list-disc pl-5 space-y-2 text-gray-700">
+            <li>Überprüfe regelmäßig die Blätter auf Anzeichen von Problemen</li>
+            <li>Halte ein Pflanzentagebuch für besseres Monitoring</li>
+            <li>Stelle sicher, dass die Belüftung ausreichend ist</li>
+            <li>Kontrolliere regelmäßig pH-Wert und Nährstoffversorgung</li>
+          </ul>
+        </div>
       </div>
     </div>
     <ContextMenu />
