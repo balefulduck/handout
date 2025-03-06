@@ -1,65 +1,65 @@
-# Handout Project Overview
+# Handout Projekt Übersicht
 
-## 🎯 Project Vision
-The Handout project is a modern web application designed to streamline the creation and management of educational handouts.
+## 🎯 Projekt Vision
+Das Handout-Projekt ist eine moderne Webanwendung zur vereinfachten Erstellung und Verwaltung von Unterrichtsmaterialien.
 
-## 🔄 Main Workflow
+## 🔄 Hauptarbeitsablauf
 
 ```mermaid
 graph TD
-    A[User Login] --> B{Authentication}
-    B -->|Success| C[Dashboard]
-    B -->|Failure| D[Login Error]
-    C --> E[View Handouts]
-    C --> F[Create Handout]
-    F --> G[Save Draft]
-    F --> H[Publish]
-    E --> I[Download PDF]
-    E --> J[Share Handout]
+    A[Benutzer Login] --> B{Authentifizierung}
+    B -->|Erfolgreich| C[Dashboard]
+    B -->|Fehlgeschlagen| D[Login Fehler]
+    C --> E[Handouts anzeigen]
+    C --> F[Handout erstellen]
+    F --> G[Entwurf speichern]
+    F --> H[Veröffentlichen]
+    E --> I[PDF herunterladen]
+    E --> J[Handout teilen]
 ```
 
-The diagram above illustrates the core user journey through our application. Each box represents a key interaction point, and arrows show the possible paths users can take.
+Das obige Diagramm zeigt den Kernprozess der Benutzerführung durch unsere Anwendung. Jedes Kästchen stellt einen wichtigen Interaktionspunkt dar, und die Pfeile zeigen die möglichen Wege, die Benutzer nehmen können.
 
-## 🌟 Key Features
-- Interactive Dashboard
-- PDF Generation
-- Collaborative Editing
-- Version Control
+## 🌟 Hauptfunktionen
+- Interaktives Dashboard
+- PDF-Generierung
+- Kollaboratives Bearbeiten
+- Versionskontrolle
 
-## 💡 Design Decisions & Discussion Points
+## 💡 Design-Entscheidungen & Diskussionspunkte
 
-### Visual Design
+### Visuelles Design
 ```mermaid
 flowchart LR
-    A[Design System] --> B[Colors]
-    A --> C[Typography]
-    A --> D[Components]
-    B --> E[Primary: #4F46E5]
-    B --> F[Secondary: #10B981]
-    C --> G[Headings: Inter]
-    C --> H[Body: System UI]
-    D --> I[Buttons]
-    D --> J[Cards]
+    A[Design System] --> B[Farben]
+    A --> C[Typografie]
+    A --> D[Komponenten]
+    B --> E[Primär: #4F46E5]
+    B --> F[Sekundär: #10B981]
+    C --> G[Überschriften: Inter]
+    C --> H[Fließtext: System UI]
+    D --> I[Schaltflächen]
+    D --> J[Karten]
 ```
 
-### Technical Stack
-- Built with Next.js
-- Tailwind CSS for styling
-- SQLite database
+### Technischer Stack
+- Entwickelt mit Next.js
+- Tailwind CSS für das Styling
+- SQLite Datenbank
 
-## 🛠️ Development Setup
+## 🛠️ Entwicklungsumgebung
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Öffnen Sie [http://localhost:3000](http://localhost:3000) in Ihrem Browser, um das Ergebnis zu sehen.
 
-## 📅 Next Steps
-- Implement user feedback system
-- Enhance PDF generation
-- Add collaborative features
+## 📅 Nächste Schritte
+- Implementierung eines Benutzer-Feedback-Systems
+- Verbesserung der PDF-Generierung
+- Hinzufügen von Kollaborationsfunktionen
 
-## 💬 Feedback & Contributions
-Stakeholder feedback and suggestions are welcome through our issue tracking system.
+## 💬 Feedback & Mitwirkung
+Feedback und Vorschläge von Stakeholdern sind über unser Issue-Tracking-System willkommen.
