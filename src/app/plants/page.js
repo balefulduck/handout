@@ -32,7 +32,7 @@ export default function PlantsPage() {
   return (
     <>
     <div className="p-6 pb-32">
-      <h1 className="text-2xl font-bold mb-6 font-aptos">My Plants</h1>
+      <h1 className="text-2xl font-bold mt-10 mb-6 font-aptos">Meine Pflanzen</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {plants.map((plant) => (
           <div 

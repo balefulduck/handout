@@ -33,7 +33,7 @@ export default function HelpPage() {
   return (
     <>
     <div className="p-6 pb-32 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6 font-aptos">Hilfe & Problemlösung</h1>
+      <h1 className="text-2xl font-bold mt-10 mb-6 font-aptos">Hilfe & Problemlösung</h1>
       
       <div className="bg-custom-orange/10 border-l-4 border-custom-orange p-4 mb-8">
         <p className="text-lg mb-2">

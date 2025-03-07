@@ -53,11 +53,11 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pt-7">
       <Disclosure defaultOpen={false}>
         {({ open }) => (
           <>
-            <div className="sticky top-0 z-10 bg-custom-orange shadow-md text-white">
+            <div className="sticky top-7 z-10 bg-custom-orange shadow-md text-white">
               <Disclosure.Button className="flex w-full justify-between items-center px-4 py-2 text-left focus:outline-none focus-visible:ring focus-visible:ring-opacity-75">
                 <div className="flex items-center gap-4">
                   <div className="text-right">
