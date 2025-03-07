@@ -87,7 +87,7 @@ export default function AdminPage() {
       <input
         type="text"
         placeholder="Name"
-        className="w-full p-2 border rounded focus:border-custom-orange focus:ring-1 focus:ring-custom-orange"focus:border-custom-orange focus:ring-1 focus:ring-custom-orange"
+        className="w-full p-2 border rounded focus:border-custom-orange focus:ring-1 focus:ring-custom-orange"
         value={strain.name}
         onChange={(e) => strain.id ? 
           setEditingStrain({ ...strain, name: e.target.value }) :
