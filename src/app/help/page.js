@@ -1,8 +1,18 @@
 'use client';
 
+import { useState } from 'react';
 import ContextMenu from '@/components/ContextMenu';
 
 export default function HelpPage() {
+  const [expandedCards, setExpandedCards] = useState({});
+  
+  // Function to toggle card expansion
+  const toggleCard = (id) => {
+    setExpandedCards(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
   const troubleshootingItems = [
     {
       id: 1,
@@ -44,32 +54,7 @@ export default function HelpPage() {
         </p>
       </div>
 
-      <div className="space-y-6">
-        {troubleshootingItems.map((item) => (
-          <div 
-            key={item.id} 
-            className="rounded-lg shadow overflow-hidden"
-          >
-            <div className="bg-custom-orange p-4">
-              <h3 className="text-xl font-bold font-aptos text-white">{item.problem}</h3>
-            </div>
-            <div className="p-6 border-x border-b border-custom-orange/20 rounded-b-lg">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">Mögliche Ursache:</h4>
-                  <p className="text-gray-700">{item.cause}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">Lösung:</h4>
-                  <p className="text-gray-700">{item.solution}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-8 rounded-lg shadow overflow-hidden">
+      <div className="mt-8 mb-8 help rounded-lg shadow overflow-hidden">
         <div className="bg-custom-orange p-4">
           <h2 className="text-lg font-bold font-aptos text-white">Allgemeine Tipps:</h2>
         </div>
@@ -82,6 +67,43 @@ export default function HelpPage() {
           </ul>
         </div>
       </div>
+
+      <div className="space-y-6">
+        {troubleshootingItems.map((item) => (
+          <div 
+            key={item.id} 
+            className="rounded-lg shadow overflow-hidden"
+          >
+            <div 
+              className="bg-custom-orange p-4 cursor-pointer"
+              onClick={() => toggleCard(item.id)}
+            >
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-bold font-aptos text-white">{item.problem}</h3>
+                <span className="text-white text-xl">
+                  {expandedCards[item.id] ? '−' : '+'}
+                </span>
+              </div>
+            </div>
+            {expandedCards[item.id] && (
+              <div className="p-6 border-x border-b border-custom-orange/20 rounded-b-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Mögliche Ursache:</h4>
+                    <p className="text-gray-700">{item.cause}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Lösung:</h4>
+                    <p className="text-gray-700">{item.solution}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+
     </div>
     <ContextMenu />
     </>

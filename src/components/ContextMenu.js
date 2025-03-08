@@ -1,25 +1,128 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { WiHumidity } from "react-icons/wi";
 import { PiPlantBold } from "react-icons/pi";
 import { LuSunMedium } from "react-icons/lu";
 import { GiPlantSeed, GiGrowth, GiFlowerPot, GiScythe } from "react-icons/gi";
 import { BsChatDots, BsPlusLg } from "react-icons/bs";
 import { FaFirstAid } from "react-icons/fa";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/solid";
 import { useRouter, usePathname } from 'next/navigation';
+import { Dialog, Transition } from '@headlessui/react';
+import { useSession, signOut } from 'next-auth/react';
 
 export default function ContextMenu({ activePhase, onPhaseSelect }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/login' });
+  };
   return (
     <>
+      {/* Mobile menu */}
+      <Transition.Root show={sidebarOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={setSidebarOpen}>
+          <Transition.Child
+            as={Fragment}
+            enter="transition-opacity ease-linear duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="transition-opacity ease-linear duration-300"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 flex z-50">
+            <Transition.Child
+              as={Fragment}
+              enter="transition ease-in-out duration-300 transform"
+              enterFrom="-translate-x-full"
+              enterTo="translate-x-0"
+              leave="transition ease-in-out duration-300 transform"
+              leaveFrom="translate-x-0"
+              leaveTo="-translate-x-full"
+            >
+              <Dialog.Panel className="relative flex-1 flex flex-col max-w-xs w-full bg-white">
+                <Transition.Child
+                  as={Fragment}
+                  enter="ease-in-out duration-300"
+                  enterFrom="opacity-0"
+                  enterTo="opacity-100"
+                  leave="ease-in-out duration-300"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+                >
+                  <div className="absolute top-0 right-0 -mr-12 pt-2">
+                    <button
+                      type="button"
+                      className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                      onClick={() => setSidebarOpen(false)}
+                    >
+                      <span className="sr-only">Close sidebar</span>
+                      <XMarkIcon className="h-6 w-6 text-white" aria-hidden="true" />
+                    </button>
+                  </div>
+                </Transition.Child>
+                <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
+                  <div className="flex-shrink-0 flex items-center px-4">
+                    <h2 className="text-xl font-bold text-custom-orange">Handout</h2>
+                  </div>
+                  <div className="mt-5 px-2 space-y-1">
+                    <div className="px-4 py-4 border-t border-gray-200">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <div className="h-10 w-10 rounded-full bg-custom-orange flex items-center justify-center text-white">
+                            {session?.user?.name?.charAt(0) || 'W'}
+                          </div>
+                        </div>
+                        <div className="ml-3">
+                          <div className="text-base font-medium text-gray-800">{session?.user?.name || 'Workshop'}</div>
+                          <div className="text-sm font-medium text-gray-500">{session?.user?.email || ''}</div>
+                        </div>
+                      </div>
+                      <div className="mt-3">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-custom-orange hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-custom-orange"
+                        >
+                          Abmelden
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+            <div className="flex-shrink-0 w-14">
+              {/* Force sidebar to shrink to fit close icon */}
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
+
       <div className="fixed top-0 left-0 right-0 z-50 bg-custom-orange shadow-lg">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto relative">
+          {/* Hamburger icon positioned absolutely to avoid affecting the grid layout */}
+          <button
+            type="button"
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 text-white focus:outline-none z-10"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <span className="sr-only">Open sidebar</span>
+            <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+          </button>
+          
+          {/* Main navigation with equal width buttons */}
           <div className="grid grid-cols-3">
             <button
               onClick={() => router.push('/dashboard')}
-              className={`flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/dashboard' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
+              className={`flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/dashboard' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'} pl-10`}
             >
               <span className="text-sm font-semibold text-icon-purple px-2">Dashboard</span>
               {pathname !== '/dashboard' && <div className="absolute right-0 top-1/2 -translate-y-1/2 h-4/5 w-px bg-white/20" />}
