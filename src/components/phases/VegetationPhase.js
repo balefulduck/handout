@@ -3,6 +3,11 @@
 import { WiHumidity } from "react-icons/wi";
 import { PiThermometerSimple, PiPlantBold, PiTestTubeFill } from "react-icons/pi";
 import { LuSunMedium } from "react-icons/lu";
+import { BsQuestionCircle } from "react-icons/bs";
+import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css';
+import 'tippy.js/animations/scale.css';
+import Image from 'next/image';
 
 export default function VegetationPhase() {
   return (
@@ -15,6 +20,35 @@ export default function VegetationPhase() {
               <div className="flex items-center gap-2">
                 <PiThermometerSimple className="text-base text-white" />
                 <span className="text-base font-bold text-white">Temperatur</span>
+                <Tippy 
+                  content={
+                    <div className="max-w-xs bg-white p-3 rounded-lg" style={{ border: '1px solid violet' }}>
+                      <div className="font-bold text-custom-orange mb-1 flex items-center gap-2">
+                        <Image src="/1.webp" width={45} height={45} alt="Icon" priority />
+                        <span>Dr. Cannabis informiert:</span>
+                      </div>
+                      <div className="text-sm text-gray-700">
+                        Bei zu hohen Temperaturschwankungen kann das Wachstum der Pflanze gehemmt werden.
+                      </div>
+                    </div>
+                  }
+                  animation="scale"
+                  duration={[300, 250]}
+                  hideOnClick={true}
+                  trigger="mouseenter click"
+                  interactive={true}
+                  maxWidth={300}
+                  onShow={(instance) => {
+                    setTimeout(() => {
+                      instance.hide();
+                    }, 5000);
+                  }}
+                  theme="light"
+                >
+                  <span>
+                    <BsQuestionCircle className="text-white text-sm cursor-help ml-1 opacity-80 hover:opacity-100 transition-opacity" style={{ filter: 'drop-shadow(1px 1px 1px rgba(0,0,0,0.2))' }} />
+                  </span>
+                </Tippy>
               </div>
             </div>
             <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
@@ -35,6 +69,35 @@ export default function VegetationPhase() {
               <div className="flex items-center gap-2">
                 <WiHumidity className="text-base text-white" />
                 <span className="text-base font-bold text-white">Luftfeuchtigkeit</span>
+                <Tippy 
+                  content={
+                    <div className="max-w-xs bg-white p-3 rounded-lg" style={{ border: '1px solid violet' }}>
+                      <div className="font-bold text-custom-orange mb-1 flex items-center gap-2">
+                        <Image src="/1.webp" width={45} height={45} alt="Icon" priority />
+                        <span>Dr. Cannabis informiert:</span>
+                      </div>
+                      <div className="text-sm text-gray-700">
+                        Etablierte Pflanzen können ausreichend Wasser über die Wurzeln aufnehmen. Eine geringere Luftfeuchtigkeit als während der Keimlingsphase kann das Schädlingsrisiko verringern.
+                      </div>
+                    </div>
+                  }
+                  animation="scale"
+                  duration={[300, 250]}
+                  hideOnClick={true}
+                  trigger="mouseenter click"
+                  interactive={true}
+                  maxWidth={300}
+                  onShow={(instance) => {
+                    setTimeout(() => {
+                      instance.hide();
+                    }, 5000);
+                  }}
+                  theme="light"
+                >
+                  <span>
+                    <BsQuestionCircle className="text-white text-sm cursor-help ml-1 opacity-80 hover:opacity-100 transition-opacity" style={{ filter: 'drop-shadow(1px 1px 1px rgba(0,0,0,0.2))' }} />
+                  </span>
+                </Tippy>
               </div>
             </div>
             <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
@@ -50,6 +113,35 @@ export default function VegetationPhase() {
               <div className="flex items-center gap-2">
                 <LuSunMedium className="text-base text-white" />
                 <span className="text-base font-bold text-white">Lichtzyklus</span>
+                <Tippy 
+                  content={
+                    <div className="max-w-xs bg-white p-3 rounded-lg" style={{ border: '1px solid violet' }}>
+                      <div className="font-bold text-custom-orange mb-1 flex items-center gap-2">
+                        <Image src="/1.webp" width={45} height={45} alt="Icon" priority />
+                        <span>Dr. Cannabis informiert:</span>
+                      </div>
+                      <div className="text-sm text-gray-700">
+                        Bei photoperiodischen Sorten bestimmt der Lichtzyklus die Wachstumsphasen.
+                      </div>
+                    </div>
+                  }
+                  animation="scale"
+                  duration={[300, 250]}
+                  hideOnClick={true}
+                  trigger="mouseenter click"
+                  interactive={true}
+                  maxWidth={300}
+                  onShow={(instance) => {
+                    setTimeout(() => {
+                      instance.hide();
+                    }, 5000);
+                  }}
+                  theme="light"
+                >
+                  <span>
+                    <BsQuestionCircle className="text-white text-sm cursor-help ml-1 opacity-80 hover:opacity-100 transition-opacity" style={{ filter: 'drop-shadow(1px 1px 1px rgba(0,0,0,0.2))' }} />
+                  </span>
+                </Tippy>
               </div>
             </div>
             <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
@@ -65,6 +157,35 @@ export default function VegetationPhase() {
               <div className="flex items-center gap-2">
                 <PiTestTubeFill className="text-base text-white" />
                 <span className="text-base font-bold text-white">pH Wert</span>
+                <Tippy 
+                  content={
+                    <div className="max-w-xs bg-white p-3 rounded-lg" style={{ border: '1px solid violet' }}>
+                      <div className="font-bold text-custom-orange mb-1 flex items-center gap-2">
+                        <Image src="/1.webp" width={45} height={45} alt="Icon" priority />
+                        <span>Dr. Cannabis informiert:</span>
+                      </div>
+                      <div className="text-sm text-gray-700">
+                        Der pH-Wert beeinflusst die Nährstoffaufnahme, Wurzelgesundheit und Pflanzengesundheit. Ein falscher Wert kann Mangelerscheinungen und Wachstumsprobleme verursachen.
+                      </div>
+                    </div>
+                  }
+                  animation="scale"
+                  duration={[300, 250]}
+                  hideOnClick={true}
+                  trigger="mouseenter click"
+                  interactive={true}
+                  maxWidth={300}
+                  onShow={(instance) => {
+                    setTimeout(() => {
+                      instance.hide();
+                    }, 5000);
+                  }}
+                  theme="light"
+                >
+                  <span>
+                    <BsQuestionCircle className="text-white text-sm cursor-help ml-1 opacity-80 hover:opacity-100 transition-opacity" style={{ filter: 'drop-shadow(1px 1px 1px rgba(0,0,0,0.2))' }} />
+                  </span>
+                </Tippy>
               </div>
             </div>
             <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
