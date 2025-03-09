@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs';
 export async function GET() {
   try {
     const users = db.prepare(`
-      SELECT id, username, created_at, onboarding_completed
+      SELECT id, username, created_at
       FROM users
     `).all();
     
@@ -46,8 +46,8 @@ export async function POST(request) {
     
     // Insert the new user
     const result = db.prepare(`
-      INSERT INTO users (username, password_hash, onboarding_completed)
-      VALUES (?, ?, 0)
+      INSERT INTO users (username, password_hash)
+      VALUES (?, ?)
     `).run(username, password_hash);
     
     return NextResponse.json(
@@ -66,7 +66,7 @@ export async function POST(request) {
 // Update an existing user
 export async function PUT(request) {
   try {
-    const { id, username, password, onboarding_completed } = await request.json();
+    const { id, username, password } = await request.json();
     
     if (!id) {
       return NextResponse.json(
@@ -116,10 +116,7 @@ export async function PUT(request) {
       params.push(password_hash);
     }
     
-    if (onboarding_completed !== undefined) {
-      updateFields.push('onboarding_completed = ?');
-      params.push(onboarding_completed);
-    }
+    // onboarding_completed field removed as it doesn't exist in the schema
     
     if (updateFields.length === 0) {
       return NextResponse.json(

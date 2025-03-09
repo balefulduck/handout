@@ -39,9 +39,15 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/strains');
       const data = await response.json();
-      setStrains(data.strains);
+      if (data && data.strains) {
+        setStrains(data.strains);
+      } else {
+        console.error('Invalid strain data format:', data);
+        setStrains([]);
+      }
     } catch (error) {
       console.error('Error loading strains:', error);
+      setStrains([]);
     }
   };
 
@@ -103,9 +109,15 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/users');
       const data = await response.json();
-      setUsers(data.users);
+      if (data && data.users) {
+        setUsers(data.users);
+      } else {
+        console.error('Invalid user data format:', data);
+        setUsers([]);
+      }
     } catch (error) {
       console.error('Error loading users:', error);
+      setUsers([]);
     }
   };
 
@@ -317,7 +329,7 @@ export default function AdminPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {strains.map(strain => (
+            {strains && strains.length > 0 && strains.map(strain => (
               <div key={strain.id} className="bg-custom-orange text-white rounded-lg shadow-md p-6">
                 {editingStrain?.id === strain.id ? (
                   <StrainForm
@@ -354,6 +366,11 @@ export default function AdminPage() {
                 )}
               </div>
             ))}
+            {(!strains || strains.length === 0) && (
+              <div className="col-span-3 text-center py-8 text-white/70">
+                No strains found. Add a new strain above.
+              </div>
+            )}
           </div>
         </>
       )}
@@ -367,7 +384,7 @@ export default function AdminPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {users.map(user => (
+            {users && users.length > 0 && users.map(user => (
               <div key={user.id} className="bg-custom-orange text-white rounded-lg shadow-md p-6">
                 {editingUser?.id === user.id ? (
                   <UserForm
@@ -400,6 +417,11 @@ export default function AdminPage() {
                 )}
               </div>
             ))}
+            {(!users || users.length === 0) && (
+              <div className="col-span-3 text-center py-8 text-white/70">
+                No users found. Add a new user above.
+              </div>
+            )}
           </div>
         </>
       )}

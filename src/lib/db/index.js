@@ -153,6 +153,25 @@ const initDb = () => {
         );
     `);
 
+    // Harvests table - for tracking plant harvest data
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS harvests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            plant_id INTEGER NOT NULL,
+            consumption_material TEXT CHECK(consumption_material IN ('flower', 'concentrate', 'edible')),
+            consumption_method TEXT CHECK(consumption_method IN ('smoking', 'vaping')),
+            description TEXT,
+            bud_density INTEGER CHECK(bud_density BETWEEN 1 AND 5),
+            trichome_color TEXT,
+            curing_begin DATE,
+            curing_end DATE,
+            dry_weight REAL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(plant_id) REFERENCES plants(id) ON DELETE CASCADE,
+            UNIQUE(plant_id)
+        );
+    `);
+
     console.log('Schema creation complete');
     console.log('Database schema updated successfully');
 };

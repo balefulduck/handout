@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import ContextMenu from '@/components/ContextMenu';
-import { FaSeedling, FaCalendarAlt, FaEdit, FaTrash, FaPlus, FaTint, FaTemperatureHigh } from 'react-icons/fa';
+import { FaSeedling, FaCalendarAlt, FaEdit, FaTrash, FaPlus, FaTint, FaTemperatureHigh, FaLeaf } from 'react-icons/fa';
 import { GiFlowerPot, GiWateringCan } from 'react-icons/gi';
 
 export default function PlantDetailPage() {
@@ -14,6 +14,7 @@ export default function PlantDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showNewDayForm, setShowNewDayForm] = useState(false);
+  const [harvestData, setHarvestData] = useState(null);
   const [newDay, setNewDay] = useState({
     date: new Date().toISOString().split('T')[0],
     watering_amount: '',
@@ -56,6 +57,18 @@ export default function PlantDetailPage() {
         } else {
           setPlant(data.plant);
           setDays(data.days || []);
+          
+          // Fetch harvest data if plant exists
+          try {
+            const harvestResponse = await fetch(`/api/plants/${params.id}/harvest`);
+            if (harvestResponse.ok) {
+              const harvestData = await harvestResponse.json();
+              setHarvestData(harvestData.harvest);
+            }
+          } catch (harvestErr) {
+            console.error('Error fetching harvest data:', harvestErr);
+            // Don't set error for harvest data fetch failure
+          }
         }
         
         setError(null); // Clear any previous errors
@@ -313,12 +326,38 @@ export default function PlantDetailPage() {
               </div>
               
               {plant.flowering_start_date ? (
-                <div className="flex items-center text-gray-700">
-                  <GiFlowerPot className="mr-2 text-purple-500" />
-                  <span>
-                    <span className="font-semibold">Blüte seit:</span> {new Date(plant.flowering_start_date).toLocaleDateString()} 
-                    ({calculateFloweringDays(plant.flowering_start_date)} Tage)
-                  </span>
+                <div className="flex flex-col space-y-2">
+                  <div className="flex items-center text-gray-700">
+                    <GiFlowerPot className="mr-2 text-purple-500" />
+                    <span>
+                      <span className="font-semibold">Blüte seit:</span> {new Date(plant.flowering_start_date).toLocaleDateString()} 
+                      ({calculateFloweringDays(plant.flowering_start_date)} Tage)
+                    </span>
+                  </div>
+                  
+                  {/* Show harvest button or harvest info */}
+                  {harvestData ? (
+                    <div className="flex items-center text-gray-700">
+                      <FaLeaf className="mr-2 text-green-500" />
+                      <span>
+                        <span className="font-semibold">Geerntet:</span> {harvestData.dry_weight ? `${harvestData.dry_weight}g` : 'Ja'}
+                      </span>
+                      <button 
+                        onClick={() => router.push(`/plants/${params.id}/harvest`)}
+                        className="ml-2 text-xs text-blue-500 hover:text-blue-700"
+                      >
+                        Bearbeiten
+                      </button>
+                    </div>
+                  ) : (
+                    <button 
+                      onClick={() => router.push(`/plants/${params.id}/harvest`)}
+                      className="px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 flex items-center w-fit"
+                    >
+                      <FaLeaf className="mr-2" />
+                      Pflanze ernten
+                    </button>
+                  )}
                 </div>
               ) : (
                 <button 
