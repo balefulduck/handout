@@ -216,7 +216,10 @@ export default function ContextMenu({ activePhase, onPhaseSelect }) {
           {pathname === '/plants' && (
             <div className="grid grid-cols-1 py-2 px-2">
               <button
-                onClick={() => {/* TODO: Implement new plant functionality */}}
+                onClick={() => {
+                  // Dispatch custom event to trigger the new plant modal
+                  window.dispatchEvent(new Event('newPlantClick'));
+                }}
                 className="flex flex-col items-center gap-2 transition-colors"
               >
                 <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-icon-purple">
