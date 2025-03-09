@@ -51,18 +51,18 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div className="min-h-screen py-12 px-4">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-teal">Willkommen beim Workshop</h1>
-          <p className="text-xl text-gray-600">
+          <h1 className="text-4xl font-bold font-aptos text-custom-orange">Willkommen beim Workshop</h1>
+          <p className="text-xl text-custom-orange/80">
             Wählen Sie 3 Cannabis-Sorten für Ihren persönlichen Anbau
           </p>
         </div>
 
         {error && (
-          <div className="bg-red-50 border-l-4 border-red-400 p-4">
-            <p className="text-red-700">{error}</p>
+          <div className="bg-custom-orange/10 border-l-4 border-custom-orange p-4">
+            <p className="text-custom-orange font-semibold">{error}</p>
           </div>
         )}
 
@@ -70,7 +70,7 @@ export default function OnboardingPage() {
           {strainData.strains.map((strain) => (
             <div
               key={strain.id}
-              className={`bg-white rounded-xl shadow-lg p-6 space-y-4 cursor-pointer transition-all
+              className={`bg-custom-orange text-white rounded-xl shadow-lg p-6 space-y-4 cursor-pointer transition-all
                 ${
                   selectedStrains.includes(strain.id)
                     ? 'ring-2 ring-lime border-transparent'
@@ -85,19 +85,19 @@ export default function OnboardingPage() {
               onClick={() => handleStrainSelect(strain.id)}
             >
               <div className="flex justify-between items-start">
-                <h3 className="text-xl font-semibold text-teal">{strain.name}</h3>
-                <span className="px-2 py-1 bg-gray-100 rounded-full text-sm">
+                <h3 className="text-xl font-bold font-aptos text-white">{strain.name}</h3>
+                <span className="px-2 py-1 bg-white/10 text-white/90 rounded-full text-sm">
                   {strain.type}
                 </span>
               </div>
               
               <div className="space-y-2">
-                <p className="text-gray-600">{strain.description}</p>
+                <p className="text-white/80">{strain.description}</p>
                 <div className="flex gap-2 flex-wrap">
                   {strain.effects.map((effect, index) => (
                     <span
                       key={index}
-                      className="px-2 py-1 bg-orange/10 text-orange rounded-full text-sm"
+                      className="px-2 py-1 bg-white/10 text-white/90 rounded-full text-sm"
                     >
                       {effect}
                     </span>
@@ -107,12 +107,12 @@ export default function OnboardingPage() {
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-gray-500">THC:</span>
-                  <span className="ml-2 font-medium">{strain.thc}</span>
+                  <span className="text-white/70">THC:</span>
+                  <span className="ml-2 font-semibold text-white/90">{strain.thc}</span>
                 </div>
                 <div>
-                  <span className="text-gray-500">CBD:</span>
-                  <span className="ml-2 font-medium">{strain.cbd}</span>
+                  <span className="text-white/70">CBD:</span>
+                  <span className="ml-2 font-semibold text-white/90">{strain.cbd}</span>
                 </div>
               </div>
             </div>
@@ -127,8 +127,8 @@ export default function OnboardingPage() {
               px-8 py-3 rounded-lg text-white font-medium
               ${
                 selectedStrains.length === 3
-                  ? 'bg-lime hover:bg-lime/90'
-                  : 'bg-gray-300 cursor-not-allowed'
+                  ? 'bg-custom-orange hover:bg-custom-orange/90'
+                  : 'bg-custom-orange/30 cursor-not-allowed'
               }
             `}
           >
@@ -136,7 +136,7 @@ export default function OnboardingPage() {
           </button>
         </div>
 
-        <div className="text-center text-sm text-gray-500">
+        <div className="text-center text-sm text-custom-orange/70">
           {selectedStrains.length}/3 Sorten ausgewählt
         </div>
       </div>
