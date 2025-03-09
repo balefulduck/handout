@@ -8,7 +8,7 @@ const dbUtils = {
     },
 
     getUserById: (id) => {
-        const stmt = db.prepare('SELECT id, username, created_at, onboarding_completed FROM users WHERE id = ?');
+        const stmt = db.prepare('SELECT id, username, created_at FROM users WHERE id = ?');
         return stmt.get(id);
     },
 
@@ -17,10 +17,7 @@ const dbUtils = {
         return stmt.get(username);
     },
 
-    updateOnboardingStatus: (userId, completed) => {
-        const stmt = db.prepare('UPDATE users SET onboarding_completed = ? WHERE id = ?');
-        return stmt.run(completed, userId);
-    },
+    // Onboarding status function removed
 
     // Strain related operations
     getAllStrains: () => {

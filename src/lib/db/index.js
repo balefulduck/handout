@@ -30,8 +30,7 @@ const initDb = () => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             password_hash TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            onboarding_completed INTEGER DEFAULT 0
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     `);
 

@@ -97,10 +97,7 @@ export async function POST(request) {
       insertStrain.run(dbUser.id, strainId);
     }
 
-    // Update onboarding status
-    db.prepare(
-      "UPDATE users SET onboarding_completed = 1 WHERE id = ?"
-    ).run(dbUser.id);
+    // Onboarding status update removed
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
