@@ -152,12 +152,6 @@ export default function HarvestPage() {
       />
       <div className="p-6 pb-32">
         <div className="flex items-center mb-6">
-          <button
-            onClick={() => router.push(`/plants/${params.id}`)}
-            className="mr-4 text-custom-orange hover:text-orange-600"
-          >
-            <FaArrowLeft className="inline mr-2" /> Zurück
-          </button>
           <h1 className="text-2xl font-bold font-aptos">
             {existingHarvest ? 'Ernte bearbeiten' : 'Pflanze ernten'}: {plant.name}
           </h1>

@@ -6,7 +6,7 @@ import { PiPlantBold } from "react-icons/pi";
 import { LuSunMedium } from "react-icons/lu";
 import { GiPlantSeed, GiGrowth, GiFlowerPot, GiScythe, GiWateringCan } from "react-icons/gi";
 import { BsChatDots, BsPlusLg } from "react-icons/bs";
-import { FaFirstAid, FaLeaf, FaPlus } from "react-icons/fa";
+import { FaFirstAid, FaLeaf, FaPlus, FaArrowLeft } from "react-icons/fa";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/solid";
 import { useRouter, usePathname, useParams } from 'next/navigation';
 import { Dialog, Transition } from '@headlessui/react';
@@ -190,7 +190,15 @@ export default function ContextMenu({
             <span className="sr-only">Open sidebar</span>
             <Bars3Icon className="h-6 w-6" aria-hidden="true" />
           </button>
-          
+          {pathname.startsWith('/plants/') && (
+            <button
+              onClick={() => router.push('/plants')}
+              className="absolute left-10 top-1/2 transform -translate-y-1/2 text-white/70 hover:text-white focus:outline-none z-10 flex items-center gap-1.5 text-sm transition-colors"
+            >
+              <FaArrowLeft className="text-sm" />
+              <span className="font-medium">Zurück</span>
+            </button>
+          )}
           {/* Main navigation with equal width buttons */}
           <div className="grid grid-cols-3">
             <button

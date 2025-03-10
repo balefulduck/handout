@@ -163,8 +163,11 @@ export async function POST(request, { params }) {
         watered,
         topped,
         ph_value,
+        temperature,
+        humidity,
+        watering_amount,
         notes
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const result = insertDay.run(
@@ -174,6 +177,9 @@ export async function POST(request, { params }) {
       data.watered ? 1 : 0,
       data.topped ? 1 : 0,
       data.ph_value || null,
+      data.temperature || null,
+      data.humidity || null,
+      data.watering_amount || null,
       data.notes || null
     );
 

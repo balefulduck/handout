@@ -15,6 +15,8 @@ export default function PlantDetailPage() {
   const [error, setError] = useState(null);
   const [showNewDayForm, setShowNewDayForm] = useState(false);
   const [harvestData, setHarvestData] = useState(null);
+  const [previousFertilizers, setPreviousFertilizers] = useState([]);
+  const [showFertilizerSelect, setShowFertilizerSelect] = useState(false);
   const [newDay, setNewDay] = useState({
     date: new Date().toISOString().split('T')[0],
     watering_amount: '',
@@ -23,8 +25,6 @@ export default function PlantDetailPage() {
     notes: '',
     fertilizers: []
   });
-  
-  const [showFertilizerForm, setShowFertilizerForm] = useState(false);
   const [newFertilizer, setNewFertilizer] = useState({
     name: '',
     amount: ''
@@ -85,6 +85,22 @@ export default function PlantDetailPage() {
     }
   }, [params.id]);
 
+  // Fetch previously used fertilizers
+  useEffect(() => {
+    const fetchFertilizers = async () => {
+      try {
+        const response = await fetch('/api/fertilizers');
+        if (!response.ok) throw new Error('Failed to fetch fertilizers');
+        const data = await response.json();
+        setPreviousFertilizers(data.fertilizers);
+      } catch (error) {
+        console.error('Error fetching fertilizers:', error);
+      }
+    };
+
+    fetchFertilizers();
+  }, []);
+
   // Calculate plant age in days
   const calculateAge = (startDate) => {
     if (!startDate) return 0;
@@ -102,17 +118,6 @@ export default function PlantDetailPage() {
     const start = new Date(floweringStartDate);
     const today = new Date();
     const diffTime = Math.abs(today - start);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
-  
-  // Calculate day number from start date
-  const calculateDayNumber = (currentDate, startDate) => {
-    if (!currentDate || !startDate) return 1;
-    
-    const start = new Date(startDate);
-    const current = new Date(currentDate);
-    const diffTime = Math.abs(current - start);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   };
@@ -289,72 +294,46 @@ export default function PlantDetailPage() {
       />
       <div className="p-6 mt-5 pb-32">
         <div className="flex items-center mb-6">
-          <button
-            onClick={() => router.push('/plants')}
-            className="mr-4 text-custom-orange hover:text-orange-600"
-          >
-            &larr; Zurück
-          </button>
           <h1 className="text-2xl font-bold font-aptos">{plant.name}</h1>
         </div>
 
         {/* Plant Info Card */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex justify-between items-start mb-4">
-            <h2 className="text-xl font-bold text-gray-800">Pflanzendetails</h2>
-            <span className="px-3 py-1 text-sm rounded-full bg-custom-orange text-white">
-              {plant.genetic_type || plant.strain_type || 'Unbekannt'}
-            </span>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-3">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between max-w-4xl mx-auto">
+            <div className="mb-4 md:mb-0">
+              <h2 className="text-3xl font-bold text-gray-800">{plant.name}</h2>
               {plant.breeder && (
-                <p className="text-gray-700"><span className="font-semibold">Züchter:</span> {plant.breeder}</p>
-              )}
-              
-              <div className="flex items-center text-gray-700">
-                <FaSeedling className="mr-2 text-green-500" />
-                <span><span className="font-semibold">Alter:</span> {calculateAge(plant.start_date)} Tage</span>
-              </div>
-              
-              {plant.expected_flowering_days && (
-                <p className="text-gray-700">
-                  <span className="font-semibold">Erwartete Blütezeit:</span> {plant.expected_flowering_days} Tage
-                </p>
+                <p className="text-gray-500 text-sm mt-1">von {plant.breeder}</p>
               )}
             </div>
             
-            <div className="space-y-3">
-              <div className="flex items-center text-gray-700">
-                <FaCalendarAlt className="mr-2 text-blue-500" />
-                <span><span className="font-semibold">Startdatum:</span> {new Date(plant.start_date).toLocaleDateString()}</span>
+            <div className="flex flex-col md:flex-row md:space-x-8 space-y-4 md:space-y-0">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-custom-orange">{calculateAge(plant.start_date)}</div>
+                <div className="text-sm uppercase tracking-wide text-gray-400 mt-1">Tage alt</div>
+                <div className="text-xs text-gray-500">{new Date(plant.start_date).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: '2-digit' })}</div>
               </div>
-              
-              {plant.flowering_start_date ? (
-                <div className="flex flex-col space-y-2">
-                  <div className="flex items-center text-gray-700">
-                    <GiFlowerPot className="mr-2 text-purple-500" />
-                    <span>
-                      <span className="font-semibold">Blüte seit:</span> {new Date(plant.flowering_start_date).toLocaleDateString()} 
-                      ({calculateFloweringDays(plant.flowering_start_date)} Tage)
-                    </span>
-                  </div>
-                  
-                  {/* Show harvest info */}
-                  {harvestData && (
-                    <div className="flex items-center text-gray-700">
-                      <FaLeaf className="mr-2 text-green-500" />
-                      <span>
-                        <span className="font-semibold">Geerntet:</span> {harvestData.dry_weight ? `${harvestData.dry_weight}g` : 'Ja'}
-                      </span>
+
+              <div className="text-center">
+                {plant.flowering_start_date ? (
+                  <>
+                    <div className="text-2xl font-bold text-purple-600">
+                      {calculateFloweringDays(plant.flowering_start_date)} / {plant.expected_flowering_days || '?'}
                     </div>
-                  )}
-                </div>
-              ) : (
-                <div className="flex items-center text-gray-700">
-                  <GiFlowerPot className="mr-2 text-purple-500" />
-                  <span>Noch nicht in Blüte</span>
+                    <div className="text-xs uppercase tracking-wide text-gray-400 mt-1">Blütetage</div>
+                  </>
+                ) : plant.expected_flowering_days ? (
+                  <>
+                    <div className="text-2xl font-bold text-gray-400">0 / {plant.expected_flowering_days}</div>
+                    <div className="text-xs uppercase tracking-wide text-gray-400 mt-1">Blütetage</div>
+                  </>
+                ) : null}
+              </div>
+
+              {harvestData && (
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-600">{harvestData.dry_weight}g</div>
+                  <div className="text-xs uppercase tracking-wide text-gray-400 mt-1">Ertrag</div>
                 </div>
               )}
             </div>
@@ -363,10 +342,7 @@ export default function PlantDetailPage() {
 
         {/* Plant Days Section */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-800">Tageseinträge</h2>
-          </div>
-          
+         
           {/* New Day Entry Form */}
           {showNewDayForm && (
             <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
@@ -383,20 +359,143 @@ export default function PlantDetailPage() {
                       required
                     />
                   </div>
-                  
+
+                  {/* Watering and Fertilizer Section */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Bewässerung (ml)</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <GiWateringCan className="text-gray-400" />
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Bewässerung</label>
+                    <div className="space-y-3">
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <GiWateringCan className="text-gray-400" />
+                        </div>
+                        <input
+                          type="number"
+                          value={newDay.watering_amount}
+                          onChange={(e) => setNewDay({...newDay, watering_amount: e.target.value})}
+                          className="w-full pl-10 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
+                          placeholder="Menge in ml"
+                        />
                       </div>
-                      <input
-                        type="number"
-                        value={newDay.watering_amount}
-                        onChange={(e) => setNewDay({...newDay, watering_amount: e.target.value})}
-                        className="w-full pl-10 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                        placeholder="0"
-                      />
+
+                      {newDay.watering_amount > 0 && (
+                        <div className="space-y-2">
+                          {/* Current Fertilizers */}
+                          {newDay.fertilizers.length > 0 && (
+                            <div className="bg-gray-100 p-2 rounded-md space-y-1">
+                              {newDay.fertilizers.map((fertilizer, index) => (
+                                <div key={index} className="flex items-center justify-between text-sm bg-white p-2 rounded">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium">{fertilizer.name}</span>
+                                    <input
+                                      type="number"
+                                      value={fertilizer.amount}
+                                      onChange={(e) => {
+                                        const updatedFertilizers = [...newDay.fertilizers];
+                                        updatedFertilizers[index] = {
+                                          ...fertilizer,
+                                          amount: e.target.value
+                                        };
+                                        setNewDay({...newDay, fertilizers: updatedFertilizers});
+                                      }}
+                                      className="w-20 px-2 py-1 border border-gray-300 rounded"
+                                      placeholder="ml"
+                                    />
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const updatedFertilizers = [...newDay.fertilizers];
+                                      updatedFertilizers.splice(index, 1);
+                                      setNewDay({...newDay, fertilizers: updatedFertilizers});
+                                    }}
+                                    className="text-red-500 hover:text-red-700"
+                                  >
+                                    &times;
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Add Fertilizer Button */}
+                          <div className="flex justify-between items-center">
+                            <button
+                              type="button"
+                              onClick={() => setShowFertilizerSelect(!showFertilizerSelect)}
+                              className="text-sm text-custom-orange hover:text-orange-600 flex items-center gap-1"
+                            >
+                              <FaPlus className="text-xs" />
+                              Dünger hinzufügen
+                            </button>
+                          </div>
+
+                          {/* Fertilizer Quick Select */}
+                          {showFertilizerSelect && (
+                            <div className="bg-white p-3 rounded-md border border-gray-200">
+                              <div className="grid gap-2">
+                                {/* Previously used fertilizers */}
+                                {previousFertilizers.length > 0 && (
+                                  <div className="space-y-1">
+                                    <label className="block text-xs font-medium text-gray-500">Zuletzt verwendet</label>
+                                    <div className="grid grid-cols-2 gap-1">
+                                      {previousFertilizers.map((fertilizer) => (
+                                        <button
+                                          key={fertilizer.fertilizer_name}
+                                          type="button"
+                                          onClick={() => {
+                                            setNewDay({
+                                              ...newDay,
+                                              fertilizers: [...newDay.fertilizers, {
+                                                name: fertilizer.fertilizer_name,
+                                                amount: fertilizer.last_amount || ''
+                                              }]
+                                            });
+                                            setShowFertilizerSelect(false);
+                                          }}
+                                          className="text-left px-2 py-1 text-sm rounded hover:bg-gray-100 flex items-center justify-between"
+                                        >
+                                          <span>{fertilizer.fertilizer_name}</span>
+                                          <span className="text-xs text-gray-500">{fertilizer.usage_count}×</span>
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Add new fertilizer */}
+                                <div className="mt-2 pt-2 border-t">
+                                  <label className="block text-xs font-medium text-gray-500 mb-1">Neuer Dünger</label>
+                                  <div className="flex gap-2">
+                                    <input
+                                      type="text"
+                                      placeholder="Name"
+                                      value={newFertilizer.name}
+                                      onChange={(e) => setNewFertilizer({...newFertilizer, name: e.target.value})}
+                                      className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-custom-orange"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        if (!newFertilizer.name) return;
+                                        setNewDay({
+                                          ...newDay,
+                                          fertilizers: [...newDay.fertilizers, {...newFertilizer}]
+                                        });
+                                        setNewFertilizer({ name: '', amount: '' });
+                                        setShowFertilizerSelect(false);
+                                      }}
+                                      className="px-3 py-1 text-sm bg-custom-orange text-white rounded hover:bg-orange-600"
+                                      disabled={!newFertilizer.name}
+                                    >
+                                      Hinzufügen
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                   
@@ -445,95 +544,6 @@ export default function PlantDetailPage() {
                   ></textarea>
                 </div>
                 
-                {/* Fertilizer Section */}
-                <div className="mb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="block text-sm font-medium text-gray-700">Dünger</label>
-                    <button 
-                      type="button"
-                      onClick={() => setShowFertilizerForm(!showFertilizerForm)}
-                      className="text-sm text-custom-orange hover:text-orange-600"
-                    >
-                      + Dünger hinzufügen
-                    </button>
-                  </div>
-                  
-                  {/* Fertilizer List */}
-                  {newDay.fertilizers.length > 0 && (
-                    <div className="mb-3">
-                      <div className="bg-gray-100 p-3 rounded-md">
-                        {newDay.fertilizers.map((fertilizer, index) => (
-                          <div key={index} className="flex justify-between items-center mb-2 last:mb-0">
-                            <div>
-                              <span className="font-medium">{fertilizer.name}</span>
-                              {fertilizer.amount && (
-                                <span className="text-sm text-gray-600 ml-2">{fertilizer.amount} ml</span>
-                              )}
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const updatedFertilizers = [...newDay.fertilizers];
-                                updatedFertilizers.splice(index, 1);
-                                setNewDay({...newDay, fertilizers: updatedFertilizers});
-                              }}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              &times;
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Add Fertilizer Form */}
-                  {showFertilizerForm && (
-                    <div className="bg-gray-50 p-3 rounded-md border border-gray-200 mb-3">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Name</label>
-                          <input
-                            type="text"
-                            value={newFertilizer.name}
-                            onChange={(e) => setNewFertilizer({...newFertilizer, name: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange text-sm"
-                            placeholder="Düngername"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Menge (ml)</label>
-                          <input
-                            type="number"
-                            value={newFertilizer.amount}
-                            onChange={(e) => setNewFertilizer({...newFertilizer, amount: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange text-sm"
-                            placeholder="0"
-                          />
-                        </div>
-                      </div>
-                      <div className="flex justify-end mt-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (!newFertilizer.name) return;
-                            
-                            setNewDay({
-                              ...newDay, 
-                              fertilizers: [...newDay.fertilizers, {...newFertilizer}]
-                            });
-                            setNewFertilizer({ name: '', amount: '' });
-                            setShowFertilizerForm(false);
-                          }}
-                          className="px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 text-sm"
-                        >
-                          Hinzufügen
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                
                 <div className="flex justify-end space-x-2">
                   <button
                     type="button"
@@ -554,86 +564,65 @@ export default function PlantDetailPage() {
           )}
           
           {/* Day Entries List */}
-          {days.length > 0 ? (
-            <div className="space-y-4">
-              {days.map((day) => (
-                <div key={day.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center">
-                      <div className="bg-green-100 text-green-800 p-2 rounded-md mr-3">
-                        <FaCalendarAlt />
-                      </div>
+          {days.length > 0 && (
+            <div className="mt-8">
+              <h2 className="text-xl font-semibold mb-4">Tageseinträge</h2>
+              <div className="space-y-4">
+                {days.map((day) => (
+                  <div
+                    key={day.id}
+                    onClick={() => router.push(`/plants/${params.id}/days/${day.id}`)}
+                    className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                  >
+                    <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="font-medium">{new Date(day.date).toLocaleDateString()}</h4>
-                        <p className="text-sm text-gray-500">
-                          Tag {calculateDayNumber(day.date, plant.start_date)}
-                          {plant.flowering_start_date && day.date >= plant.flowering_start_date && 
-                            ` | Blütetag ${calculateDayNumber(day.date, plant.flowering_start_date)}`}
-                        </p>
+                        <h3 className="font-medium">Tag {day.day_number}</h3>
+                        <p className="text-sm text-gray-600">{new Date(day.date).toLocaleDateString('de-DE')}</p>
+                        
+                        <div className="mt-2 grid grid-cols-3 gap-4">
+                          <div className="flex items-center">
+                            <FaTint className="text-blue-500 mr-2" />
+                            <span>{day.watering_amount} ml</span>
+                          </div>
+                          <div className="flex items-center">
+                            <FaTemperatureHigh className="text-red-500 mr-2" />
+                            <span>{day.temperature}°C</span>
+                          </div>
+                          <div className="flex items-center">
+                            <FaLeaf className="text-green-500 mr-2" />
+                            <span>{day.humidity}%</span>
+                          </div>
+                        </div>
+                        
+                        {day.notes && (
+                          <p className="mt-2 text-sm text-gray-600 line-clamp-2">{day.notes}</p>
+                        )}
                       </div>
-                    </div>
-                    <div className="flex space-x-2">
-                      <button 
-                        onClick={() => handleEditDay(day.id)}
-                        className="text-blue-600 hover:text-blue-800"
-                      >
-                        <FaEdit />
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteDay(day.id)}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        <FaTrash />
-                      </button>
+                      
+                      <ContextMenu
+                        items={[
+                          {
+                            label: 'Bearbeiten',
+                            icon: <FaEdit />,
+                            onClick: (e) => {
+                              e.stopPropagation();
+                              handleEditDay(day.id);
+                            }
+                          },
+                          {
+                            label: 'Löschen',
+                            icon: <FaTrash />,
+                            onClick: (e) => {
+                              e.stopPropagation();
+                              handleDeleteDay(day.id);
+                            }
+                          }
+                        ]}
+                      />
                     </div>
                   </div>
-                  
-                  <div className="mt-3 grid grid-cols-3 gap-2 text-sm">
-                    {day.watering_amount && (
-                      <div className="flex items-center">
-                        <GiWateringCan className="text-blue-500 mr-1" />
-                        <span>{day.watering_amount} ml</span>
-                      </div>
-                    )}
-                    {day.temperature && (
-                      <div className="flex items-center">
-                        <FaTemperatureHigh className="text-red-500 mr-1" />
-                        <span>{day.temperature} °C</span>
-                      </div>
-                    )}
-                    {day.humidity && (
-                      <div className="flex items-center">
-                        <FaTint className="text-blue-400 mr-1" />
-                        <span>{day.humidity}%</span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Display fertilizers if any */}
-                  {day.fertilizers && day.fertilizers.length > 0 && (
-                    <div className="mt-2 border-t border-gray-100 pt-2">
-                      <div className="text-sm font-medium text-gray-700">Dünger:</div>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {day.fertilizers.map((fertilizer, idx) => (
-                          <span key={idx} className="inline-flex items-center px-2 py-1 bg-green-50 text-green-700 text-xs rounded">
-                            {fertilizer.fertilizer_name}
-                            {fertilizer.amount && ` (${fertilizer.amount} ml)`}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {day.notes && (
-                    <p className="mt-2 text-gray-700 text-sm border-t border-gray-100 pt-2">{day.notes}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <p>Noch keine Tageseinträge vorhanden.</p>
-              <p className="text-sm">Füge deinen ersten Eintrag hinzu, um das Wachstum zu verfolgen.</p>
+                ))}
+              </div>
             </div>
           )}
         </div>
