@@ -281,7 +281,13 @@ export default function PlantDetailPage() {
 
   return (
     <>
-      <div className="p-6 pb-32">
+      <ContextMenu
+        plant={plant}
+        harvestData={harvestData}
+        onStartFlowering={handleStartFlowering}
+        onShowNewDayForm={() => setShowNewDayForm(true)}
+      />
+      <div className="p-6 mt-5 pb-32">
         <div className="flex items-center mb-6">
           <button
             onClick={() => router.push('/plants')}
@@ -335,38 +341,21 @@ export default function PlantDetailPage() {
                     </span>
                   </div>
                   
-                  {/* Show harvest button or harvest info */}
-                  {harvestData ? (
+                  {/* Show harvest info */}
+                  {harvestData && (
                     <div className="flex items-center text-gray-700">
                       <FaLeaf className="mr-2 text-green-500" />
                       <span>
                         <span className="font-semibold">Geerntet:</span> {harvestData.dry_weight ? `${harvestData.dry_weight}g` : 'Ja'}
                       </span>
-                      <button 
-                        onClick={() => router.push(`/plants/${params.id}/harvest`)}
-                        className="ml-2 text-xs text-blue-500 hover:text-blue-700"
-                      >
-                        Bearbeiten
-                      </button>
                     </div>
-                  ) : (
-                    <button 
-                      onClick={() => router.push(`/plants/${params.id}/harvest`)}
-                      className="px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 flex items-center w-fit"
-                    >
-                      <FaLeaf className="mr-2" />
-                      Pflanze ernten
-                    </button>
                   )}
                 </div>
               ) : (
-                <button 
-                  onClick={handleStartFlowering}
-                  className="px-3 py-1 bg-purple-100 text-purple-700 rounded-md hover:bg-purple-200 flex items-center"
-                >
-                  <GiFlowerPot className="mr-2" />
-                  Blütephase starten
-                </button>
+                <div className="flex items-center text-gray-700">
+                  <GiFlowerPot className="mr-2 text-purple-500" />
+                  <span>Noch nicht in Blüte</span>
+                </div>
               )}
             </div>
           </div>
@@ -376,13 +365,6 @@ export default function PlantDetailPage() {
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-gray-800">Tageseinträge</h2>
-            <button 
-              onClick={() => setShowNewDayForm(!showNewDayForm)}
-              className="px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 flex items-center"
-            >
-              <FaPlus className="mr-2" />
-              Neuer Eintrag
-            </button>
           </div>
           
           {/* New Day Entry Form */}
@@ -657,7 +639,6 @@ export default function PlantDetailPage() {
         </div>
       </div>
 
-      <ContextMenu />
     </>
   );
 }

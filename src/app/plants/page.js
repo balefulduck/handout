@@ -170,7 +170,7 @@ export default function PlantsPage() {
                 
                 <div className="mt-3 space-y-2">
                   {plant.breeder && (
-                    <p className="text-sm text-gray-600">Züchter: {plant.breeder}</p>
+                    <p className="text-sm text-gray-600 font-semibold">{plant.breeder}</p>
                   )}
                   
                   <div className="flex items-center text-sm text-gray-600">
@@ -185,10 +185,7 @@ export default function PlantsPage() {
                     </div>
                   )}
                   
-                  <div className="flex items-center text-sm text-gray-600">
-                    <FaCalendarAlt className="mr-2 text-blue-500" />
-                    <span>Start: {new Date(plant.start_date).toLocaleDateString()}</span>
-                  </div>
+            
                 </div>
               </div>
             ))}

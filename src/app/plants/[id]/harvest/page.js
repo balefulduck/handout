@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { FaLeaf, FaArrowLeft } from 'react-icons/fa';
 import { GiFlowerPot } from 'react-icons/gi';
+import ContextMenu from '@/components/ContextMenu';
 
 export default function HarvestPage() {
   const params = useParams();
@@ -142,160 +143,157 @@ export default function HarvestPage() {
   }
 
   return (
-    <div className="p-6 pb-32">
-      <div className="flex items-center mb-6">
-        <button
-          onClick={() => router.push(`/plants/${params.id}`)}
-          className="mr-4 text-custom-orange hover:text-orange-600"
-        >
-          <FaArrowLeft className="inline mr-2" /> Zurück
-        </button>
-        <h1 className="text-2xl font-bold font-aptos">
-          {existingHarvest ? 'Ernte bearbeiten' : 'Pflanze ernten'}: {plant.name}
-        </h1>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div className="flex items-center mb-4">
-          <GiFlowerPot className="text-2xl text-purple-500 mr-2" />
-          <h2 className="text-xl font-bold text-gray-800">Erntedaten</h2>
+    <>
+      <ContextMenu
+        plant={plant}
+        harvestData={harvestData}
+        existingHarvest={existingHarvest}
+        onSaveHarvest={handleSubmit}
+      />
+      <div className="p-6 pb-32">
+        <div className="flex items-center mb-6">
+          <button
+            onClick={() => router.push(`/plants/${params.id}`)}
+            className="mr-4 text-custom-orange hover:text-orange-600"
+          >
+            <FaArrowLeft className="inline mr-2" /> Zurück
+          </button>
+          <h1 className="text-2xl font-bold font-aptos">
+            {existingHarvest ? 'Ernte bearbeiten' : 'Pflanze ernten'}: {plant.name}
+          </h1>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          {/* Consumption Method Group */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-3">Konsummethode</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Material</label>
-                <select
-                  value={harvestData.consumption_material}
-                  onChange={(e) => setHarvestData({...harvestData, consumption_material: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                  required
-                >
-                  <option value="flower">Blüte</option>
-                  <option value="concentrate">Konzentrat</option>
-                  <option value="edible">Essbar</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Methode</label>
-                <select
-                  value={harvestData.consumption_method}
-                  onChange={(e) => setHarvestData({...harvestData, consumption_method: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                  required
-                >
-                  <option value="smoking">Rauchen</option>
-                  <option value="vaping">Verdampfen</option>
-                </select>
-              </div>
-            </div>
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="flex items-center mb-4">
+            <GiFlowerPot className="text-2xl text-purple-500 mr-2" />
+            <h2 className="text-xl font-bold text-gray-800">Erntedaten</h2>
           </div>
-          
-          {/* Description */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Beschreibung</label>
-            <textarea
-              value={harvestData.description}
-              onChange={(e) => setHarvestData({...harvestData, description: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-              rows="3"
-              placeholder="Beschreibe deine Ernte..."
-            ></textarea>
-          </div>
-          
-          {/* Quality Metrics */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-3">Qualitätsmerkmale</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Knospendichte (1-5)</label>
-                <input
-                  type="range"
-                  min="1"
-                  max="5"
-                  step="1"
-                  value={harvestData.bud_density}
-                  onChange={(e) => setHarvestData({...harvestData, bud_density: parseInt(e.target.value)})}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-xs text-gray-500">
-                  <span>Locker (1)</span>
-                  <span>Mittel (3)</span>
-                  <span>Dicht (5)</span>
+
+          <form onSubmit={handleSubmit}>
+            {/* Consumption Method Group */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3">Konsummethode</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Material</label>
+                  <select
+                    value={harvestData.consumption_material}
+                    onChange={(e) => setHarvestData({...harvestData, consumption_material: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
+                    required
+                  >
+                    <option value="flower">Blüte</option>
+                    <option value="concentrate">Konzentrat</option>
+                    <option value="edible">Essbar</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Methode</label>
+                  <select
+                    value={harvestData.consumption_method}
+                    onChange={(e) => setHarvestData({...harvestData, consumption_method: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
+                    required
+                  >
+                    <option value="smoking">Rauchen</option>
+                    <option value="vaping">Verdampfen</option>
+                  </select>
                 </div>
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Trichomfarbe</label>
-                <select
-                  value={harvestData.trichome_color}
-                  onChange={(e) => setHarvestData({...harvestData, trichome_color: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                >
-                  <option value="clear">Klar</option>
-                  <option value="cloudy">Trüb</option>
-                  <option value="milky">Milchig</option>
-                  <option value="amber">Bernstein</option>
-                </select>
+            </div>
+            
+            {/* Description */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Beschreibung</label>
+              <textarea
+                value={harvestData.description}
+                onChange={(e) => setHarvestData({...harvestData, description: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
+                rows="3"
+                placeholder="Beschreibe deine Ernte..."
+              ></textarea>
+            </div>
+            
+            {/* Quality Metrics */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3">Qualitätsmerkmale</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Knospendichte (1-5)</label>
+                  <input
+                    type="range"
+                    min="1"
+                    max="5"
+                    step="1"
+                    value={harvestData.bud_density}
+                    onChange={(e) => setHarvestData({...harvestData, bud_density: parseInt(e.target.value)})}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Locker (1)</span>
+                    <span>Mittel (3)</span>
+                    <span>Dicht (5)</span>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Trichomfarbe</label>
+                  <select
+                    value={harvestData.trichome_color}
+                    onChange={(e) => setHarvestData({...harvestData, trichome_color: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
+                  >
+                    <option value="clear">Klar</option>
+                    <option value="cloudy">Trüb</option>
+                    <option value="milky">Milchig</option>
+                    <option value="amber">Bernstein</option>
+                  </select>
+                </div>
               </div>
             </div>
-          </div>
-          
-          {/* Curing and Weight */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-3">Trocknung & Gewicht</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Trocknungsbeginn</label>
-                <input
-                  type="date"
-                  value={harvestData.curing_begin}
-                  onChange={(e) => setHarvestData({...harvestData, curing_begin: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Trocknungsende</label>
-                <input
-                  type="date"
-                  value={harvestData.curing_end}
-                  onChange={(e) => setHarvestData({...harvestData, curing_end: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Trockengewicht (g)</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={harvestData.dry_weight}
-                  onChange={(e) => setHarvestData({...harvestData, dry_weight: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                  placeholder="0.0"
-                />
+            
+            {/* Curing and Weight */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3">Trocknung & Gewicht</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Trocknungsbeginn</label>
+                  <input
+                    type="date"
+                    value={harvestData.curing_begin}
+                    onChange={(e) => setHarvestData({...harvestData, curing_begin: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Trocknungsende</label>
+                  <input
+                    type="date"
+                    value={harvestData.curing_end}
+                    onChange={(e) => setHarvestData({...harvestData, curing_end: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Trockengewicht (g)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={harvestData.dry_weight}
+                    onChange={(e) => setHarvestData({...harvestData, dry_weight: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
+                    placeholder="0.0"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-          
-          {/* Submit Button */}
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              className="px-6 py-2 bg-custom-orange text-white rounded-md hover:bg-orange-600 flex items-center"
-            >
-              <FaLeaf className="mr-2" />
-              {existingHarvest ? 'Erntedaten aktualisieren' : 'Ernte speichern'}
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

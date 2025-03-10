@@ -2,19 +2,24 @@ const db = require('./index');
 
 const dbUtils = {
     // User related operations
-    createUser: (username, passwordHash) => {
-        const stmt = db.prepare('INSERT INTO users (username, password_hash) VALUES (?, ?)');
-        return stmt.run(username, passwordHash);
+    createUser: (username, passwordHash, email = null) => {
+        const stmt = db.prepare('INSERT INTO users (username, password_hash, email) VALUES (?, ?, ?)');
+        return stmt.run(username, passwordHash, email);
     },
 
     getUserById: (id) => {
-        const stmt = db.prepare('SELECT id, username, created_at FROM users WHERE id = ?');
+        const stmt = db.prepare('SELECT id, username, email, created_at FROM users WHERE id = ?');
         return stmt.get(id);
     },
 
     getUserByUsername: (username) => {
         const stmt = db.prepare('SELECT * FROM users WHERE username = ?');
         return stmt.get(username);
+    },
+
+    updateUserEmail: (userId, email) => {
+        const stmt = db.prepare('UPDATE users SET email = ? WHERE id = ?');
+        return stmt.run(email, userId);
     },
 
     // Onboarding status function removed

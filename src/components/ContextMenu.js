@@ -1,26 +1,67 @@
 'use client';
 
-import { useState, Fragment } from 'react';
+import { useState, Fragment, useEffect } from 'react';
 import { WiHumidity } from "react-icons/wi";
 import { PiPlantBold } from "react-icons/pi";
 import { LuSunMedium } from "react-icons/lu";
-import { GiPlantSeed, GiGrowth, GiFlowerPot, GiScythe } from "react-icons/gi";
+import { GiPlantSeed, GiGrowth, GiFlowerPot, GiScythe, GiWateringCan } from "react-icons/gi";
 import { BsChatDots, BsPlusLg } from "react-icons/bs";
-import { FaFirstAid } from "react-icons/fa";
+import { FaFirstAid, FaLeaf, FaPlus } from "react-icons/fa";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/solid";
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useParams } from 'next/navigation';
 import { Dialog, Transition } from '@headlessui/react';
 import { useSession, signOut } from 'next-auth/react';
 
-export default function ContextMenu({ activePhase, onPhaseSelect }) {
+export default function ContextMenu({ 
+  activePhase, 
+  onPhaseSelect,
+  // Plant detail specific props
+  plant,
+  harvestData,
+  onStartFlowering,
+  onShowNewDayForm,
+  // Harvest page specific props
+  onSaveHarvest,
+  existingHarvest
+}) {
   const router = useRouter();
   const pathname = usePathname();
+  const params = useParams();
   const { data: session } = useSession();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
+  const [email, setEmail] = useState('');
+
+  useEffect(() => {
+    if (session?.user?.email) {
+      setEmail(session.user.email);
+    }
+  }, [session?.user?.email]);
+
   const handleLogout = async () => {
     await signOut({ callbackUrl: '/login' });
   };
+
+  const handleEmailUpdate = async () => {
+    try {
+      const response = await fetch('/api/user/email', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update email');
+      }
+
+      setIsEditingEmail(false);
+    } catch (error) {
+      console.error('Error updating email:', error);
+    }
+  };
+
   return (
     <>
       {/* Mobile menu */}
@@ -83,7 +124,39 @@ export default function ContextMenu({ activePhase, onPhaseSelect }) {
                         </div>
                         <div className="ml-3">
                           <div className="text-base font-medium text-gray-800">{session?.user?.name || 'Workshop'}</div>
-                          <div className="text-sm font-medium text-gray-500">{session?.user?.email || ''}</div>
+                          {isEditingEmail ? (
+                            <div className="flex items-center gap-2 mt-1">
+                              <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="text-sm text-gray-900 rounded-md border border-gray-300 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-custom-orange"
+                                placeholder="Enter email"
+                              />
+                              <button
+                                onClick={handleEmailUpdate}
+                                className="text-xs bg-custom-orange text-white px-2 py-1 rounded-md hover:bg-orange-700"
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={() => setIsEditingEmail(false)}
+                                className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-md hover:bg-gray-300"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <div className="text-sm font-medium text-gray-500">{session?.user?.email || 'Keine E-Mail hinterlegt'}</div>
+                              <button
+                                onClick={() => setIsEditingEmail(true)}
+                                className="text-xs text-custom-orange hover:text-orange-700"
+                              >
+                                Editieren 
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="mt-3">
@@ -185,6 +258,60 @@ export default function ContextMenu({ activePhase, onPhaseSelect }) {
                   <GiScythe className="text-lg" />
                 </div>
                 <span className="text-xs text-white font-semibold">Ernte</span>
+              </button>
+            </div>
+          )}
+
+          {pathname.startsWith('/plants/') && pathname.split('/').length === 3 && plant && (
+            <div className="grid grid-cols-3 gap-3 py-2 px-2">
+              <button
+                onClick={onShowNewDayForm}
+                className="flex flex-col items-center gap-2 transition-colors"
+              >
+                <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-custom-orange">
+                  <FaPlus className="text-lg" />
+                </div>
+                <span className="text-xs text-white font-semibold">Neuer Tageseintrag</span>
+              </button>
+
+              {!plant.flowering_start_date && (
+                <button
+                  onClick={onStartFlowering}
+                  className="flex flex-col items-center gap-2 transition-colors"
+                >
+                  <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-purple-500">
+                    <GiFlowerPot className="text-lg" />
+                  </div>
+                  <span className="text-xs text-white font-semibold">Blüte starten</span>
+                </button>
+              )}
+
+              {plant.flowering_start_date && !harvestData && (
+                <button
+                  onClick={() => router.push(`/plants/${params.id}/harvest`)}
+                  className="flex flex-col items-center gap-2 transition-colors"
+                >
+                  <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-green-500">
+                    <FaLeaf className="text-lg" />
+                  </div>
+                  <span className="text-xs text-white font-semibold">Ernten</span>
+                </button>
+              )}
+            </div>
+          )}
+
+          {pathname.startsWith('/plants/') && pathname.split('/').length === 4 && pathname.endsWith('/harvest') && (
+            <div className="grid grid-cols-1 gap-3 py-2 px-2">
+              <button
+                onClick={onSaveHarvest}
+                className="flex flex-col items-center gap-2 transition-colors"
+              >
+                <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-green-500">
+                  <FaLeaf className="text-lg" />
+                </div>
+                <span className="text-xs text-white font-semibold">
+                  {existingHarvest ? 'Erntedaten aktualisieren' : 'Ernte speichern'}
+                </span>
               </button>
             </div>
           )}
