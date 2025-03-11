@@ -12,6 +12,12 @@ if (typeof window === 'undefined') {
 
 // Helper function to save uploaded files
 async function saveFile(file, userId) {
+  // TEMPORARILY DISABLED FOR VERCEL COMPATIBILITY
+  // File system operations are not supported in Vercel's serverless environment
+  console.log('File upload temporarily disabled for Vercel compatibility');
+  return null;
+  
+  /* Original implementation - kept for future reference
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
   
@@ -27,6 +33,7 @@ async function saveFile(file, userId) {
     console.error('Error saving file:', error);
     throw new Error('Failed to save uploaded file');
   }
+  */
 }
 
 // POST /api/help-requests - Create a new help request
@@ -96,6 +103,9 @@ export async function POST(request) {
     // Save uploaded files
     const fileUrls = [];
     
+    // TEMPORARILY DISABLED FOR VERCEL COMPATIBILITY
+    // File system operations are not supported in Vercel's serverless environment
+    /*
     if (files && files.length > 0) {
       for (const file of files) {
         if (file && file.name) {
@@ -104,6 +114,7 @@ export async function POST(request) {
         }
       }
     }
+    */
 
     // Create the help request in database
     // First, check if we have the help_requests table
