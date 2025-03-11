@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Fragment, useEffect } from 'react';
+import { useState, Fragment, useEffect, useRef } from 'react';
 import { WiHumidity } from "react-icons/wi";
 import { PiPlantBold } from "react-icons/pi";
 import { LuSunMedium } from "react-icons/lu";
@@ -32,6 +32,21 @@ export default function ContextMenu({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [email, setEmail] = useState('');
+  const [helpModalOpen, setHelpModalOpen] = useState(false);
+  const [helpFormData, setHelpFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: '',
+    files: []
+  });
+  const [userPlants, setUserPlants] = useState([]);
+  const [selectedPlants, setSelectedPlants] = useState([]);
+  const [isLoadingPlants, setIsLoadingPlants] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const fileInputRef = useRef(null);
   const [recentPlants, setRecentPlants] = useState([]);
 
   useEffect(() => {
@@ -39,6 +54,45 @@ export default function ContextMenu({
       setEmail(session.user.email);
     }
   }, [session?.user?.email]);
+
+  // Pre-fill help form with user data when modal opens
+  useEffect(() => {
+    if (helpModalOpen && session?.user) {
+      setHelpFormData(prevData => ({
+        ...prevData,
+        name: session.user.name || '',
+        email: session.user.email || ''
+      }));
+      
+      // Fetch user's plants when help modal opens
+      setIsLoadingPlants(true);
+      fetch('/api/plants')
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          console.log('Plants API response:', data);
+          // The API returns { plants: [...] }
+          if (data && Array.isArray(data.plants)) {
+            setUserPlants(data.plants);
+          } else if (Array.isArray(data)) {
+            setUserPlants(data);
+          } else {
+            console.error('Unexpected data format for plants:', data);
+            setUserPlants([]);
+          }
+          setIsLoadingPlants(false);
+        })
+        .catch(err => {
+          console.error('Error loading plants:', err);
+          setUserPlants([]);
+          setIsLoadingPlants(false);
+        });
+    }
+  }, [helpModalOpen, session]);
 
   // Function to force refresh of recently viewed plants
   const refreshRecentPlants = () => {
@@ -433,7 +487,7 @@ export default function ContextMenu({
               </button>
 
               <button
-                onClick={() => {/* TODO: Implement Dr. Cannabis help */}}
+                onClick={() => setHelpModalOpen(true)}
                 className="flex flex-col items-center gap-2 transition-colors"
               >
                 <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-icon-olive">
@@ -462,6 +516,363 @@ export default function ContextMenu({
           )}
         </div>
       </div>
+      {/* Dr. Cannabis Hilfe Modal */}
+      <Transition.Root show={helpModalOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={() => {
+          if (!isSubmitting) {
+            setHelpModalOpen(false);
+            // Reset form after closing if not in the middle of submitting
+            if (submitSuccess) {
+              setHelpFormData({
+                name: '',
+                email: '',
+                subject: '',
+                message: '',
+                files: []
+              });
+              setSubmitSuccess(false);
+              setSubmitError('');
+            }
+          }
+        }}>
+          <Transition.Child
+            as={Fragment}
+            enter="transition-opacity ease-linear duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="transition-opacity ease-linear duration-300"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 z-10 overflow-y-auto">
+            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              >
+                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                  {submitSuccess ? (
+                    <div className="text-center">
+                      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+                        <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <h3 className="mt-3 text-lg font-medium text-gray-900">Nachricht gesendet!</h3>
+                      <p className="mt-2 text-sm text-gray-500">
+                        Vielen Dank für Ihre Nachricht. Wir werden uns so schnell wie möglich bei Ihnen melden.
+                      </p>
+                      <div className="mt-5">
+                        <button
+                          type="button"
+                          className="inline-flex w-full justify-center rounded-md border border-transparent bg-olive-green px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-yellow-green focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-olive-green sm:text-sm"
+                          onClick={() => {
+                            setHelpModalOpen(false);
+                            setHelpFormData({
+                              name: '',
+                              email: '',
+                              subject: '',
+                              message: '',
+                              files: []
+                            });
+                            setSelectedPlants([]);
+                            setSubmitSuccess(false);
+                          }}
+                        >
+                          Schließen
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="text-center">
+                        <img src="/menu.png" alt="Dr. Cannabis Logo" className="h-16 mx-auto mb-4" />
+                        <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
+                          Dr. Cannabis Hilfe
+                        </Dialog.Title>
+                        <p className="mt-2 text-sm text-gray-500">
+                          Haben Sie Probleme mit Ihrer Pflanze? Senden Sie uns eine Nachricht mit Details und Fotos, und wir helfen Ihnen gerne weiter.
+                        </p>
+                      </div>
+                      {submitError && (
+                        <div className="mt-3 bg-red-50 border border-red-200 rounded-md p-3">
+                          <p className="text-sm text-red-600">{submitError}</p>
+                        </div>
+                      )}
+                      <form className="mt-5 space-y-4" onSubmit={(e) => {
+                        e.preventDefault();
+                        setIsSubmitting(true);
+                        setSubmitError('');
+                        
+                        // Compile plant data to send with the form
+                        const compilePlantData = () => {
+                          return selectedPlants.map(plant => ({
+                            id: plant.id,
+                            name: plant.name,
+                            strain: plant.strain_name || plant.strain, // Handle both formats
+                            created_at: plant.created_at,
+                            flowering_start_date: plant.flowering_start_date,
+                            // Add any other relevant plant data we want to include
+                          }));
+                        };
+                        
+                        // Create FormData to send to the API
+                        const formData = new FormData();
+                        formData.append('name', helpFormData.name);
+                        formData.append('email', helpFormData.email);
+                        formData.append('subject', helpFormData.subject);
+                        formData.append('message', helpFormData.message);
+                        formData.append('recipient', 'riegelsberg@drcannabis.de');
+                        
+                        // Add selected plants and their data
+                        const plantData = compilePlantData();
+                        formData.append('plantData', JSON.stringify(plantData));
+                        formData.append('selectedPlantIds', JSON.stringify(selectedPlants.map(p => p.id)));
+                        
+                        // Add files (images)
+                        for (let i = 0; i < helpFormData.files.length; i++) {
+                          formData.append('files', helpFormData.files[i]);
+                        }
+                        
+                        // Send the data to the server
+                        console.log('Sending help request to server...');
+                        console.log('Plant data:', plantData);
+                        
+                        fetch('/api/help-requests', {
+                          method: 'POST',
+                          body: formData,
+                        })
+                        .then(response => {
+                          if (!response.ok) {
+                            console.error('Error response:', response.status);
+                            throw new Error('Fehler beim Senden der Nachricht');
+                          }
+                          return response.json();
+                        })
+                        .then(data => {
+                          console.log('Help request saved successfully:', data);
+                          setIsSubmitting(false);
+                          setSubmitSuccess(true);
+                        })
+                        .catch(error => {
+                          console.error('Error saving help request:', error);
+                          setIsSubmitting(false);
+                          setSubmitError(error.message || 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.');
+                        });
+                      }}>
+                        <div>
+                          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                            Name
+                          </label>
+                          <input
+                            type="text"
+                            name="name"
+                            id="name"
+                            required
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-olive-green focus:ring-olive-green sm:text-sm"
+                            value={helpFormData.name}
+                            onChange={(e) => setHelpFormData({...helpFormData, name: e.target.value})}
+                            disabled={isSubmitting}
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                            E-Mail
+                          </label>
+                          <input
+                            type="email"
+                            name="email"
+                            id="email"
+                            required
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-olive-green focus:ring-olive-green sm:text-sm"
+                            value={helpFormData.email}
+                            onChange={(e) => setHelpFormData({...helpFormData, email: e.target.value})}
+                            disabled={isSubmitting}
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="subject" className="block text-sm font-medium text-gray-700">
+                            Betreff
+                          </label>
+                          <input
+                            type="text"
+                            name="subject"
+                            id="subject"
+                            required
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-olive-green focus:ring-olive-green sm:text-sm"
+                            value={helpFormData.subject}
+                            onChange={(e) => setHelpFormData({...helpFormData, subject: e.target.value})}
+                            disabled={isSubmitting}
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="message" className="block text-sm font-medium text-gray-700">
+                            Nachricht
+                          </label>
+                          <textarea
+                            name="message"
+                            id="message"
+                            rows={4}
+                            required
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-olive-green focus:ring-olive-green sm:text-sm"
+                            value={helpFormData.message}
+                            onChange={(e) => setHelpFormData({...helpFormData, message: e.target.value})}
+                            disabled={isSubmitting}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">
+                            Fotos anhängen (optional)
+                          </label>
+                          <div className="mt-1 flex items-center">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              className="hidden"
+                              ref={fileInputRef}
+                              onChange={(e) => {
+                                const fileList = Array.from(e.target.files || []);
+                                setHelpFormData({...helpFormData, files: fileList});
+                              }}
+                              disabled={isSubmitting}
+                            />
+                            <button
+                              type="button"
+                              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-olive-green"
+                              onClick={() => fileInputRef.current?.click()}
+                              disabled={isSubmitting}
+                            >
+                              Dateien auswählen
+                            </button>
+                            <span className="ml-3 text-sm text-gray-500">
+                              {helpFormData.files.length > 0 ? `${helpFormData.files.length} Datei(en) ausgewählt` : 'Keine Dateien ausgewählt'}
+                            </span>
+                          </div>
+                          {helpFormData.files.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {helpFormData.files.map((file, index) => (
+                                <div key={index} className="relative bg-gray-100 rounded p-1">
+                                  <img 
+                                    src={URL.createObjectURL(file)} 
+                                    alt={`Vorschau ${index}`} 
+                                    className="h-16 w-16 object-cover rounded" 
+                                  />
+                                  <button 
+                                    type="button" 
+                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-700"
+                                    onClick={() => {
+                                      const newFiles = [...helpFormData.files];
+                                      newFiles.splice(index, 1);
+                                      setHelpFormData({...helpFormData, files: newFiles});
+                                    }}
+                                    disabled={isSubmitting}
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">
+                            Betroffene Pflanzen auswählen
+                          </label>
+                          {isLoadingPlants ? (
+                            <div className="mt-2 flex items-center text-sm text-gray-500">
+                              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-olive-green" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Pflanzen werden geladen...
+                            </div>
+                          ) : userPlants.length === 0 ? (
+                            <p className="mt-1 text-sm text-gray-500">Keine Pflanzen gefunden</p>
+                          ) : (
+                            <div className="mt-2 max-h-40 overflow-y-auto border border-gray-200 rounded-md p-2">
+                              {userPlants.map(plant => (
+                                <div key={plant.id} className="flex items-center p-2 hover:bg-gray-50 rounded-md">
+                                  <input
+                                    id={`plant-${plant.id}`}
+                                    name={`plant-${plant.id}`}
+                                    type="checkbox"
+                                    className="h-4 w-4 text-olive-green focus:ring-olive-green border-gray-300 rounded"
+                                    checked={selectedPlants.some(p => p.id === plant.id)}
+                                    onChange={() => {
+                                      if (selectedPlants.some(p => p.id === plant.id)) {
+                                        setSelectedPlants(selectedPlants.filter(p => p.id !== plant.id));
+                                      } else {
+                                        setSelectedPlants([...selectedPlants, plant]);
+                                      }
+                                    }}
+                                    disabled={isSubmitting}
+                                  />
+                                  <label htmlFor={`plant-${plant.id}`} className="ml-3 block text-sm font-medium text-gray-700">
+                                    {plant.name}
+                                    {plant.strain && <span className="ml-1 text-xs text-gray-500">({plant.strain})</span>}
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {selectedPlants.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              <p className="w-full text-sm text-gray-600">Ausgewählt: {selectedPlants.length} Pflanze(n)</p>
+                              <button
+                                type="button"
+                                className="text-xs text-gray-500 hover:text-gray-700"
+                                onClick={() => setSelectedPlants([])}
+                                disabled={isSubmitting}
+                              >
+                                Alle entfernen
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3">
+                          <button
+                            type="button"
+                            className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-olive-green sm:text-sm"
+                            onClick={() => setHelpModalOpen(false)}
+                            disabled={isSubmitting}
+                          >
+                            Abbrechen
+                          </button>
+                          <button
+                            type="submit"
+                            className="inline-flex w-full justify-center rounded-md border border-transparent bg-olive-green px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-yellow-green focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-olive-green sm:text-sm"
+                            disabled={isSubmitting}
+                          >
+                            {isSubmitting ? (
+                              <>
+                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Senden...
+                              </>
+                            ) : 'Senden'}
+                          </button>
+                        </div>
+                      </form>
+                    </>
+                  )}
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
     </>
   );
 }
