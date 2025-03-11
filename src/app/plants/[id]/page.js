@@ -192,6 +192,29 @@ export default function PlantDetailPage() {
     }
   };
   
+  // Handle deleting a plant
+  const handleDeletePlant = async () => {
+    if (!confirm('Möchtest du diese Pflanze wirklich löschen?')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/plants/${params.id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete plant');
+      }
+      
+      // Redirect to plants list after successful deletion
+      router.push('/plants');
+    } catch (err) {
+      console.error('Error deleting plant:', err);
+      alert('Failed to delete plant: ' + err.message);
+    }
+  };
+  
   // Handle starting the flowering phase
   const handleStartFlowering = async () => {
     if (!confirm('Möchtest du die Blütephase für diese Pflanze jetzt starten?')) {
@@ -294,10 +317,8 @@ export default function PlantDetailPage() {
         onStartFlowering={handleStartFlowering}
         onShowNewDayForm={() => setShowNewDayForm(true)}
       />
-      <div className="p-6 mt-5 pb-32">
-        <div className="flex items-center mb-6">
-          <h1 className="text-2xl font-bold font-aptos">{plant.name}</h1>
-        </div>
+      <div className="p-6 mt-10 pb-32">
+  
 
         {/* Plant Info Card */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -342,111 +363,7 @@ export default function PlantDetailPage() {
           </div>
         </div>
 
-        {/* Plant details section */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          {/* Plant header with image and basic info */}
-          <div className="flex flex-col md:flex-row gap-6 mb-6">
-            {/* Plant image */}
-            <div className="w-full md:w-1/3 flex justify-center">
-              <div className="w-full max-w-[300px] aspect-square bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
-                {plant.image_url ? (
-                  <img 
-                    src={plant.image_url} 
-                    alt={plant.name} 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <GiFlowerPot className="text-gray-400 text-8xl" />
-                )}
-              </div>
-            </div>
-            
-            {/* Plant info */}
-            <div className="w-full md:w-2/3">
-              <h1 className="text-3xl font-aptos font-bold text-gray-800 mb-2">{plant.name}</h1>
-              <p className="text-gray-600 mb-4">{plant.strain}</p>
-              
-              {/* Plant stats */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-                {/* Age */}
-                <div className="bg-gray-100 p-3 rounded-lg">
-                  <div className="flex items-center gap-2 text-gray-600 mb-1">
-                    <FaSeedling className="text-icon-olive" />
-                    <span className="text-sm">Alter</span>
-                  </div>
-                  <p className="text-xl font-semibold">{calculateAge(plant.planting_date)} Tage</p>
-                </div>
-                
-                {/* Phase */}
-                <div className="bg-gray-100 p-3 rounded-lg">
-                  <div className="flex items-center gap-2 text-gray-600 mb-1">
-                    <FaLeaf className="text-icon-lime" />
-                    <span className="text-sm">Phase</span>
-                  </div>
-                  <p className="text-xl font-semibold">
-                    {plant.flowering_start_date ? 'Blüte' : 'Wachstum'}
-                  </p>
-                </div>
-                
-                {/* Flowering days (if applicable) */}
-                {plant.flowering_start_date && (
-                  <div className="bg-gray-100 p-3 rounded-lg">
-                    <div className="flex items-center gap-2 text-gray-600 mb-1">
-                      <GiFlowerPot className="text-icon-purple" />
-                      <span className="text-sm">Blütetage</span>
-                    </div>
-                    <p className="text-xl font-semibold">{calculateFloweringDays(plant.flowering_start_date)} Tage</p>
-                  </div>
-                )}
-              </div>
-              
-              {/* Plant actions */}
-              <div className="flex flex-wrap gap-2">
-                <button 
-                  onClick={() => router.push(`/plants/${plant.id}/harvest`)}
-                  className="flex items-center gap-1 px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
-                >
-                  <FaLeaf />
-                  {harvestData ? 'Ernte bearbeiten' : 'Ernte erfassen'}
-                </button>
-                
-                {!plant.flowering_start_date && (
-                  <button 
-                    onClick={handleStartFlowering}
-                    className="flex items-center gap-1 px-3 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition"
-                  >
-                    <GiFlowerPot />
-                    Blütephase starten
-                  </button>
-                )}
-                
-                <button 
-                  onClick={() => router.push(`/plants/${plant.id}/edit`)}
-                  className="flex items-center gap-1 px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-                >
-                  <FaEdit />
-                  Bearbeiten
-                </button>
-                
-                <button 
-                  onClick={handleDeletePlant}
-                  className="flex items-center gap-1 px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
-                >
-                  <FaTrash />
-                  Löschen
-                </button>
-              </div>
-            </div>
-          </div>
-          
-          {/* Plant description */}
-          {plant.description && (
-            <div className="mb-6">
-              <h2 className="text-xl font-aptos font-semibold mb-2">Beschreibung</h2>
-              <p className="text-gray-700">{plant.description}</p>
-            </div>
-          )}
-        </div>
+
 
         {/* Tab navigation */}
         <div className="flex justify-center mb-6">
@@ -480,12 +397,12 @@ export default function PlantDetailPage() {
           </div>
         </div>
 
-        {/* Plant Days Section */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-         
-          {/* New Day Entry Form */}
-          {showNewDayForm && (
-            <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
+        {/* Tab Content */}
+        {activeTab === 'details' ? (
+          <div className="bg-white rounded-lg shadow-md p-6">
+            {/* New Day Entry Form */}
+            {showNewDayForm && (
+              <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
               <h3 className="text-lg font-semibold mb-3">Neuer Tageseintrag</h3>
               <form onSubmit={handleAddDayEntry}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -706,7 +623,6 @@ export default function PlantDetailPage() {
           {/* Day Entries List */}
           {days.length > 0 && (
             <div className="mt-8">
-              <h2 className="text-xl font-semibold mb-4">Tageseinträge</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {days.map((day) => (
                   <div
@@ -772,33 +688,10 @@ export default function PlantDetailPage() {
               </div>
             </div>
           )}
-        </div>
-
-        {/* Render tab content */}
-        {activeTab === 'details' && (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            {/* Render details content here */}
           </div>
+        ) : (
+          <StatisticsTab days={days} />
         )}
-        {activeTab === 'statistics' && (
-          <StatisticsTab />
-        )}
-      </div>
-
-      {/* Add tab navigation */}
-      <div className="flex justify-center mb-6">
-        <button
-          className={`px-4 py-2 ${activeTab === 'details' ? 'bg-custom-orange text-white' : 'bg-gray-100 text-gray-600'} rounded-md hover:bg-orange-600`}
-          onClick={() => setActiveTab('details')}
-        >
-          Details
-        </button>
-        <button
-          className={`px-4 py-2 ${activeTab === 'statistics' ? 'bg-custom-orange text-white' : 'bg-gray-100 text-gray-600'} rounded-md hover:bg-orange-600`}
-          onClick={() => setActiveTab('statistics')}
-        >
-          Statistiken
-        </button>
       </div>
     </>
   );

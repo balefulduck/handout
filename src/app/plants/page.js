@@ -136,8 +136,7 @@ export default function PlantsPage() {
 
   return (
     <>
-      <div className="p-6 pb-32">
-        <h1 className="text-2xl font-bold mt-10 mb-6 font-aptos">Meine Pflanzen</h1>
+      <div className="p-6 mt-10 pb-32">
         
         {loading ? (
           <div className="flex justify-center items-center h-40">
