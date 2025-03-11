@@ -201,26 +201,47 @@ export default function ContextMenu({
           )}
           {/* Main navigation with equal width buttons */}
           <div className="grid grid-cols-3">
-            <button
-              onClick={() => router.push('/dashboard')}
+            <a 
+              href="/dashboard"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Use window.location for a full page navigation to avoid any router conflicts
+                window.location.href = '/dashboard';
+                return false;
+              }}
               className={`flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/dashboard' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'} pl-10`}
             >
               <span className="text-sm font-semibold text-icon-purple px-2">Dashboard</span>
               {pathname !== '/dashboard' && <div className="absolute right-0 top-1/2 -translate-y-1/2 h-4/5 w-px bg-white/20" />}
-            </button>
-            <button
-              onClick={() => router.push('/plants')}
+            </a>
+            <a
+              href="/plants"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Use window.location for a full page navigation to avoid any router conflicts
+                window.location.href = '/plants';
+                return false;
+              }}
               className={`flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/plants' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
             >
               <span className="text-sm font-semibold text-icon-purple px-2">Pflanzen</span>
               {pathname !== '/plants' && <div className="absolute right-0 top-1/2 -translate-y-1/2 h-4/5 w-px bg-white/20" />}
-            </button>
-            <button
-              onClick={() => router.push('/help')}
+            </a>
+            <a
+              href="/help"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Use window.location for a full page navigation to avoid any router conflicts
+                window.location.href = '/help';
+                return false;
+              }}
               className={`flex items-center justify-center py-1.5 transition-colors ${pathname === '/help' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
             >
               <span className="text-sm font-semibold text-icon-purple px-2">Erste Hilfe</span>
-            </button>
+            </a>
           </div>
         </div>
       </div>

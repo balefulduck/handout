@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import ContextMenu from '@/components/ContextMenu';
+import DayEntryMenu from '@/components/DayEntryMenu';
 import { FaSeedling, FaCalendarAlt, FaEdit, FaTrash, FaPlus, FaTint, FaTemperatureHigh, FaLeaf, FaChartLine } from 'react-icons/fa';
 import { GiFlowerPot, GiWateringCan } from 'react-icons/gi';
 import StatisticsTab from '@/components/StatisticsTab';
@@ -662,7 +663,7 @@ export default function PlantDetailPage() {
                         </div>
                       </div>
                       
-                      <ContextMenu
+                      <DayEntryMenu
                         items={[
                           {
                             label: 'Bearbeiten',
