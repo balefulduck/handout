@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import ContextMenu from '@/components/ContextMenu';
-import { FaSeedling, FaCalendarAlt, FaEdit, FaTrash, FaPlus, FaTint, FaTemperatureHigh, FaLeaf } from 'react-icons/fa';
+import { FaSeedling, FaCalendarAlt, FaEdit, FaTrash, FaPlus, FaTint, FaTemperatureHigh, FaLeaf, FaChartLine } from 'react-icons/fa';
 import { GiFlowerPot, GiWateringCan } from 'react-icons/gi';
+import StatisticsTab from '@/components/StatisticsTab';
 
 export default function PlantDetailPage() {
   const params = useParams();
@@ -29,6 +30,7 @@ export default function PlantDetailPage() {
     name: '',
     amount: ''
   });
+  const [activeTab, setActiveTab] = useState('details'); // Add tab state: 'details' or 'statistics'
 
   // Fetch plant data
   useEffect(() => {
@@ -263,7 +265,7 @@ export default function PlantDetailPage() {
         <div className="flex space-x-4">
           <button
             onClick={() => router.push('/plants')}
-            className="px-4 py-2 bg-custom-orange text-white rounded hover:bg-orange-600"
+            className="px-4 py-2 bg-custom-orange text-white rounded-md hover:bg-orange-600"
           >
             Zurück zur Pflanzenübersicht
           </button>
@@ -275,7 +277,7 @@ export default function PlantDetailPage() {
                 window.dispatchEvent(new Event('newPlantClick'));
               }, 100);
             }}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
           >
             Neue Pflanze anlegen
           </button>
@@ -337,6 +339,144 @@ export default function PlantDetailPage() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Plant details section */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          {/* Plant header with image and basic info */}
+          <div className="flex flex-col md:flex-row gap-6 mb-6">
+            {/* Plant image */}
+            <div className="w-full md:w-1/3 flex justify-center">
+              <div className="w-full max-w-[300px] aspect-square bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
+                {plant.image_url ? (
+                  <img 
+                    src={plant.image_url} 
+                    alt={plant.name} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <GiFlowerPot className="text-gray-400 text-8xl" />
+                )}
+              </div>
+            </div>
+            
+            {/* Plant info */}
+            <div className="w-full md:w-2/3">
+              <h1 className="text-3xl font-aptos font-bold text-gray-800 mb-2">{plant.name}</h1>
+              <p className="text-gray-600 mb-4">{plant.strain}</p>
+              
+              {/* Plant stats */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                {/* Age */}
+                <div className="bg-gray-100 p-3 rounded-lg">
+                  <div className="flex items-center gap-2 text-gray-600 mb-1">
+                    <FaSeedling className="text-icon-olive" />
+                    <span className="text-sm">Alter</span>
+                  </div>
+                  <p className="text-xl font-semibold">{calculateAge(plant.planting_date)} Tage</p>
+                </div>
+                
+                {/* Phase */}
+                <div className="bg-gray-100 p-3 rounded-lg">
+                  <div className="flex items-center gap-2 text-gray-600 mb-1">
+                    <FaLeaf className="text-icon-lime" />
+                    <span className="text-sm">Phase</span>
+                  </div>
+                  <p className="text-xl font-semibold">
+                    {plant.flowering_start_date ? 'Blüte' : 'Wachstum'}
+                  </p>
+                </div>
+                
+                {/* Flowering days (if applicable) */}
+                {plant.flowering_start_date && (
+                  <div className="bg-gray-100 p-3 rounded-lg">
+                    <div className="flex items-center gap-2 text-gray-600 mb-1">
+                      <GiFlowerPot className="text-icon-purple" />
+                      <span className="text-sm">Blütetage</span>
+                    </div>
+                    <p className="text-xl font-semibold">{calculateFloweringDays(plant.flowering_start_date)} Tage</p>
+                  </div>
+                )}
+              </div>
+              
+              {/* Plant actions */}
+              <div className="flex flex-wrap gap-2">
+                <button 
+                  onClick={() => router.push(`/plants/${plant.id}/harvest`)}
+                  className="flex items-center gap-1 px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+                >
+                  <FaLeaf />
+                  {harvestData ? 'Ernte bearbeiten' : 'Ernte erfassen'}
+                </button>
+                
+                {!plant.flowering_start_date && (
+                  <button 
+                    onClick={handleStartFlowering}
+                    className="flex items-center gap-1 px-3 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition"
+                  >
+                    <GiFlowerPot />
+                    Blütephase starten
+                  </button>
+                )}
+                
+                <button 
+                  onClick={() => router.push(`/plants/${plant.id}/edit`)}
+                  className="flex items-center gap-1 px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                >
+                  <FaEdit />
+                  Bearbeiten
+                </button>
+                
+                <button 
+                  onClick={handleDeletePlant}
+                  className="flex items-center gap-1 px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+                >
+                  <FaTrash />
+                  Löschen
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {/* Plant description */}
+          {plant.description && (
+            <div className="mb-6">
+              <h2 className="text-xl font-aptos font-semibold mb-2">Beschreibung</h2>
+              <p className="text-gray-700">{plant.description}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Tab navigation */}
+        <div className="flex justify-center mb-6">
+          <div className="inline-flex rounded-md shadow-sm" role="group">
+            <button
+              className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
+                activeTab === 'details' 
+                  ? 'bg-custom-orange text-white' 
+                  : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
+              onClick={() => setActiveTab('details')}
+            >
+              <span className="flex items-center gap-2">
+                <FaCalendarAlt />
+                Tageseinträge
+              </span>
+            </button>
+            <button
+              className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
+                activeTab === 'statistics' 
+                  ? 'bg-custom-orange text-white' 
+                  : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
+              onClick={() => setActiveTab('statistics')}
+            >
+              <span className="flex items-center gap-2">
+                <FaChartLine />
+                Statistiken
+              </span>
+            </button>
           </div>
         </div>
 
@@ -567,7 +707,7 @@ export default function PlantDetailPage() {
           {days.length > 0 && (
             <div className="mt-8">
               <h2 className="text-xl font-semibold mb-4">Tageseinträge</h2>
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {days.map((day) => (
                   <div
                     key={day.id}
@@ -575,28 +715,35 @@ export default function PlantDetailPage() {
                     className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
                   >
                     <div className="flex justify-between items-start">
-                      <div>
+                      <div className="flex-1">
                         <h3 className="font-medium">Tag {day.day_number}</h3>
                         <p className="text-sm text-gray-600">{new Date(day.date).toLocaleDateString('de-DE')}</p>
                         
-                        <div className="mt-2 grid grid-cols-3 gap-4">
-                          <div className="flex items-center">
-                            <FaTint className="text-blue-500 mr-2" />
-                            <span>{day.watering_amount} ml</span>
-                          </div>
-                          <div className="flex items-center">
-                            <FaTemperatureHigh className="text-red-500 mr-2" />
-                            <span>{day.temperature}°C</span>
-                          </div>
-                          <div className="flex items-center">
-                            <FaLeaf className="text-green-500 mr-2" />
-                            <span>{day.humidity}%</span>
-                          </div>
+                        <div className="mt-2 space-y-2">
+                          {day.watering_amount && (
+                            <div className="flex items-center text-sm text-gray-600">
+                              <GiWateringCan className="mr-2" />
+                              <span>{day.watering_amount} ml</span>
+                            </div>
+                          )}
+                          {day.temperature && (
+                            <div className="flex items-center text-sm text-gray-600">
+                              <FaTemperatureHigh className="mr-2" />
+                              <span>{day.temperature} °C</span>
+                            </div>
+                          )}
+                          {day.humidity && (
+                            <div className="flex items-center text-sm text-gray-600">
+                              <FaTint className="mr-2" />
+                              <span>{day.humidity}%</span>
+                            </div>
+                          )}
+                          {day.notes && (
+                            <div className="text-sm text-gray-600 mt-2 line-clamp-2">
+                              {day.notes}
+                            </div>
+                          )}
                         </div>
-                        
-                        {day.notes && (
-                          <p className="mt-2 text-sm text-gray-600 line-clamp-2">{day.notes}</p>
-                        )}
                       </div>
                       
                       <ContextMenu
@@ -626,8 +773,33 @@ export default function PlantDetailPage() {
             </div>
           )}
         </div>
+
+        {/* Render tab content */}
+        {activeTab === 'details' && (
+          <div className="bg-white rounded-lg shadow-md p-6">
+            {/* Render details content here */}
+          </div>
+        )}
+        {activeTab === 'statistics' && (
+          <StatisticsTab />
+        )}
       </div>
 
+      {/* Add tab navigation */}
+      <div className="flex justify-center mb-6">
+        <button
+          className={`px-4 py-2 ${activeTab === 'details' ? 'bg-custom-orange text-white' : 'bg-gray-100 text-gray-600'} rounded-md hover:bg-orange-600`}
+          onClick={() => setActiveTab('details')}
+        >
+          Details
+        </button>
+        <button
+          className={`px-4 py-2 ${activeTab === 'statistics' ? 'bg-custom-orange text-white' : 'bg-gray-100 text-gray-600'} rounded-md hover:bg-orange-600`}
+          onClick={() => setActiveTab('statistics')}
+        >
+          Statistiken
+        </button>
+      </div>
     </>
   );
 }
