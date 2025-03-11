@@ -135,7 +135,7 @@ export default function ContextMenu({
                 <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
                   <div className="flex-shrink-0 flex flex-col items-center px-4">
                     <img src="/drca.svg" alt="DRCA Logo" className="h-16 w-auto mb-2" />
-                    <h2 className="text-xl font-bold text-custom-orange">Handout</h2>
+                    <h2 className="text-custom-orange scale-animation">Handout</h2>
                   </div>
                   <div className="mt-5 px-2 space-y-1">
                     <div className="px-4 py-4 border-t border-gray-200">
@@ -146,7 +146,7 @@ export default function ContextMenu({
                           </div>
                         </div>
                         <div className="ml-3">
-                          <div className="text-base font-medium text-gray-800">{session?.user?.name || 'Workshop'}</div>
+                          <div className="text-normal font-medium text-gray-800">{session?.user?.name || 'Workshop'}</div>
                           {isEditingEmail ? (
                             <div className="flex items-center gap-2 mt-1">
                               <input
@@ -171,7 +171,7 @@ export default function ContextMenu({
                             </div>
                           ) : (
                             <div className="flex items-center gap-2">
-                              <div className="text-sm font-medium text-gray-500">{session?.user?.email || 'Keine E-Mail hinterlegt'}</div>
+                              <div className="text-small text-gray-500">{session?.user?.email || 'Keine E-Mail hinterlegt'}</div>
                               <button
                                 onClick={() => setIsEditingEmail(true)}
                                 className="text-xs text-olive-green hover:text-yellow-green"
@@ -185,7 +185,7 @@ export default function ContextMenu({
                       <div className="mt-3">
                         <button
                           onClick={handleLogout}
-                          className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple"
+                          className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-small font-medium text-white bg-purple hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple"
                         >
                           Abmelden
                         </button>
@@ -198,7 +198,7 @@ export default function ContextMenu({
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center">
                             <FaClock className="mr-2 text-olive-green" />
-                            <h3 className="text-sm font-medium text-gray-700">Zuletzt angesehen</h3>
+                            <h4 className="text-gray-700">Zuletzt angesehen</h4>
                           </div>
                           <div className="flex space-x-2">
                             <button 
@@ -287,7 +287,7 @@ export default function ContextMenu({
               }}
               className={`flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/growguide' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'} pl-10`}
             >
-              <span className="text-sm font-semibold text-yellow-green px-2">Grow Guide</span>
+              <span className="text-sm font-semibold text-yellow-green px-2 interactive-link">Grow Guide</span>
               {pathname !== '/growguide' && <div className="absolute right-0 top-1/2 -translate-y-1/2 h-4/5 w-px bg-white/20" />}
             </a>
             <a
@@ -301,7 +301,7 @@ export default function ContextMenu({
               }}
               className={`flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/plants' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
             >
-              <span className="text-sm font-semibold text-turquoise px-2">Pflanzen</span>
+              <span className="text-sm font-semibold text-turquoise px-2 interactive-link">Pflanzen</span>
               {pathname !== '/plants' && <div className="absolute right-0 top-1/2 -translate-y-1/2 h-4/5 w-px bg-white/20" />}
             </a>
             <a
@@ -315,7 +315,7 @@ export default function ContextMenu({
               }}
               className={`flex items-center justify-center py-1.5 transition-colors ${pathname === '/help' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
             >
-              <span className="text-sm font-semibold text-medium-blue px-2">Erste Hilfe</span>
+              <span className="text-sm font-semibold text-medium-blue px-2 interactive-link">Erste Hilfe</span>
             </a>
           </div>
         </div>
@@ -328,7 +328,7 @@ export default function ContextMenu({
                 onClick={() => onPhaseSelect('seedling')}
                 className={`flex flex-col items-center gap-2 transition-colors`}
               >
-                <div className={`p-2 rounded-lg bg-gray-50/95 ${activePhase === 'seedling' ? 'text-purple' : 'text-gray-600 hover:text-purple'}`}>
+                <div className={`p-2 rounded-lg bg-gray-50/95 transition-colors duration-300 ${activePhase === 'seedling' ? 'text-purple' : 'text-gray-600 hover:text-purple'}`}>
                   <GiPlantSeed className="text-lg" />
                 </div>
                 <span className="text-xs text-white font-semibold">Keimling</span>

@@ -260,7 +260,7 @@ export default function PlantDetailPage() {
   if (loading) {
     return (
       <div className="p-6 flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-custom-orange"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-primary"></div>
       </div>
     );
   }
@@ -268,12 +268,12 @@ export default function PlantDetailPage() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+        <div className="alert-error px-4 py-3 rounded">
           Error: {error}
         </div>
         <button
           onClick={() => router.push('/plants')}
-          className="mt-4 px-4 py-2 bg-custom-orange text-white rounded hover:bg-orange-600"
+          className="mt-4 px-4 py-2 bg-brand-primary text-white rounded hover:bg-primary-hover transition-all duration-300 hover:shadow-md"
         >
           Zurück zur Pflanzenübersicht
         </button>
@@ -284,7 +284,7 @@ export default function PlantDetailPage() {
   if (!plant) {
     return (
       <div className="p-6">
-        <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded mb-4">
+        <div className="alert-warning px-4 py-3 rounded mb-4">
           Pflanze nicht gefunden
         </div>
         <p className="text-gray-600 mb-4">
@@ -293,7 +293,7 @@ export default function PlantDetailPage() {
         <div className="flex space-x-4">
           <button
             onClick={() => router.push('/plants')}
-            className="px-4 py-2 bg-custom-orange text-white rounded-md hover:bg-orange-600"
+            className="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-primary-hover transition-all duration-300 hover:shadow-md"
           >
             Zurück zur Pflanzenübersicht
           </button>
@@ -305,7 +305,7 @@ export default function PlantDetailPage() {
                 window.dispatchEvent(new Event('newPlantClick'));
               }, 100);
             }}
-            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+            className="px-4 py-2 bg-brand-secondary text-white rounded-md hover:bg-secondary-hover transition-all duration-300 hover:shadow-md"
           >
             Neue Pflanze anlegen
           </button>
@@ -329,17 +329,17 @@ export default function PlantDetailPage() {
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between max-w-4xl mx-auto">
             <div className="mb-4 md:mb-0">
-              <h2 className="text-3xl font-bold text-gray-800">{plant.name}</h2>
+              <h2 className="text-gray-800 interactive-heading text-focus-animation">{plant.name}</h2>
               {plant.breeder && (
-                <p className="text-gray-500 text-sm mt-1">von {plant.breeder}</p>
+                <p className="text-gray-500 text-small mt-1">von {plant.breeder}</p>
               )}
             </div>
             
             <div className="flex flex-col md:flex-row md:space-x-8 space-y-4 md:space-y-0">
               <div className="text-center">
-                <div className="text-2xl font-bold text-custom-orange">{calculateAge(plant.start_date)}</div>
-                <div className="text-sm uppercase tracking-wide text-gray-400 mt-1">Tage alt</div>
-                <div className="text-xs text-gray-500">{new Date(plant.start_date).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: '2-digit' })}</div>
+                <div className="text-2xl font-bold text-brand-primary">{calculateAge(plant.start_date)}</div>
+                <div className="text-small uppercase tracking-wide text-gray-400 mt-1">Tage alt</div>
+                <div className="text-micro text-gray-500">{new Date(plant.start_date).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: '2-digit' })}</div>
               </div>
 
               <div className="text-center">
@@ -371,17 +371,17 @@ export default function PlantDetailPage() {
 
 
         {/* Tab navigation */}
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-6 text-focus-animation">
           <div className="inline-flex rounded-md shadow-sm" role="group">
             <button
               className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
                 activeTab === 'details' 
-                  ? 'bg-custom-orange text-white' 
+                  ? 'bg-brand-primary text-white' 
                   : 'bg-white text-gray-700 hover:bg-gray-100'
               }`}
               onClick={() => setActiveTab('details')}
             >
-              <span className="flex items-center gap-2">
+              <span className="flex items-center gap-2 transition-all duration-300">
                 <FaCalendarAlt />
                 Tageseinträge
               </span>
@@ -389,12 +389,12 @@ export default function PlantDetailPage() {
             <button
               className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
                 activeTab === 'statistics' 
-                  ? 'bg-custom-orange text-white' 
+                  ? 'bg-brand-primary text-white' 
                   : 'bg-white text-gray-700 hover:bg-gray-100'
               }`}
               onClick={() => setActiveTab('statistics')}
             >
-              <span className="flex items-center gap-2">
+              <span className="flex items-center gap-2 transition-all duration-300">
                 <FaChartLine />
                 Statistiken
               </span>
@@ -404,11 +404,11 @@ export default function PlantDetailPage() {
 
         {/* Tab Content */}
         {activeTab === 'details' ? (
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-md p-6 interactive-card">
             {/* New Day Entry Form */}
             {showNewDayForm && (
               <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
-              <h3 className="text-lg font-semibold mb-3">Neuer Tageseintrag</h3>
+              <h3 className="mb-3 text-focus-animation text-text-primary">Neuer Tageseintrag</h3>
               <form onSubmit={handleAddDayEntry}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
@@ -616,7 +616,7 @@ export default function PlantDetailPage() {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-custom-orange text-white rounded-md hover:bg-orange-600"
+                    className="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-primary-hover transition-all duration-300 hover:shadow-md"
                   >
                     Speichern
                   </button>

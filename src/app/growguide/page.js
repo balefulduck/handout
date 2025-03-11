@@ -71,16 +71,16 @@ export default function GrowGuidePage() {
       <main className="max-w-7xl mx-auto px-6 py-10 pb-24">
         {/* Page Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-medium-blue mb-4">Grow Guide</h1>
-          <p className="max-w-2xl mx-auto text-gray-600">Select a growth phase from the menu below to view detailed information about optimal growing conditions.</p>
+          <h1 className="text-medium-blue mb-2 interactive-heading text-focus-animation">Grow Guide</h1>
+          <p className="max-w-2xl mx-auto text-gray-600 text-large">Select a growth phase from the menu below to view detailed information about optimal growing conditions.</p>
         </div>
         
         {/* Phase Content */}
         <div className="mb-10 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           {activePhase && (
             <div className="mb-6">
-              <h2 className="text-2xl font-semibold mb-2 text-cool-gray">{getPhaseTitle()}</h2>
-              <div className="h-1 w-24 bg-gradient-to-r from-purple to-medium-blue rounded"></div>
+              <h2 className="mb-2 text-cool-gray text-pulse-animation">{getPhaseTitle()}</h2>
+              <div className="h-1 w-24 bg-gradient-to-r from-purple to-medium-blue rounded transition-all duration-500 hover:w-32"></div>
             </div>
           )}
           <Transition
@@ -92,7 +92,7 @@ export default function GrowGuidePage() {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="transition-all duration-300">
+            <div className="transition-all duration-300 text-focus-animation">
               {renderPhaseContent()}
             </div>
           </Transition>
