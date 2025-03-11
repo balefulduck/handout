@@ -2,13 +2,13 @@ const db = require('./index');
 
 const dbUtils = {
     // User related operations
-    createUser: (username, passwordHash) => {
-        const stmt = db.prepare('INSERT INTO users (username, password_hash) VALUES (?, ?)');
-        return stmt.run(username, passwordHash);
+    createUser: (username, passwordHash, email = null) => {
+        const stmt = db.prepare('INSERT INTO users (username, password_hash, email) VALUES (?, ?, ?)');
+        return stmt.run(username, passwordHash, email);
     },
 
     getUserById: (id) => {
-        const stmt = db.prepare('SELECT id, username, created_at, onboarding_completed FROM users WHERE id = ?');
+        const stmt = db.prepare('SELECT id, username, email, created_at FROM users WHERE id = ?');
         return stmt.get(id);
     },
 
@@ -17,10 +17,12 @@ const dbUtils = {
         return stmt.get(username);
     },
 
-    updateOnboardingStatus: (userId, completed) => {
-        const stmt = db.prepare('UPDATE users SET onboarding_completed = ? WHERE id = ?');
-        return stmt.run(completed, userId);
+    updateUserEmail: (userId, email) => {
+        const stmt = db.prepare('UPDATE users SET email = ? WHERE id = ?');
+        return stmt.run(email, userId);
     },
+
+    // Onboarding status function removed
 
     // Strain related operations
     getAllStrains: () => {

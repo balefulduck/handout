@@ -3,57 +3,213 @@
 import { WiHumidity } from "react-icons/wi";
 import { PiThermometerSimple, PiPlantBold, PiTestTubeFill } from "react-icons/pi";
 import { LuSunMedium } from "react-icons/lu";
+import { BsQuestionCircle } from "react-icons/bs";
+import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css';
+import 'tippy.js/animations/scale.css';
+import Image from 'next/image';
 
 export default function FlowerPhase() {
   return (
     <div className="py-4 px-3">
       <div className="max-w-3xl mx-auto">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {/* Climate Card */}
-          <div className="bg-white rounded-xl shadow p-3 border-l-2 border-orange col-span-2 sm:col-span-1">
-            <div className="flex items-center gap-1.5 mb-2">
-              <WiHumidity className="text-lg text-orange" />
-              <span className="text-sm font-medium">40-50% RH</span>
+          {/* Temperature Card */}
+          <div className="rounded-xl shadow overflow-hidden col-span-1">
+            <div className="bg-custom-orange p-3">
+              <div className="flex items-center gap-2">
+                <PiThermometerSimple className="text-base text-white" />
+                <span className="text-base font-bold text-white">Temperatur</span>
+                <Tippy 
+                  content={
+                    <div className="max-w-xs bg-white p-3 rounded-lg" style={{ border: '1px solid violet' }}>
+                      <div className="font-bold text-custom-orange mb-1 flex items-center gap-2">
+                        <Image src="/1.webp" width={45} height={45} alt="Icon" priority />
+                        <span>Dr. Cannabis informiert:</span>
+                      </div>
+                      <div className="text-sm text-gray-700">
+                        Bei zu hohen Temperaturschwankungen kann das Wachstum der Pflanze gehemmt werden.
+                      </div>
+                    </div>
+                  }
+                  animation="scale"
+                  duration={[300, 250]}
+                  hideOnClick={true}
+                  trigger="mouseenter click"
+                  interactive={true}
+                  maxWidth={300}
+                  onShow={(instance) => {
+                    setTimeout(() => {
+                      instance.hide();
+                    }, 5000);
+                  }}
+                  theme="light"
+                >
+                  <span>
+                    <BsQuestionCircle className="text-white text-sm cursor-help ml-1 opacity-80 hover:opacity-100 transition-opacity" style={{ filter: 'drop-shadow(1px 1px 1px rgba(0,0,0,0.2))' }} />
+                  </span>
+                </Tippy>
+              </div>
             </div>
-            <div className="space-y-1">
+            <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm text-gray-700">20 - 26°C Tagsüber</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm text-gray-700">18 - 20°C Nachts</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Humidity Card */}
+          <div className="rounded-xl shadow overflow-hidden col-span-1">
+            <div className="bg-custom-orange p-3">
+              <div className="flex items-center gap-2">
+                <WiHumidity className="text-base text-white" />
+                <span className="text-base font-bold text-white">Luftfeuchtigkeit</span>
+                <Tippy 
+                  content={
+                    <div className="max-w-xs bg-white p-3 rounded-lg" style={{ border: '1px solid violet' }}>
+                      <div className="font-bold text-custom-orange mb-1 flex items-center gap-2">
+                        <Image src="/1.webp" width={45} height={45} alt="Icon" priority />
+                        <span>Dr. Cannabis informiert:</span>
+                      </div>
+                      <div className="text-sm text-gray-700">
+                        Jungpflanzen gleichen die schwache Wurzelstruktur aus, indem sie vermehrt Feuchtigkeit über das Blattwerk aufnehmen
+                      </div>
+                    </div>
+                  }
+                  animation="scale"
+                  duration={[300, 250]}
+                  hideOnClick={true}
+                  trigger="mouseenter click"
+                  interactive={true}
+                  maxWidth={300}
+                  onShow={(instance) => {
+                    setTimeout(() => {
+                      instance.hide();
+                    }, 5000);
+                  }}
+                  theme="light"
+                >
+                  <span>
+                    <BsQuestionCircle className="text-white text-sm cursor-help ml-1 opacity-80 hover:opacity-100 transition-opacity" style={{ filter: 'drop-shadow(1px 1px 1px rgba(0,0,0,0.2))' }} />
+                  </span>
+                </Tippy>
+              </div>
+            </div>
+            <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
               <div className="flex items-center gap-1.5">
-                <PiThermometerSimple className="text-lg text-orange" />
-                <span className="text-sm">20-26°C Tag</span>
+                <span className="text-sm text-gray-700">40 - 50% RH</span>
               </div>
+            </div>
+          </div>
+
+          {/* Light Schedule Card */}
+          <div className="rounded-xl shadow overflow-hidden">
+            <div className="bg-custom-orange p-3">
+              <div className="flex items-center gap-2">
+                <LuSunMedium className="text-base text-white" />
+                <span className="text-base font-bold text-white">Lichtzyklus</span>
+                <Tippy 
+                  content={
+                    <div className="max-w-xs bg-white p-3 rounded-lg" style={{ border: '1px solid violet' }}>
+                      <div className="font-bold text-custom-orange mb-1 flex items-center gap-2">
+                        <Image src="/1.webp" width={45} height={45} alt="Icon" priority />
+                        <span>Dr. Cannabis informiert:</span>
+                      </div>
+                      <div className="text-sm text-gray-700">
+                        Bei photoperiodischen Sorten bestimmt der Lichtzyklus die Wachstumsphasen.
+                      </div>
+                    </div>
+                  }
+                  animation="scale"
+                  duration={[300, 250]}
+                  hideOnClick={true}
+                  trigger="mouseenter click"
+                  interactive={true}
+                  maxWidth={300}
+                  onShow={(instance) => {
+                    setTimeout(() => {
+                      instance.hide();
+                    }, 5000);
+                  }}
+                  theme="light"
+                >
+                  <span>
+                    <BsQuestionCircle className="text-white text-sm cursor-help ml-1 opacity-80 hover:opacity-100 transition-opacity" style={{ filter: 'drop-shadow(1px 1px 1px rgba(0,0,0,0.2))' }} />
+                  </span>
+                </Tippy>
+              </div>
+            </div>
+            <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
               <div className="flex items-center gap-1.5">
-                <PiThermometerSimple className="text-lg text-orange/70" />
-                <span className="text-sm">18-20°C Nacht</span>
+                <span className="text-sm text-gray-700">12 / 12</span>
               </div>
             </div>
           </div>
 
-          {/* Light Schedule - Compact Card */}
-          <div className="bg-white rounded-xl shadow p-3 flex items-center justify-center gap-2">
-            <LuSunMedium className="text-lg text-amber-500" />
-            <span className="text-sm font-medium">12/12</span>
-          </div>
-
-          {/* pH Value - Small Square Card */}
-          <div className="bg-white rounded-xl shadow p-3 flex flex-col items-center justify-center">
-            <PiTestTubeFill className="text-lg text-orange mb-1" />
-            <div className="text-center">
-              <div className="text-xs font-medium text-gray-600">pH</div>
-              <div className="text-sm">5.8-6.2</div>
-            </div>
-          </div>
-
-          {/* Substrate Card - Full Width */}
-          <div className="bg-white rounded-xl shadow p-3 border-l-2 border-orange col-span-2 sm:col-span-3">
-            <div className="flex items-center gap-2 mb-1.5">
-              <PiPlantBold className="text-lg text-orange" />
-              <span className="text-sm font-medium">Blütephase</span>
-            </div>
-            <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
-              <div className="flex items-center gap-1">
-                <span>Dauer:</span>
-                <span className="text-gray-600">8-12 Wochen</span>
+          {/* pH Value Card */}
+          <div className="rounded-xl shadow overflow-hidden">
+            <div className="bg-custom-orange p-3">
+              <div className="flex items-center gap-2">
+                <PiTestTubeFill className="text-base text-white" />
+                <span className="text-base font-bold text-white">pH Wert</span>
+                <Tippy 
+                  content={
+                    <div className="max-w-xs bg-white p-3 rounded-lg" style={{ border: '1px solid violet' }}>
+                      <div className="font-bold text-custom-orange mb-1 flex items-center gap-2">
+                        <Image src="/1.webp" width={45} height={45} alt="Icon" priority />
+                        <span>Dr. Cannabis informiert:</span>
+                      </div>
+                      <div className="text-sm text-gray-700">
+                        Der pH-Wert beeinflusst die Nährstoffaufnahme, Wurzelgesundheit und Pflanzengesundheit. Ein falscher Wert kann Mangelerscheinungen und Wachstumsprobleme verursachen.
+                      </div>
+                    </div>
+                  }
+                  animation="scale"
+                  duration={[300, 250]}
+                  hideOnClick={true}
+                  trigger="mouseenter click"
+                  interactive={true}
+                  maxWidth={300}
+                  onShow={(instance) => {
+                    setTimeout(() => {
+                      instance.hide();
+                    }, 5000);
+                  }}
+                  theme="light"
+                >
+                  <span>
+                    <BsQuestionCircle className="text-white text-sm cursor-help ml-1 opacity-80 hover:opacity-100 transition-opacity" style={{ filter: 'drop-shadow(1px 1px 1px rgba(0,0,0,0.2))' }} />
+                  </span>
+                </Tippy>
               </div>
-              
+            </div>
+            <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm text-gray-700">5.8 - 6.2</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Info Card */}
+          <div className="rounded-xl shadow overflow-hidden col-span-2 sm:col-span-3">
+            <div className="bg-custom-orange p-3">
+              <div className="flex items-center gap-2">
+                <PiPlantBold className="text-base text-white" />
+                <span className="text-base font-bold text-white">Blütephase</span>
+              </div>
+            </div>
+            <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
+              <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-700">
+                <div className="flex items-center gap-1">
+                  <span>Dauer:</span>
+                  <span>8-12 Wochen</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
