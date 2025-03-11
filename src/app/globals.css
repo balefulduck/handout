@@ -1,11 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Encode+Sans:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Aptos:wght@400;500;600;700&display=swap');
 
-/* Tailwind Directives */
-/* These directives tell Tailwind to inject its generated CSS */
+/* Tailwind Directives - START */
+/* 
+ * These special directives are used by the Tailwind CSS framework
+ * to inject its generated styles into the final CSS output.
+ * They are processed by the Tailwind PostCSS plugin and replaced with
+ * the actual CSS during the build process.
+ * 
+ * @tailwind base - Injects Tailwind's base styles and any base styles registered by plugins
+ * @tailwind components - Injects Tailwind's component classes and any component classes registered by plugins
+ * @tailwind utilities - Injects Tailwind's utility classes and any utility classes registered by plugins
+ */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* Tailwind Directives - END */
 
 :root {
   --background: #ffffff;
@@ -286,4 +296,46 @@ h6 {
   background-color: #EFF6FF;
   border-color: #DBEAFE;
   color: var(--info);
+}
+
+/* Subtle Background Patterns */
+.pattern-grid {
+  background-image: linear-gradient(#00000005 1px, transparent 1px),
+                   linear-gradient(90deg, #00000005 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.pattern-dots {
+  background-image: radial-gradient(#00000008 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.pattern-stripes {
+  background: repeating-linear-gradient(
+    45deg,
+    #f5f5f5,
+    #f5f5f5 10px,
+    #ffffff 10px,
+    #ffffff 20px
+  );
+}
+
+.pattern-diagonal {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    #00000003,
+    #00000003 1px,
+    transparent 1px,
+    transparent 16px
+  );
+}
+
+.pattern-checks {
+  background-image: 
+    linear-gradient(45deg, #00000003 25%, transparent 25%), 
+    linear-gradient(-45deg, #00000003 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #00000003 75%),
+    linear-gradient(-45deg, transparent 75%, #00000003 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
 }

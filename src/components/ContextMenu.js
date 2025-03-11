@@ -263,7 +263,7 @@ export default function ContextMenu({
             onClick={() => setSidebarOpen(true)}
           >
             <span className="sr-only">Open sidebar</span>
-            <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+            <img src="/menu.png" alt="Menu" className="h-6 w-6" aria-hidden="true" />
           </button>
           {pathname.startsWith('/plants/') && (
             <button

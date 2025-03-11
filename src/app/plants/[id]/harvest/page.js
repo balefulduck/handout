@@ -150,14 +150,16 @@ export default function HarvestPage() {
         existingHarvest={existingHarvest}
         onSaveHarvest={handleSubmit}
       />
-      <div className="p-6 pb-32">
+      <div className="p-6 pb-32 pattern-diagonal">
         <div className="flex items-center mb-6">
           <h1 className="font-aptos text-focus-animation interactive-heading">
             {existingHarvest ? 'Ernte bearbeiten' : 'Pflanze ernten'}: {plant.name}
           </h1>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6 interactive-card">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6 interactive-card relative overflow-hidden">
+          <div className="absolute inset-0 pattern-dots opacity-[0.03] pointer-events-none"></div>
+          <div className="relative z-10">
           <div className="flex items-center mb-4">
             <GiFlowerPot className="text-2xl text-brand-accent mr-2" />
             <h2 className="text-gray-800 text-focus-animation">Erntedaten</h2>
@@ -286,6 +288,7 @@ export default function HarvestPage() {
               </div>
             </div>
           </form>
+          </div>
         </div>
       </div>
     </>

@@ -13,7 +13,7 @@ export default function FlowerPhase() {
   return (
     <div className="py-6 px-4">
       <div className="max-w-3xl mx-auto">
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
           {/* Temperature Card */}
           <div className="rounded-xl shadow overflow-hidden col-span-1">
             <div className="bg-olive-green p-3">
@@ -196,7 +196,7 @@ export default function FlowerPhase() {
           </div>
 
           {/* Info Card */}
-          <div className="rounded-xl shadow overflow-hidden col-span-2 sm:col-span-3">
+          <div className="rounded-xl shadow overflow-hidden col-span-1 sm:col-span-2 md:col-span-3">
             <div className="bg-olive-green p-3">
               <div className="flex items-center gap-2">
                 <PiPlantBold className="text-base text-white" />

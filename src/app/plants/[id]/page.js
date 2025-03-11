@@ -322,11 +322,13 @@ export default function PlantDetailPage() {
         onStartFlowering={handleStartFlowering}
         onShowNewDayForm={() => setShowNewDayForm(true)}
       />
-      <div className="p-6 mt-10 pb-32">
+      <div className="p-6 mt-10 pb-32 pattern-diagonal">
   
 
         {/* Plant Info Card */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6 relative overflow-hidden">
+          <div className="absolute inset-0 pattern-dots opacity-[0.03] pointer-events-none"></div>
+          <div className="relative z-10">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between max-w-4xl mx-auto">
             <div className="mb-4 md:mb-0">
               <h2 className="text-gray-800 interactive-heading text-focus-animation">{plant.name}</h2>
@@ -366,6 +368,7 @@ export default function PlantDetailPage() {
               )}
             </div>
           </div>
+        </div>
         </div>
 
 
