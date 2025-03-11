@@ -7,6 +7,7 @@ import DayEntryMenu from '@/components/DayEntryMenu';
 import { FaSeedling, FaCalendarAlt, FaEdit, FaTrash, FaPlus, FaTint, FaTemperatureHigh, FaLeaf, FaChartLine } from 'react-icons/fa';
 import { GiFlowerPot, GiWateringCan } from 'react-icons/gi';
 import StatisticsTab from '@/components/StatisticsTab';
+import { addToRecentlyViewed } from '@/utils/recentlyViewedPlants';
 
 export default function PlantDetailPage() {
   const params = useParams();
@@ -60,6 +61,9 @@ export default function PlantDetailPage() {
         } else {
           setPlant(data.plant);
           setDays(data.days || []);
+          
+          // Add to recently viewed plants
+          addToRecentlyViewed(data.plant);
           
           // Fetch harvest data if plant exists
           try {

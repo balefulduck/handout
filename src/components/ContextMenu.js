@@ -4,13 +4,14 @@ import { useState, Fragment, useEffect } from 'react';
 import { WiHumidity } from "react-icons/wi";
 import { PiPlantBold } from "react-icons/pi";
 import { LuSunMedium } from "react-icons/lu";
-import { GiPlantSeed, GiGrowth, GiFlowerPot, GiScythe, GiWateringCan } from "react-icons/gi";
+import { GiPlantSeed, GiGrowth, GiFlowerPot, GiScythe, GiWateringCan, GiSprout } from "react-icons/gi";
 import { BsChatDots, BsPlusLg } from "react-icons/bs";
-import { FaFirstAid, FaLeaf, FaPlus, FaArrowLeft } from "react-icons/fa";
+import { FaFirstAid, FaLeaf, FaPlus, FaArrowLeft, FaClock } from "react-icons/fa";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/solid";
 import { useRouter, usePathname, useParams } from 'next/navigation';
 import { Dialog, Transition } from '@headlessui/react';
 import { useSession, signOut } from 'next-auth/react';
+import { getRecentlyViewedPlants, clearRecentlyViewedPlants } from '@/utils/recentlyViewedPlants';
 
 export default function ContextMenu({ 
   activePhase, 
@@ -31,12 +32,33 @@ export default function ContextMenu({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [email, setEmail] = useState('');
+  const [recentPlants, setRecentPlants] = useState([]);
 
   useEffect(() => {
     if (session?.user?.email) {
       setEmail(session.user.email);
     }
   }, [session?.user?.email]);
+
+  // Function to force refresh of recently viewed plants
+  const refreshRecentPlants = () => {
+    const recentlyViewed = getRecentlyViewedPlants();
+    console.log('Force refreshed plants:', recentlyViewed);
+    setRecentPlants(recentlyViewed);
+  };
+  
+  // Function to clear recently viewed plants
+  const clearRecentPlants = () => {
+    clearRecentlyViewedPlants();
+    setRecentPlants([]);
+  };
+
+  // Load recently viewed plants when sidebar opens
+  useEffect(() => {
+    if (sidebarOpen) {
+      refreshRecentPlants();
+    }
+  }, [sidebarOpen]);
 
   const handleLogout = async () => {
     await signOut({ callbackUrl: '/login' });
@@ -111,7 +133,8 @@ export default function ContextMenu({
                   </div>
                 </Transition.Child>
                 <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
-                  <div className="flex-shrink-0 flex items-center px-4">
+                  <div className="flex-shrink-0 flex flex-col items-center px-4">
+                    <img src="/drca.svg" alt="DRCA Logo" className="h-16 w-auto mb-2" />
                     <h2 className="text-xl font-bold text-custom-orange">Handout</h2>
                   </div>
                   <div className="mt-5 px-2 space-y-1">
@@ -168,6 +191,58 @@ export default function ContextMenu({
                         </button>
                       </div>
                     </div>
+                    
+                    {/* Recently Viewed Plants */}
+                    {recentPlants.length > 0 && (
+                      <div className="mt-6 px-4 py-4 border-t border-gray-200">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center">
+                            <FaClock className="mr-2 text-custom-orange" />
+                            <h3 className="text-sm font-medium text-gray-700">Zuletzt angesehen</h3>
+                          </div>
+                          <div className="flex space-x-2">
+                            <button 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                refreshRecentPlants();
+                              }}
+                              className="text-xs text-custom-orange hover:text-orange-700"
+                            >
+                              Aktualisieren
+                            </button>
+                            <button 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                clearRecentPlants();
+                              }}
+                              className="text-xs text-gray-500 hover:text-gray-700"
+                            >
+                              Löschen
+                            </button>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          {recentPlants.map((plant) => (
+                            <button
+                              key={plant.id}
+                              onClick={() => {
+                                router.push(`/plants/${plant.id}`);
+                                setSidebarOpen(false);
+                              }}
+                              className="w-full text-left p-2 rounded-md hover:bg-gray-100 transition-colors flex items-center"
+                            >
+
+                              {plant.isFlowering ? (
+                                <GiFlowerPot className="text-purple-600 mr-2" />
+                              ) : (
+                                <GiSprout className="text-green-600 mr-2" />
+                              )}
+                              <span className="text-sm text-gray-800 truncate">{plant.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </Dialog.Panel>
