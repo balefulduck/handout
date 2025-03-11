@@ -42,10 +42,10 @@ export default function HelpPage() {
 
   return (
     <>
-    <div className="p-6 pb-32 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mt-10 mb-6 font-aptos">Hilfe & Problemlösung</h1>
+    <div className="p-8 pb-32 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold mt-10 mb-6 font-aptos text-medium-blue">Hilfe & Problemlösung</h1>
       
-      <div className="bg-custom-orange/10 border-l-4 border-custom-orange p-4 mb-8">
+      <div className="bg-medium-blue/10 border-l-4 border-medium-blue p-5 mb-10 rounded-r-lg">
         <p className="text-lg mb-2">
           Verfärbte oder verformte Blätter können Anzeichen für Probleme sein.
         </p>
@@ -54,11 +54,11 @@ export default function HelpPage() {
         </p>
       </div>
 
-      <div className="mt-8 mb-8 help rounded-lg shadow overflow-hidden">
-        <div className="bg-custom-orange p-4">
+      <div className="mt-8 mb-10 help rounded-lg shadow-sm overflow-hidden border border-gray-100">
+        <div className="bg-medium-blue p-4">
           <h2 className="text-lg font-bold font-aptos text-white">Allgemeine Tipps:</h2>
         </div>
-        <div className="p-4 border-x border-b border-custom-orange/20 rounded-b-lg">
+        <div className="p-5 border-x border-b border-medium-blue/20 rounded-b-lg bg-white">
           <ul className="list-disc pl-5 space-y-2 text-gray-700">
             <li>Überprüfe regelmäßig die Blätter auf Anzeichen von Problemen</li>
             <li>Halte ein Pflanzentagebuch für besseres Monitoring</li>
@@ -68,14 +68,14 @@ export default function HelpPage() {
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-6 mt-10">
         {troubleshootingItems.map((item) => (
           <div 
             key={item.id} 
             className="rounded-lg shadow overflow-hidden"
           >
             <div 
-              className="bg-custom-orange p-4 cursor-pointer"
+              className="bg-turquoise p-4 cursor-pointer"
               onClick={() => toggleCard(item.id)}
             >
               <div className="flex justify-between items-center">
@@ -86,7 +86,7 @@ export default function HelpPage() {
               </div>
             </div>
             {expandedCards[item.id] && (
-              <div className="p-6 border-x border-b border-custom-orange/20 rounded-b-lg">
+              <div className="p-6 border-x border-b border-turquoise/20 rounded-b-lg bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-1">Mögliche Ursache:</h4>

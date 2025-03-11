@@ -8,6 +8,15 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  
+  /* New brand color system */
+  --yellow-green: #ADBC10;
+  --olive-green: #6F8328;
+  --turquoise: #00ACB9;
+  --orange: #F08600;
+  --purple: #941E71;
+  --medium-blue: #0086CB;
+  --cool-gray: #003F51;
 }
 
 body {

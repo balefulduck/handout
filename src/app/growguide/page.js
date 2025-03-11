@@ -11,7 +11,7 @@ import VegetationPhase from '@/components/phases/VegetationPhase';
 import FlowerPhase from '@/components/phases/FlowerPhase';
 import HarvestPhase from '@/components/phases/HarvestPhase';
 
-export default function DashboardPage() {
+export default function GrowGuidePage() {
   const { data: session } = useSession();
   const [selectedStrains, setSelectedStrains] = useState([]);
   const [activePhase, setActivePhase] = useState('seedling'); //Make seedling phase default
@@ -29,6 +29,21 @@ export default function DashboardPage() {
 
   const handlePhaseSelect = (phase) => {
     setActivePhase(activePhase === phase ? null : phase);
+  };
+  
+  const getPhaseTitle = () => {
+    switch (activePhase) {
+      case 'seedling':
+        return 'Seedling Phase';
+      case 'vegetation':
+        return 'Vegetation Phase';
+      case 'flower':
+        return 'Flower Phase';
+      case 'harvest':
+        return 'Harvest Phase';
+      default:
+        return '';
+    }
   };
 
 
@@ -49,13 +64,25 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen pt-7">
+    <div className="min-h-screen pt-7 bg-gray-50">
 
       <ContextMenu activePhase={activePhase} onPhaseSelect={handlePhaseSelect} />
 
-      <main className="max-w-7xl mx-auto px-4 py-8 pb-24">
+      <main className="max-w-7xl mx-auto px-6 py-10 pb-24">
+        {/* Page Header */}
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold text-medium-blue mb-4">Grow Guide</h1>
+          <p className="max-w-2xl mx-auto text-gray-600">Select a growth phase from the menu below to view detailed information about optimal growing conditions.</p>
+        </div>
+        
         {/* Phase Content */}
-        <div className="mb-8">
+        <div className="mb-10 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          {activePhase && (
+            <div className="mb-6">
+              <h2 className="text-2xl font-semibold mb-2 text-cool-gray">{getPhaseTitle()}</h2>
+              <div className="h-1 w-24 bg-gradient-to-r from-purple to-medium-blue rounded"></div>
+            </div>
+          )}
           <Transition
             show={activePhase !== null}
             enter="transition-opacity duration-200"
@@ -65,7 +92,7 @@ export default function DashboardPage() {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div>
+            <div className="transition-all duration-300">
               {renderPhaseContent()}
             </div>
           </Transition>

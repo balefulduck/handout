@@ -141,7 +141,7 @@ export default function ContextMenu({
                     <div className="px-4 py-4 border-t border-gray-200">
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
-                          <div className="h-10 w-10 rounded-full bg-custom-orange flex items-center justify-center text-white">
+                          <div className="h-10 w-10 rounded-full bg-turquoise flex items-center justify-center text-white">
                             {session?.user?.name?.charAt(0) || 'W'}
                           </div>
                         </div>
@@ -174,7 +174,7 @@ export default function ContextMenu({
                               <div className="text-sm font-medium text-gray-500">{session?.user?.email || 'Keine E-Mail hinterlegt'}</div>
                               <button
                                 onClick={() => setIsEditingEmail(true)}
-                                className="text-xs text-custom-orange hover:text-orange-700"
+                                className="text-xs text-olive-green hover:text-yellow-green"
                               >
                                 Editieren 
                               </button>
@@ -185,7 +185,7 @@ export default function ContextMenu({
                       <div className="mt-3">
                         <button
                           onClick={handleLogout}
-                          className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-custom-orange hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-custom-orange"
+                          className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple"
                         >
                           Abmelden
                         </button>
@@ -197,7 +197,7 @@ export default function ContextMenu({
                       <div className="mt-6 px-4 py-4 border-t border-gray-200">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center">
-                            <FaClock className="mr-2 text-custom-orange" />
+                            <FaClock className="mr-2 text-olive-green" />
                             <h3 className="text-sm font-medium text-gray-700">Zuletzt angesehen</h3>
                           </div>
                           <div className="flex space-x-2">
@@ -206,7 +206,7 @@ export default function ContextMenu({
                                 e.preventDefault();
                                 refreshRecentPlants();
                               }}
-                              className="text-xs text-custom-orange hover:text-orange-700"
+                              className="text-xs text-olive-green hover:text-yellow-green"
                             >
                               Aktualisieren
                             </button>
@@ -233,9 +233,9 @@ export default function ContextMenu({
                             >
 
                               {plant.isFlowering ? (
-                                <GiFlowerPot className="text-purple-600 mr-2" />
+                                <GiFlowerPot className="text-purple mr-2" />
                               ) : (
-                                <GiSprout className="text-green-600 mr-2" />
+                                <GiSprout className="text-yellow-green mr-2" />
                               )}
                               <span className="text-sm text-gray-800 truncate">{plant.name}</span>
                             </button>
@@ -254,7 +254,7 @@ export default function ContextMenu({
         </Dialog>
       </Transition.Root>
 
-      <div className="fixed top-0 left-0 right-0 z-50 bg-custom-orange shadow-lg">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-cool-gray shadow-lg">
         <div className="max-w-7xl mx-auto relative">
           {/* Hamburger icon positioned absolutely to avoid affecting the grid layout */}
           <button
@@ -268,7 +268,7 @@ export default function ContextMenu({
           {pathname.startsWith('/plants/') && (
             <button
               onClick={() => router.push('/plants')}
-              className="absolute left-10 top-1/2 transform -translate-y-1/2 text-white/70 hover:text-white focus:outline-none z-10 flex items-center gap-1.5 text-sm transition-colors"
+              className="absolute left-10 top-1/2 transform -translate-y-1/2 text-turquoise hover:text-white focus:outline-none z-10 flex items-center gap-1.5 text-sm transition-colors"
             >
               <FaArrowLeft className="text-sm" />
               <span className="font-medium">Zurück</span>
@@ -277,18 +277,18 @@ export default function ContextMenu({
           {/* Main navigation with equal width buttons */}
           <div className="grid grid-cols-3">
             <a 
-              href="/dashboard"
+              href="/growguide"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 // Use window.location for a full page navigation to avoid any router conflicts
-                window.location.href = '/dashboard';
+                window.location.href = '/growguide';
                 return false;
               }}
-              className={`flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/dashboard' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'} pl-10`}
+              className={`flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/growguide' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'} pl-10`}
             >
-              <span className="text-sm font-semibold text-icon-purple px-2">Dashboard</span>
-              {pathname !== '/dashboard' && <div className="absolute right-0 top-1/2 -translate-y-1/2 h-4/5 w-px bg-white/20" />}
+              <span className="text-sm font-semibold text-yellow-green px-2">Grow Guide</span>
+              {pathname !== '/growguide' && <div className="absolute right-0 top-1/2 -translate-y-1/2 h-4/5 w-px bg-white/20" />}
             </a>
             <a
               href="/plants"
@@ -301,7 +301,7 @@ export default function ContextMenu({
               }}
               className={`flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/plants' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
             >
-              <span className="text-sm font-semibold text-icon-purple px-2">Pflanzen</span>
+              <span className="text-sm font-semibold text-turquoise px-2">Pflanzen</span>
               {pathname !== '/plants' && <div className="absolute right-0 top-1/2 -translate-y-1/2 h-4/5 w-px bg-white/20" />}
             </a>
             <a
@@ -315,20 +315,20 @@ export default function ContextMenu({
               }}
               className={`flex items-center justify-center py-1.5 transition-colors ${pathname === '/help' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
             >
-              <span className="text-sm font-semibold text-icon-purple px-2">Erste Hilfe</span>
+              <span className="text-sm font-semibold text-medium-blue px-2">Erste Hilfe</span>
             </a>
           </div>
         </div>
       </div>
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-custom-orange shadow-lg border-t border-gray-200">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-cool-gray shadow-lg border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4">
-          {pathname === '/dashboard' && (
+          {pathname === '/growguide' && (
             <div className="grid grid-cols-4 gap-3 py-2 px-2">
               <button
                 onClick={() => onPhaseSelect('seedling')}
                 className={`flex flex-col items-center gap-2 transition-colors`}
               >
-                <div className={`p-2 rounded-lg bg-gray-50/95 ${activePhase === 'seedling' ? 'text-icon-purple' : 'text-gray-600 hover:text-icon-purple'}`}>
+                <div className={`p-2 rounded-lg bg-gray-50/95 ${activePhase === 'seedling' ? 'text-purple' : 'text-gray-600 hover:text-purple'}`}>
                   <GiPlantSeed className="text-lg" />
                 </div>
                 <span className="text-xs text-white font-semibold">Keimling</span>
@@ -338,7 +338,7 @@ export default function ContextMenu({
                 onClick={() => onPhaseSelect('vegetation')}
                 className={`flex flex-col items-center gap-2 transition-colors`}
               >
-                <div className={`p-2 rounded-lg bg-gray-50/95 ${activePhase === 'vegetation' ? 'text-icon-lime' : 'text-gray-600 hover:text-icon-lime'}`}>
+                <div className={`p-2 rounded-lg bg-gray-50/95 ${activePhase === 'vegetation' ? 'text-yellow-green' : 'text-gray-600 hover:text-yellow-green'}`}>
                   <GiGrowth className="text-lg" />
                 </div>
                 <span className="text-xs text-white font-semibold">Vegetation</span>
@@ -348,7 +348,7 @@ export default function ContextMenu({
                 onClick={() => onPhaseSelect('flower')}
                 className={`flex flex-col items-center gap-2 transition-colors`}
               >
-                <div className={`p-2 rounded-lg bg-gray-50/95 ${activePhase === 'flower' ? 'text-icon-olive' : 'text-gray-600 hover:text-icon-olive'}`}>
+                <div className={`p-2 rounded-lg bg-gray-50/95 ${activePhase === 'flower' ? 'text-olive-green' : 'text-gray-600 hover:text-olive-green'}`}>
                   <GiFlowerPot className="text-lg" />
                 </div>
                 <span className="text-xs text-white font-semibold">Blüte</span>
@@ -358,7 +358,7 @@ export default function ContextMenu({
                 onClick={() => onPhaseSelect('harvest')}
                 className={`flex flex-col items-center gap-2 transition-colors`}
               >
-                <div className={`p-2 rounded-lg bg-gray-50/95 ${activePhase === 'harvest' ? 'text-icon-purple' : 'text-gray-600 hover:text-icon-purple'}`}>
+                <div className={`p-2 rounded-lg bg-gray-50/95 ${activePhase === 'harvest' ? 'text-orange' : 'text-gray-600 hover:text-orange'}`}>
                   <GiScythe className="text-lg" />
                 </div>
                 <span className="text-xs text-white font-semibold">Ernte</span>
@@ -372,7 +372,7 @@ export default function ContextMenu({
                 onClick={onShowNewDayForm}
                 className="flex flex-col items-center gap-2 transition-colors"
               >
-                <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-custom-orange">
+                <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-orange">
                   <FaPlus className="text-lg" />
                 </div>
                 <span className="text-xs text-white font-semibold">Neuer Tageseintrag</span>
@@ -383,7 +383,7 @@ export default function ContextMenu({
                   onClick={onStartFlowering}
                   className="flex flex-col items-center gap-2 transition-colors"
                 >
-                  <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-purple-500">
+                  <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-purple">
                     <GiFlowerPot className="text-lg" />
                   </div>
                   <span className="text-xs text-white font-semibold">Blüte starten</span>
@@ -395,7 +395,7 @@ export default function ContextMenu({
                   onClick={() => router.push(`/plants/${params.id}/harvest`)}
                   className="flex flex-col items-center gap-2 transition-colors"
                 >
-                  <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-green-500">
+                  <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-turquoise">
                     <FaLeaf className="text-lg" />
                   </div>
                   <span className="text-xs text-white font-semibold">Ernten</span>
