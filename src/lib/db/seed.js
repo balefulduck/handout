@@ -4,8 +4,7 @@ const strainData = require('../../data/strains.json');
 // Pre-configured user with password 'drc'
 const mockUser = {
     username: 'workshop',
-    password_hash: '$2b$12$/HnsHinDsAFpDaFwwUqo7ugaxmsNABkPddf51s2M4NtUJwT30QPWq',
-    onboarding_completed: 0  // Using 0 instead of false
+    password_hash: '$2b$12$/HnsHinDsAFpDaFwwUqo7ugaxmsNABkPddf51s2M4NtUJwT30QPWq'
 };
 
 const seedDatabase = () => {
@@ -28,8 +27,8 @@ const seedDatabase = () => {
 
     // Seed mock user
     const insertUser = db.prepare(`
-        INSERT OR REPLACE INTO users (username, password_hash, onboarding_completed)
-        VALUES (@username, @password_hash, @onboarding_completed)
+        INSERT OR REPLACE INTO users (username, password_hash)
+        VALUES (@username, @password_hash)
     `);
 
     try {

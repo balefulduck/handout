@@ -16,19 +16,7 @@ Zum Anderen verwenden *wir* die Anwendung um die Kundenzugänge und angebotenen 
 
 ## 🔄 Hauptarbeitsablauf
 
-```mermaid
-graph TD
-    A[Benutzer Login] --> B{Authentifizierung}
-    B -->|Fehlgeschlagen| C[Login Fehler]
-    B -->|Erfolgreich| D{Erster Login?}
-    D -->|Ja| E[Onboarding]
-    E --> F[Samen Auswahl]
-    F --> G[Dashboard]
-    D -->|Nein| G
-    G --> H[Wachstumsphasen Info]
-    G --> I[Hilfe & Support]
-    G --> J[Pflanzen Journal]
-```
+![diagram](./readme-with-diagrams-1.svg)
 
 Das obige Diagramm zeigt den Kernprozess der Benutzerführung durch unsere Anwendung. Jedes Kästchen stellt einen wichtigen Interaktionspunkt dar, und die Pfeile zeigen die möglichen Wege, die Benutzer nehmen können.
 
@@ -41,15 +29,7 @@ Das obige Diagramm zeigt den Kernprozess der Benutzerführung durch unsere Anwen
 ## 💡 Design-Entscheidungen & Diskussionspunkte
 
 ### Visuelles Design
-```mermaid
-flowchart LR
-    A[Design System] --> B[Farben]
-    A --> C[Typografie]
-    B --> E[Primär: #4F46E5]
-    B --> F[Sekundär: #10B981]
-    C --> G[Überschriften: Jura]
-    C --> H[Fließtext: Jura]
-```
+![diagram](./readme-with-diagrams-2.svg)
 
 ### Technischer Stack
 
