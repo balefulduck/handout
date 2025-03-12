@@ -11,19 +11,19 @@ import Image from 'next/image';
 
 export default function VegetationPhase() {
   return (
-    <div className="py-4 px-3">
+    <div className="py-6 px-4">
       <div className="max-w-3xl mx-auto">
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
           {/* Temperature Card */}
           <div className="rounded-xl shadow overflow-hidden col-span-1">
-            <div className="bg-custom-orange p-3">
+            <div className="bg-yellow-green p-3">
               <div className="flex items-center gap-2">
                 <PiThermometerSimple className="text-base text-white" />
                 <span className="text-base font-bold text-white">Temperatur</span>
                 <Tippy 
                   content={
                     <div className="max-w-xs bg-white p-3 rounded-lg" style={{ border: '1px solid violet' }}>
-                      <div className="font-bold text-custom-orange mb-1 flex items-center gap-2">
+                      <div className="font-bold text-yellow-green mb-1 flex items-center gap-2">
                         <Image src="/1.webp" width={45} height={45} alt="Icon" priority />
                         <span>Dr. Cannabis informiert:</span>
                       </div>
@@ -51,7 +51,7 @@ export default function VegetationPhase() {
                 </Tippy>
               </div>
             </div>
-            <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
+            <div className="p-4 border-x border-b border-yellow-green/20 rounded-b-xl bg-white">
               <div className="space-y-1">
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm text-gray-700">22 - 28°C Tagsüber</span>
@@ -65,14 +65,14 @@ export default function VegetationPhase() {
 
           {/* Humidity Card */}
           <div className="rounded-xl shadow overflow-hidden col-span-1">
-            <div className="bg-custom-orange p-3">
+            <div className="bg-yellow-green p-3">
               <div className="flex items-center gap-2">
                 <WiHumidity className="text-base text-white" />
                 <span className="text-base font-bold text-white">Luftfeuchtigkeit</span>
                 <Tippy 
                   content={
                     <div className="max-w-xs bg-white p-3 rounded-lg" style={{ border: '1px solid violet' }}>
-                      <div className="font-bold text-custom-orange mb-1 flex items-center gap-2">
+                      <div className="font-bold text-yellow-green mb-1 flex items-center gap-2">
                         <Image src="/1.webp" width={45} height={45} alt="Icon" priority />
                         <span>Dr. Cannabis informiert:</span>
                       </div>
@@ -100,7 +100,7 @@ export default function VegetationPhase() {
                 </Tippy>
               </div>
             </div>
-            <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
+            <div className="p-4 border-x border-b border-yellow-green/20 rounded-b-xl bg-white">
               <div className="flex items-center gap-1.5">
                 <span className="text-sm text-gray-700">60 - 70% RH</span>
               </div>
@@ -109,14 +109,14 @@ export default function VegetationPhase() {
 
           {/* Light Schedule Card */}
           <div className="rounded-xl shadow overflow-hidden">
-            <div className="bg-custom-orange p-3">
+            <div className="bg-yellow-green p-3">
               <div className="flex items-center gap-2">
                 <LuSunMedium className="text-base text-white" />
                 <span className="text-base font-bold text-white">Lichtzyklus</span>
                 <Tippy 
                   content={
                     <div className="max-w-xs bg-white p-3 rounded-lg" style={{ border: '1px solid violet' }}>
-                      <div className="font-bold text-custom-orange mb-1 flex items-center gap-2">
+                      <div className="font-bold text-yellow-green mb-1 flex items-center gap-2">
                         <Image src="/1.webp" width={45} height={45} alt="Icon" priority />
                         <span>Dr. Cannabis informiert:</span>
                       </div>
@@ -144,7 +144,7 @@ export default function VegetationPhase() {
                 </Tippy>
               </div>
             </div>
-            <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
+            <div className="p-4 border-x border-b border-yellow-green/20 rounded-b-xl bg-white">
               <div className="flex items-center gap-1.5">
                 <span className="text-sm text-gray-700">18 / 6</span>
               </div>
@@ -153,14 +153,14 @@ export default function VegetationPhase() {
 
           {/* pH Value Card */}
           <div className="rounded-xl shadow overflow-hidden">
-            <div className="bg-custom-orange p-3">
+            <div className="bg-yellow-green p-3">
               <div className="flex items-center gap-2">
                 <PiTestTubeFill className="text-base text-white" />
                 <span className="text-base font-bold text-white">pH Wert</span>
                 <Tippy 
                   content={
                     <div className="max-w-xs bg-white p-3 rounded-lg" style={{ border: '1px solid violet' }}>
-                      <div className="font-bold text-custom-orange mb-1 flex items-center gap-2">
+                      <div className="font-bold text-yellow-green mb-1 flex items-center gap-2">
                         <Image src="/1.webp" width={45} height={45} alt="Icon" priority />
                         <span>Dr. Cannabis informiert:</span>
                       </div>
@@ -188,7 +188,7 @@ export default function VegetationPhase() {
                 </Tippy>
               </div>
             </div>
-            <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
+            <div className="p-4 border-x border-b border-yellow-green/20 rounded-b-xl bg-white">
               <div className="flex items-center gap-1.5">
                 <span className="text-sm text-gray-700">5.8 - 6.5</span>
               </div>
@@ -196,14 +196,14 @@ export default function VegetationPhase() {
           </div>
 
           {/* Info Card */}
-          <div className="rounded-xl shadow overflow-hidden col-span-2 sm:col-span-3">
-            <div className="bg-custom-orange p-3">
+          <div className="rounded-xl shadow overflow-hidden col-span-1 sm:col-span-2 md:col-span-3">
+            <div className="bg-yellow-green p-3">
               <div className="flex items-center gap-2">
                 <PiPlantBold className="text-base text-white" />
                 <span className="text-base font-bold text-white">Wachstumsphase</span>
               </div>
             </div>
-            <div className="p-3 border-x border-b border-custom-orange/20 rounded-b-xl">
+            <div className="p-4 border-x border-b border-yellow-green/20 rounded-b-xl bg-white">
               <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-700">
                 <div className="flex items-center gap-1">
                   <span>Dauer:</span>
