@@ -12,10 +12,29 @@ module.exports = {
         aptos: ['Aptos', 'sans-serif'],
       },
       colors: {
-        'custom-orange': '#f19421',
-        'icon-purple': '#8d1563',
-        'icon-lime': '#beca18',
-        'icon-olive': '#8b9d4b',
+        // New color system
+        'yellow-green': '#ADBC10',
+        'olive-green': '#6F8328',
+        'turquoise': '#00ACB9',
+        'orange': '#F08600',
+        'purple': '#941E71',
+        'medium-blue': '#0086CB',
+        'cool-gray': '#003F51',
+        
+        // Legacy color naming for backward compatibility
+        'custom-orange': '#F08600', // Updated to new orange
+        'icon-purple': '#941E71',  // Updated to new purple
+        'icon-lime': '#ADBC10',    // Updated to new yellow-green
+        'icon-olive': '#6F8328',   // Updated to new olive-green
+      },
+      animation: {
+        'fadeIn': 'fadeIn 0.2s ease-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: 0, transform: 'translateX(-50%) translateY(5px)' },
+          '100%': { opacity: 1, transform: 'translateX(-50%) translateY(0)' },
+        },
       },
     },
   },

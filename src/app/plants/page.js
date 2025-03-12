@@ -131,38 +131,38 @@ export default function PlantsPage() {
   };
 
   if (error) {
-    return <div className="p-4 text-custom-orange font-semibold">Error: {error}</div>;
+    return <div className="p-4 alert-error rounded-md px-4 py-3 font-semibold">Error: {error}</div>;
   }
 
   return (
     <>
-      <div className="p-6 mt-10 pb-32">
+      <div className="p-6 mt-10 pb-32 pattern-diagonal">
         
         {loading ? (
           <div className="flex justify-center items-center h-40">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-custom-orange"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-primary"></div>
           </div>
         ) : plants.length === 0 ? (
-          <div className="text-center p-8 bg-gray-50 rounded-lg shadow">
-            <p className="text-gray-600 mb-4">Du hast noch keine Pflanzen hinzugefügt.</p>
+          <div className="text-center p-8 bg-gray-50 rounded-lg shadow text-focus-animation pattern-dots">
+            <p className="text-gray-600 mb-4 text-normal">Du hast noch keine Pflanzen hinzugefügt.</p>
             <button 
               onClick={() => setShowNewPlantModal(true)}
-              className="px-4 py-2 bg-custom-orange text-white rounded-md hover:bg-orange-600 transition-colors"
+              className="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-brand-primary hover:bg-primary-hover transition-all duration-300 hover:shadow-md"
             >
               Erste Pflanze hinzufügen
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-2">
             {plants.map((plant) => (
               <div 
                 key={plant.id}
                 onClick={() => navigateToPlantDetail(plant.id)}
-                className="bg-white border border-gray-200 p-4 rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer"
+                className="bg-white border border-gray-200 p-4 rounded-lg shadow hover:shadow-md transition-all duration-300 cursor-pointer interactive-card relative overflow-hidden"
               >
                 <div className="flex justify-between items-start mb-2">
-                  <h2 className="text-lg font-bold font-aptos text-gray-800">{plant.name}</h2>
-                  <span className="px-2 py-1 text-xs rounded-full bg-custom-orange text-white">
+                  <h4 className="font-aptos text-gray-800">{plant.name}</h4>
+                  <span className="px-2 py-1 text-micro rounded-full bg-brand-primary text-white">
                     {plant.genetic_type || plant.strain_type || 'Unbekannt'}
                   </span>
                 </div>
@@ -195,9 +195,10 @@ export default function PlantsPage() {
       {/* New Plant Modal */}
       {showNewPlantModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <h2 className="text-xl font-bold mb-4 text-gray-800">Neue Pflanze hinzufügen</h2>
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto relative">
+            <div className="absolute inset-0 pattern-grid opacity-5 pointer-events-none"></div>
+            <div className="relative z-10 p-6">
+              <h3 className="mb-4 text-gray-800 interactive-heading">Neue Pflanze hinzufügen</h3>
               
               <form onSubmit={createPlant}>
                 <div className="space-y-4">

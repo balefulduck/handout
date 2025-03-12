@@ -51,8 +51,23 @@ export async function GET() {
       WHERE p.user_id = ?
       ORDER BY p.id DESC
     `).all(user.id);
+    
+    // Fetch plant_days for each plant
+    const plantsWithDays = plants.map(plant => {
+      const days = db.prepare(`
+        SELECT * FROM plant_days
+        WHERE plant_id = ?
+        ORDER BY date DESC
+        LIMIT 10
+      `).all(plant.id);
+      
+      return {
+        ...plant,
+        days: days
+      };
+    });
 
-    return new Response(JSON.stringify({ plants }), {
+    return new Response(JSON.stringify({ plants: plantsWithDays }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });

@@ -27,7 +27,7 @@ export async function middleware(request) {
   if (token) {
     // If user is authenticated and tries to access auth pages
     if (isAuthPage) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      return NextResponse.redirect(new URL('/growguide', request.url));
     }
   }
 
