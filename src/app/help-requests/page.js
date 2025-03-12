@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import ContextMenu from '@/components/ContextMenu';
 
 export default function UserHelpRequestsPage() {
   const [helpRequests, setHelpRequests] = useState([]);
@@ -133,7 +134,8 @@ export default function UserHelpRequestsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen mt-10 bg-gray-100 p-6">
+      <ContextMenu />
       <div className="max-w-7xl mx-auto">
         <div className="mb-6 flex justify-between items-center">
           <div>

@@ -28,12 +28,12 @@ module.exports = {
         'icon-olive': '#6F8328',   // Updated to new olive-green
       },
       animation: {
-        'fadeIn': 'fadeIn 0.3s ease-in-out',
+        'fadeIn': 'fadeIn 0.2s ease-out',
       },
       keyframes: {
         fadeIn: {
-          '0%': { opacity: 0, transform: 'translate(-50%, calc(100% - 10px))' },
-          '100%': { opacity: 1, transform: 'translate(-50%, 100%)' },
+          '0%': { opacity: 0, transform: 'translateX(-50%) translateY(5px)' },
+          '100%': { opacity: 1, transform: 'translateX(-50%) translateY(0)' },
         },
       },
     },
