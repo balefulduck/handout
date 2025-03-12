@@ -629,14 +629,116 @@ export default function ContextMenu({
                         
                         // Compile plant data to send with the form
                         const compilePlantData = () => {
-                          return selectedPlants.map(plant => ({
-                            id: plant.id,
-                            name: plant.name,
-                            strain: plant.strain_name || plant.strain, // Handle both formats
-                            created_at: plant.created_at,
-                            flowering_start_date: plant.flowering_start_date,
-                            // Add any other relevant plant data we want to include
-                          }));
+                          return selectedPlants.map(plant => {
+                            // Fetch additional plant data for each selected plant
+                            let measurements = [];
+                            let lastImages = [];
+                            let growNotes = '';
+                            
+                            // Get measurements from plant_days entries if available
+                            if (plant.days && plant.days.length) {
+                              // Sort days by date (newest first) and take up to 5 latest
+                              const sortedDays = [...plant.days].sort((a, b) => 
+                                new Date(b.date) - new Date(a.date)
+                              ).slice(0, 5);
+                              
+                              // Map to the format we need for displaying in the admin view
+                              measurements = sortedDays.map(day => ({
+                                date: day.date,
+                                created_at: day.date, // For compatibility with different date field names
+                                ph: day.ph_value,
+                                watered: day.watered ? 'Ja' : 'Nein',
+                                watering_amount: day.watering_amount,
+                                temperature: day.temperature,
+                                humidity: day.humidity,
+                                notes: day.notes
+                              }));
+                              
+                              // Collect notes from plant_days to compile growth information
+                              const dayNotes = sortedDays
+                                .filter(day => day.notes && day.notes.trim() !== '')
+                                .map(day => `${new Date(day.date).toLocaleDateString('de-DE')}: ${day.notes}`)
+                                .join('\n');
+                                
+                              if (dayNotes) {
+                                growNotes = dayNotes;
+                              }
+                            } else if (plant.measurements && plant.measurements.length) {
+                              // Fallback to measurements array if present
+                              measurements = plant.measurements.slice(-5);
+                            }
+                            
+                            // Get latest images if available
+                            if (plant.images && plant.images.length) {
+                              // Take up to 3 latest images
+                              lastImages = plant.images.slice(-3);
+                            } else if (plant.timeline && plant.timeline.items) {
+                              // Try to get images from timeline if direct images array isn't available
+                              const imageEntries = plant.timeline.items
+                                .filter(item => item.type === 'image')
+                                .slice(-3);
+                              lastImages = imageEntries;
+                            }
+                            
+                            // Extract phase information based on flowering_start_date
+                            let phase = 'unknown';
+                            if (plant.status === 'harvested') {
+                              phase = 'harvested';
+                            } else if (plant.flowering_start_date) {
+                              phase = 'flowering';
+                            } else {
+                              const ageInDays = calculateAgeDays(plant.created_at || plant.start_date);
+                              if (ageInDays < 21) {
+                                phase = 'seedling';
+                              } else {
+                                phase = 'vegetative';
+                              }
+                            }
+                            
+                            // Calculate environmental averages if available
+                            const environmentalData = {};
+                            if (measurements.length > 0) {
+                              const validTemps = measurements.filter(m => m.temperature).map(m => m.temperature);
+                              const validHumidity = measurements.filter(m => m.humidity).map(m => m.humidity);
+                              
+                              if (validTemps.length > 0) {
+                                environmentalData.avg_temperature = (validTemps.reduce((sum, temp) => sum + temp, 0) / validTemps.length).toFixed(1);
+                              }
+                              
+                              if (validHumidity.length > 0) {
+                                environmentalData.avg_humidity = Math.round(validHumidity.reduce((sum, hum) => sum + hum, 0) / validHumidity.length);
+                              }
+                            }
+                            
+                            return {
+                              id: plant.id,
+                              name: plant.name,
+                              strain: plant.strain_name || plant.strain || (plant.strain_id ? `Strain #${plant.strain_id}` : 'Unbekannt'),
+                              created_at: plant.created_at || plant.start_date,
+                              flowering_start_date: plant.flowering_start_date,
+                              phase: phase,
+                              age_days: plant.age_days || calculateAgeDays(plant.created_at || plant.start_date),
+                              measurements: measurements,
+                              last_images: lastImages,
+                              notes: plant.notes || growNotes || '',
+                              grow_details: {
+                                ...environmentalData,
+                                // We'll add these fields in the future
+                                grow_medium: '',
+                                light_schedule: '',
+                                nutrients: ''
+                              }
+                            };
+                          });
+                        };
+                        
+                        // Helper function to calculate plant age in days
+                        const calculateAgeDays = (createdAt) => {
+                          if (!createdAt) return 0;
+                          const created = new Date(createdAt);
+                          const now = new Date();
+                          const diffTime = Math.abs(now - created);
+                          return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                         };
                         
                         // Create FormData to send to the API
@@ -653,11 +755,10 @@ export default function ContextMenu({
                         formData.append('selectedPlantIds', JSON.stringify(selectedPlants.map(p => p.id)));
                         
                         // Add files (images)
-                        // TEMPORARILY DISABLED FOR VERCEL COMPATIBILITY
-                        // File system operations are not supported in Vercel's serverless environment
-                        // for (let i = 0; i < helpFormData.files.length; i++) {
-                        //   formData.append('files', helpFormData.files[i]);
-                        // }
+                        // Now enabled for DigitalOcean which supports file system operations
+                        for (let i = 0; i < helpFormData.files.length; i++) {
+                          formData.append('files', helpFormData.files[i]);
+                        }
                         
                         // Send the data to the server
                         console.log('Sending help request to server...');
@@ -746,9 +847,6 @@ export default function ContextMenu({
                           />
                         </div>
                         <div>
-                          {/* TEMPORARILY DISABLED FOR VERCEL COMPATIBILITY */}
-                          {/* File system operations are not supported in Vercel's serverless environment */}
-                          {/* 
                           <label className="block text-sm font-medium text-gray-700">
                             Fotos anhängen (optional)
                           </label>
@@ -802,12 +900,7 @@ export default function ContextMenu({
                               ))}
                             </div>
                           )}
-                          */}
-                          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                            <p className="text-sm text-yellow-700">
-                              <strong>Hinweis:</strong> Das Hochladen von Dateien ist vorübergehend deaktiviert.
-                            </p>
-                          </div>
+
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700">

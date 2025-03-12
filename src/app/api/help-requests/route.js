@@ -12,20 +12,25 @@ if (typeof window === 'undefined') {
 
 // Helper function to save uploaded files
 async function saveFile(file, userId) {
-  // TEMPORARILY DISABLED FOR VERCEL COMPATIBILITY
-  // File system operations are not supported in Vercel's serverless environment
-  console.log('File upload temporarily disabled for Vercel compatibility');
-  return null;
-  
-  /* Original implementation - kept for future reference
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
   
   // Create unique filename
-  const fileName = `${uuidv4()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;
+  const fileName = `${uuidv4()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;  
+  
+  // Create upload directory path
+  // Using /app/public for DigitalOcean persistent storage
   const uploadDir = join(process.cwd(), 'public', 'uploads', 'help-requests', userId.toString());
   
-  // Ensure directory exists
+  // Create directory if it doesn't exist
+  const { mkdir } = await import('fs/promises');
+  try {
+    await mkdir(uploadDir, { recursive: true });
+  } catch (error) {
+    console.error('Error creating directory:', error);
+    // Continue even if directory already exists
+  }
+  
   try {
     await writeFile(join(uploadDir, fileName), buffer);
     return `/uploads/help-requests/${userId}/${fileName}`;
@@ -33,7 +38,6 @@ async function saveFile(file, userId) {
     console.error('Error saving file:', error);
     throw new Error('Failed to save uploaded file');
   }
-  */
 }
 
 // POST /api/help-requests - Create a new help request
@@ -103,18 +107,24 @@ export async function POST(request) {
     // Save uploaded files
     const fileUrls = [];
     
-    // TEMPORARILY DISABLED FOR VERCEL COMPATIBILITY
-    // File system operations are not supported in Vercel's serverless environment
-    /*
+    // Now enabled for DigitalOcean which supports file system operations
     if (files && files.length > 0) {
+      console.log(`Processing ${files.length} uploaded files`);
       for (const file of files) {
         if (file && file.name) {
-          const fileUrl = await saveFile(file, user.id);
-          fileUrls.push(fileUrl);
+          try {
+            const fileUrl = await saveFile(file, user.id);
+            if (fileUrl) {
+              fileUrls.push(fileUrl);
+              console.log(`Successfully saved file: ${fileUrl}`);
+            }
+          } catch (fileError) {
+            console.error('Error processing file:', fileError);
+            // Continue with other files even if one fails
+          }
         }
       }
     }
-    */
 
     // Create the help request in database
     // First, check if we have the help_requests table

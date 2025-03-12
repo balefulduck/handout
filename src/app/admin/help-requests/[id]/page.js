@@ -312,26 +312,40 @@ export default function HelpRequestDetailPage() {
               <h3 className="text-lg leading-6 font-medium text-gray-900">Ausgewählte Pflanzen</h3>
             </div>
             <div className="px-4 py-5 sm:p-6">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-6">
                 {plantData.map((plant) => (
-                  <div key={plant.id} className="border rounded-md p-4 hover:bg-gray-50">
-                    <div className="flex justify-between items-start">
+                  <div key={plant.id} className="border rounded-md p-4 bg-gray-50">
+                    {/* Plant Header */}
+                    <div className="flex justify-between items-start mb-4">
                       <div>
                         <h4 className="text-lg font-medium text-gray-900">{plant.name}</h4>
                         {plant.strain && (
                           <p className="text-sm text-gray-500">Sorte: {plant.strain}</p>
                         )}
                       </div>
-                      <a
-                        href={`/plants/${plant.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-olive-green hover:text-yellow-green"
-                      >
-                        Pflanze ansehen
-                      </a>
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        plant.phase === 'flowering' ? 'bg-purple-100 text-purple-800' : 
+                        plant.phase === 'vegetative' ? 'bg-green-100 text-green-800' : 
+                        plant.phase === 'seedling' ? 'bg-blue-100 text-blue-800' : 
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {plant.phase === 'flowering' ? 'Blüte' : 
+                         plant.phase === 'vegetative' ? 'Vegetative' : 
+                         plant.phase === 'seedling' ? 'Sämling' : 
+                         'Unbekannt'}
+                      </span>
                     </div>
-                    <div className="mt-3 grid grid-cols-2 gap-2">
+                    
+                    {/* Basic Plant Info */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                      <div>
+                        <dt className="text-xs font-medium text-gray-500">Pflanze ID</dt>
+                        <dd className="text-sm text-gray-900">{plant.id}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs font-medium text-gray-500">Alter</dt>
+                        <dd className="text-sm text-gray-900">{plant.age_days || '-'} Tage</dd>
+                      </div>
                       <div>
                         <dt className="text-xs font-medium text-gray-500">Erstellt am</dt>
                         <dd className="text-sm text-gray-900">
@@ -345,6 +359,96 @@ export default function HelpRequestDetailPage() {
                         </dd>
                       </div>
                     </div>
+                    
+                    {/* Environmental Data */}
+                    {plant.grow_details && (
+                      plant.grow_details.avg_temperature || 
+                      plant.grow_details.avg_humidity
+                    ) && (
+                      <div className="mb-4 border-t border-gray-200 pt-3">
+                        <h5 className="text-sm font-medium text-gray-700 mb-2">Umgebungsdaten</h5>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          {plant.grow_details.avg_temperature && (
+                            <div>
+                              <dt className="text-xs font-medium text-gray-500">Durchschn. Temperatur</dt>
+                              <dd className="text-sm text-gray-900">{plant.grow_details.avg_temperature}°C</dd>
+                            </div>
+                          )}
+                          {plant.grow_details.avg_humidity && (
+                            <div>
+                              <dt className="text-xs font-medium text-gray-500">Durchschn. Luftfeuchtigkeit</dt>
+                              <dd className="text-sm text-gray-900">{plant.grow_details.avg_humidity}%</dd>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Latest Measurements */}
+                    {plant.measurements && plant.measurements.length > 0 && (
+                      <div className="mb-4 border-t border-gray-200 pt-3">
+                        <h5 className="text-sm font-medium text-gray-700 mb-2">Letzte Messungen</h5>
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-100">
+                              <tr>
+                                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Datum</th>
+                                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gegossen</th>
+                                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">pH-Wert</th>
+                                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Temp.</th>
+                                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Feucht.</th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              {plant.measurements.map((measurement, idx) => (
+                                <tr key={idx}>
+                                  <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-900">{formatDate(measurement.date || measurement.created_at).split(',')[0]}</td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-900">{measurement.watered || '-'}</td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-900">{measurement.ph || '-'}</td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-900">{measurement.temperature ? `${measurement.temperature}°C` : '-'}</td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-900">{measurement.humidity ? `${measurement.humidity}%` : '-'}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Latest Images */}
+                    {plant.last_images && plant.last_images.length > 0 && (
+                      <div className="border-t border-gray-200 pt-3">
+                        <h5 className="text-sm font-medium text-gray-700 mb-2">Letzte Bilder</h5>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {plant.last_images.map((image, idx) => (
+                            <div key={idx} className="relative">
+                              <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-lg bg-gray-100">
+                                <img 
+                                  src={image.url || image.image_url || ''} 
+                                  alt={`Plant image ${idx + 1}`} 
+                                  className="object-cover"
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = '/placeholder-plant.jpg';
+                                  }}
+                                />
+                              </div>
+                              <div className="mt-1 text-xs text-gray-500">
+                                {formatDate((image.date || image.created_at || '').split(',')[0])}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Notes */}
+                    {plant.notes && (
+                      <div className="border-t border-gray-200 pt-3 mt-3">
+                        <h5 className="text-sm font-medium text-gray-700 mb-1">Notizen</h5>
+                        <p className="text-sm text-gray-600 whitespace-pre-line">{plant.notes}</p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
