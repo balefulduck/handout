@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { FaArrowRight } from 'react-icons/fa';
+import { FaArrowRight, FaInfoCircle } from 'react-icons/fa';
 
 /**
  * DrcInfoTag - Component for Dr. Cannabis terminology that provides 
@@ -146,7 +146,7 @@ export default function DrcInfoTag({ term, children, tooltipContent, color = "ol
     <div className="drc-info-tag-container inline-block">
       <span
         ref={triggerRef}
-        className={`drc-info-tag bg-${color} text-white rounded px-1.5 font-bold hover:brightness-95 transition-all cursor-pointer`}
+        className={`drc-info-tag bg-white/20 text-white rounded-md px-2 py-0.5 font-bold hover:bg-white/30 transition-all cursor-pointer shadow-md hover:shadow-lg`}
         onMouseEnter={showTooltip}
         onClick={() => {
           // Toggle tooltip and reset auto-close timer if showing
@@ -159,12 +159,6 @@ export default function DrcInfoTag({ term, children, tooltipContent, color = "ol
         }}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        style={{
-          textDecoration: 'underline',
-          textDecorationStyle: 'dotted',
-          textDecorationColor: 'rgba(255,255,255,0.7)',
-          textUnderlineOffset: '2px'
-        }}
       >
         {children}
       </span>
@@ -186,7 +180,7 @@ export default function DrcInfoTag({ term, children, tooltipContent, color = "ol
               transformOrigin: 'top center'
             }}
         >
-          <div className="max-w-xs rounded-lg overflow-hidden shadow-lg">
+          <div className="max-w-xs rounded-lg overflow-hidden shadow-xl border border-gray-200">
             <div className={`bg-${color} p-3 flex items-center gap-2`}>
               <Image src="/1.webp" width={45} height={45} alt="Icon" priority className="rounded-full border-2 border-white/70" />
               <span className="text-white font-bold">Dr. Cannabis informiert:</span>
@@ -208,7 +202,7 @@ export default function DrcInfoTag({ term, children, tooltipContent, color = "ol
             </div>
           </div>
           <div 
-            className={`absolute left-1/2 -top-2 transform -translate-x-1/2 w-0 h-0 border-l-[8px] border-r-[8px] border-b-[8px] border-l-transparent border-r-transparent border-b-${color}`}
+            className={`absolute left-1/2 -top-2 transform -translate-x-1/2 w-0 h-0 border-l-[8px] border-r-[8px] border-b-[8px] border-l-transparent border-r-transparent border-b-${color} filter drop-shadow-sm`}
           ></div>
           </div>,
           document.body

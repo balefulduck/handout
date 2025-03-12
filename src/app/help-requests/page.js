@@ -140,7 +140,6 @@ export default function UserHelpRequestsPage() {
         <div className="mb-6 flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Meine Hilfe-Anfragen</h1>
-            <p className="text-gray-600">Ihre eingereichten Hilfe-Anfragen an Dr. Cannabis.</p>
           </div>
           <div className="flex gap-2">
             <button
