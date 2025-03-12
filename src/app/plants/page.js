@@ -161,7 +161,7 @@ export default function PlantsPage() {
                 className="bg-white border border-gray-200 p-4 rounded-lg shadow hover:shadow-md transition-all duration-300 cursor-pointer interactive-card relative overflow-hidden"
               >
                 <div className="flex justify-between items-start mb-2">
-                  <h2 className="font-aptos text-gray-800">{plant.name}</h2>
+                  <h4 className="font-aptos text-gray-800">{plant.name}</h4>
                   <span className="px-2 py-1 text-micro rounded-full bg-brand-primary text-white">
                     {plant.genetic_type || plant.strain_type || 'Unbekannt'}
                   </span>
@@ -198,7 +198,7 @@ export default function PlantsPage() {
           <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto relative">
             <div className="absolute inset-0 pattern-grid opacity-5 pointer-events-none"></div>
             <div className="relative z-10 p-6">
-              <h2 className="mb-4 text-gray-800 interactive-heading">Neue Pflanze hinzufügen</h2>
+              <h3 className="mb-4 text-gray-800 interactive-heading">Neue Pflanze hinzufügen</h3>
               
               <form onSubmit={createPlant}>
                 <div className="space-y-4">

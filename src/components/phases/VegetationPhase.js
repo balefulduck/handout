@@ -19,6 +19,7 @@ export default function VegetationPhase() {
                 <DrcInfoTag 
                   term="temperatur" 
                   color="yellow-green" 
+                  bgMode="dark"
                   tooltipContent="Bei zu hohen Temperaturschwankungen kann das Wachstum der Pflanze gehemmt werden."
                 >
                   Temperatur
@@ -45,6 +46,7 @@ export default function VegetationPhase() {
                 <DrcInfoTag 
                   term="luftfeuchtigkeit" 
                   color="yellow-green" 
+                  bgMode="dark"
                   tooltipContent="Etablierte Pflanzen können ausreichend Wasser über die Wurzeln aufnehmen. Eine geringere Luftfeuchtigkeit als während der Keimlingsphase kann das Schädlingsrisiko verringern."
                 >
                   Luftfeuchtigkeit
@@ -66,6 +68,7 @@ export default function VegetationPhase() {
                 <DrcInfoTag 
                   term="lichtzyklus" 
                   color="yellow-green" 
+                  bgMode="dark"
                   tooltipContent="Bei photoperiodischen Sorten bestimmt der Lichtzyklus die Wachstumsphasen."
                 >
                   Lichtzyklus
@@ -85,8 +88,9 @@ export default function VegetationPhase() {
               <div className="flex items-center gap-2">
                 <PiTestTubeFill className="text-base text-white" />
                 <DrcInfoTag 
-                  term="ph" 
-                  color="yellow-green" 
+                  term="pH" 
+                  color="yellow-green"
+                  bgMode="dark" 
                   tooltipContent="Der pH-Wert beeinflusst die Nährstoffaufnahme, Wurzelgesundheit und Pflanzengesundheit. Ein falscher Wert kann Mangelerscheinungen und Wachstumsprobleme verursachen."
                 >
                   pH Wert

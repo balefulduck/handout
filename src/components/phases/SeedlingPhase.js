@@ -19,6 +19,7 @@ export default function SeedlingPhase() {
                 <DrcInfoTag 
                   term="temperatur" 
                   color="purple" 
+                  bgMode="dark"
                   tooltipContent="Bei zu hohen Temperaturschwankungen kann das Wachstum der Pflanze gehemmt werden."
                 >
                   Temperatur
@@ -45,6 +46,7 @@ export default function SeedlingPhase() {
                 <DrcInfoTag 
                   term="luftfeuchtigkeit" 
                   color="purple" 
+                  bgMode="dark"
                   tooltipContent="Jungpflanzen gleichen die schwache Wurzelstruktur aus, indem sie vermehrt Feuchtigkeit über das Blattwerk aufnehmen"
                 >
                   Luftfeuchtigkeit
@@ -66,6 +68,7 @@ export default function SeedlingPhase() {
                 <DrcInfoTag 
                   term="lichtzyklus" 
                   color="purple" 
+                  bgMode="dark"
                   tooltipContent="Bei photoperiodischen Sorten bestimmt der Lichtzyklus die Wachstumsphasen."
                 >
                   Lichtzyklus
@@ -85,8 +88,9 @@ export default function SeedlingPhase() {
               <div className="flex items-center gap-2">
                 <PiTestTubeFill className="text-base text-white" />
                 <DrcInfoTag 
-                  term="ph" 
+                  term="pH" 
                   color="purple" 
+                  bgMode="dark"
                   tooltipContent="Der pH-Wert beeinflusst die Nährstoffaufnahme, Wurzelgesundheit und Pflanzengesundheit. Ein falscher Wert kann Mangelerscheinungen und Wachstumsprobleme verursachen."
                 >
                   pH Wert

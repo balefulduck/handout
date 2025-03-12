@@ -15,8 +15,9 @@ import { FaArrowRight, FaInfoCircle } from 'react-icons/fa';
  * @param {React.ReactNode} props.children - The content to be displayed
  * @param {string} props.tooltipContent - The content for the tooltip
  * @param {string} props.color - The accent color for the tooltip header (default: "olive-green")
+ * @param {string} props.bgMode - Background mode ("light", "dark", or "auto" - default: "auto")
  */
-export default function DrcInfoTag({ term, children, tooltipContent, color = "olive-green" }) {
+export default function DrcInfoTag({ term, children, tooltipContent, color = "olive-green", bgMode = "auto" }) {
   const router = useRouter();
   const [isLongPress, setIsLongPress] = useState(false);
   const [longPressTimer, setLongPressTimer] = useState(null);
@@ -146,7 +147,9 @@ export default function DrcInfoTag({ term, children, tooltipContent, color = "ol
     <div className="drc-info-tag-container inline-block">
       <span
         ref={triggerRef}
-        className={`drc-info-tag bg-white/20 text-white rounded-md px-2 py-0.5 font-bold hover:bg-white/30 transition-all cursor-pointer shadow-md hover:shadow-lg`}
+        className={`drc-info-tag rounded-md px-2 py-0.5 font-bold transition-all cursor-pointer shadow-md hover:shadow-lg ${bgMode === "light" || (bgMode === "auto" && color === "olive-green") 
+          ? `bg-${color}/15 text-${color} hover:bg-${color}/25 border border-${color}/30` 
+          : "bg-white/20 text-white hover:bg-white/30"}`}
         onMouseEnter={showTooltip}
         onClick={() => {
           // Toggle tooltip and reset auto-close timer if showing
