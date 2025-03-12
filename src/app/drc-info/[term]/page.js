@@ -193,7 +193,7 @@ export default function DrcInfoPage() {
       {/* Header */}
       <header className="bg-olive-green text-white p-4 shadow-md">
         <div className="container mx-auto max-w-5xl">
-          <Link href="/grow-guide" className="flex items-center gap-2 w-fit text-white hover:text-yellow-50 transition-colors">
+          <Link href="/growguide" className="flex items-center gap-2 w-fit text-white hover:text-yellow-50 transition-colors">
             <FaArrowLeft />
             <span>Zurück zum Grow Guide</span>
           </Link>
