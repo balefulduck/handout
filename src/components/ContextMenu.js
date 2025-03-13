@@ -289,6 +289,28 @@ export default function ContextMenu({
                         </div>
                       </div>
                     )}
+                    
+                    {/* Last Harvests - Feature Preview */}
+                    <div className="mt-6 px-4 py-4 border-t border-gray-200">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center">
+                          <h4 className="text-gray-500">Letzte Ernten</h4>
+                        </div>
+                        <div>
+                          <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-md">Feature Vorschau!</span>
+                        </div>
+                      </div>
+                      <div className="space-y-2 opacity-60">
+                        <div className="w-full text-left p-2 rounded-md bg-gray-100 flex items-center cursor-not-allowed">
+     
+                          <span className="text-sm text-gray-500 truncate">White Widow</span>
+                        </div>
+                        <div className="w-full text-left p-2 rounded-md bg-gray-100 flex items-center cursor-not-allowed">
+           
+                          <span className="text-sm text-gray-500 truncate">Northern Lights</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </Dialog.Panel>

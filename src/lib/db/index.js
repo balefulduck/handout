@@ -142,6 +142,11 @@ const initDb = () => {
         console.log('Adding humidity column to plant_days table...');
         db.exec('ALTER TABLE plant_days ADD COLUMN humidity INTEGER;');
     }
+    
+    if (!plantDaysColumns.includes('setup_entry_id')) {
+        console.log('Adding setup_entry_id column to plant_days table...');
+        db.exec('ALTER TABLE plant_days ADD COLUMN setup_entry_id INTEGER;');
+    }
 
     // Fertilizer usage table - for tracking fertilizers used on specific days
     db.exec(`
@@ -172,6 +177,58 @@ const initDb = () => {
             UNIQUE(plant_id)
         );
     `);
+
+    // Plant Setups table - for grouping plants for batch operations
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS plant_setups (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            description TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+    `);
+
+    // Plant-Setup relationships (many-to-many)
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS plant_setup_mappings (
+            setup_id INTEGER NOT NULL,
+            plant_id INTEGER NOT NULL,
+            added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY(setup_id, plant_id),
+            FOREIGN KEY(setup_id) REFERENCES plant_setups(id) ON DELETE CASCADE,
+            FOREIGN KEY(plant_id) REFERENCES plants(id) ON DELETE CASCADE
+        );
+    `);
+    
+    // Setup day entries table - for tracking batch day entries for setups
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS setup_day_entries (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            setup_id INTEGER NOT NULL,
+            date DATE NOT NULL,
+            watered INTEGER DEFAULT 0,
+            topped INTEGER DEFAULT 0,
+            ph_value REAL,
+            watering_amount INTEGER,
+            temperature REAL,
+            humidity INTEGER,
+            notes TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(setup_id) REFERENCES plant_setups(id) ON DELETE CASCADE,
+            UNIQUE(setup_id, date)
+        );
+    `);
+
+    // Update fertilizer_usage table schema if needed
+    const fertilizerTableInfo = db.prepare("PRAGMA table_info(fertilizer_usage)").all();
+    const fertilizerColumns = fertilizerTableInfo.map(col => col.name);
+    
+    if (!fertilizerColumns.includes('setup_day_id')) {
+        console.log('Adding setup_day_id column to fertilizer_usage table...');
+        db.exec('ALTER TABLE fertilizer_usage ADD COLUMN setup_day_id INTEGER REFERENCES setup_day_entries(id) ON DELETE CASCADE;');
+    }
 
     console.log('Schema creation complete');
     console.log('Database schema updated successfully');
