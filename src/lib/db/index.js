@@ -74,6 +74,7 @@ const initDb = () => {
             start_date DATE NOT NULL,
             flowering_start_date DATE,
             status TEXT DEFAULT 'active',
+            substrate TEXT,
             FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
             FOREIGN KEY(strain_id) REFERENCES strains(id) ON DELETE CASCADE
         );
@@ -102,6 +103,11 @@ const initDb = () => {
     if (!columns.includes('flowering_start_date')) {
         console.log('Adding flowering_start_date column to plants table...');
         db.exec('ALTER TABLE plants ADD COLUMN flowering_start_date DATE;');
+    }
+    
+    if (!columns.includes('substrate')) {
+        console.log('Adding substrate column to plants table...');
+        db.exec('ALTER TABLE plants ADD COLUMN substrate TEXT;');
     }
 
     // Plant days table - for tracking daily plant data

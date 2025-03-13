@@ -19,7 +19,8 @@ export default function PlantsPage() {
     breeder: '',
     genetic_type: 'hybrid', // Default value
     expected_flowering_days: 60, // Default value
-    start_date: new Date().toISOString().split('T')[0] // Today's date as default
+    start_date: new Date().toISOString().split('T')[0], // Today's date as default
+    substrate: '' // New substrate field
   });
 
   // Function to handle new plant form input changes
@@ -75,7 +76,8 @@ export default function PlantsPage() {
         breeder: '',
         genetic_type: 'hybrid',
         expected_flowering_days: 60,
-        start_date: new Date().toISOString().split('T')[0]
+        start_date: new Date().toISOString().split('T')[0],
+        substrate: ''
       });
       setShowNewPlantModal(false);
       
@@ -177,12 +179,23 @@ export default function PlantsPage() {
                     {plant.genetic_type || plant.strain_type || 'Unbekannt'}
                   </span>
                 </div>
-                
-                <div className="mt-3 space-y-2">
-                  {plant.breeder && (
+                {plant.breeder && (
                     <p className="text-sm text-gray-600 font-semibold">{plant.breeder}</p>
                   )}
-                  
+                
+                {plant.substrate && (
+                  <div className="text-xs text-gray-600 mb-1">
+                    <span className="font-semibold">Substrat:</span> {plant.substrate === 'soil' ? 'Erde' : 
+                                                      plant.substrate === 'coco' ? 'Kokos' : 
+                                                      plant.substrate === 'hydro' ? 'Hydrokultur' : 
+                                                      plant.substrate === 'rockwool' ? 'Steinwolle' : 
+                                                      plant.substrate === 'other' ? 'Andere' : 
+                                                      plant.substrate}
+                  </div>
+                )}
+                
+                <div className="mt-3 space-y-2">
+                
                   <div className="space-y-1">
                     {/* Age progress bar */}
                     <div className="relative pt-1">
@@ -314,6 +327,24 @@ export default function PlantsPage() {
                       max={new Date().toISOString().split('T')[0]}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
                     />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="substrate" className="block text-sm font-medium text-gray-700 mb-1">Substrat</label>
+                    <select
+                      id="substrate"
+                      name="substrate"
+                      value={newPlant.substrate}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
+                    >
+                      <option value="">Bitte wählen</option>
+                      <option value="soil">Erde</option>
+                      <option value="coco">Kokos</option>
+                      <option value="hydro">Hydrokultur</option>
+                      <option value="rockwool">Steinwolle</option>
+                      <option value="other">Andere</option>
+                    </select>
                   </div>
                 </div>
                 

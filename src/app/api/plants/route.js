@@ -131,8 +131,9 @@ export async function POST(request) {
         expected_flowering_days, 
         start_date, 
         flowering_start_date, 
-        status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        status,
+        substrate
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const result = insertPlant.run(
@@ -144,7 +145,8 @@ export async function POST(request) {
       data.expected_flowering_days || null,
       startDate,
       data.flowering_start_date || null,
-      'active'
+      'active',
+      data.substrate || null
     );
 
     if (!result.lastInsertRowid) {
