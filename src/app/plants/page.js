@@ -130,6 +130,17 @@ export default function PlantsPage() {
     return diffDays;
   };
 
+  // Calculate vegetation days (from start to flowering start)
+  const calculateFloweringAge = (startDate, floweringStartDate) => {
+    if (!floweringStartDate) return null;
+    
+    const start = new Date(startDate);
+    const floweringStart = new Date(floweringStartDate);
+    const diffTime = Math.abs(floweringStart - start);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
   if (error) {
     return <div className="p-4 alert-error rounded-md px-4 py-3 font-semibold">Error: {error}</div>;
   }
@@ -172,17 +183,53 @@ export default function PlantsPage() {
                     <p className="text-sm text-gray-600 font-semibold">{plant.breeder}</p>
                   )}
                   
-                  <div className="flex items-center text-sm text-gray-600">
-                    <FaSeedling className="mr-2 text-green-500" />
-                    <span>Alter: {calculateAge(plant.start_date)} Tage</span>
-                  </div>
-                  
-                  {plant.flowering_start_date && (
-                    <div className="flex items-center text-sm text-gray-600">
-                      <GiFlowerPot className="mr-2 text-purple-500" />
-                      <span>Blüte: {calculateFloweringDays(plant.flowering_start_date)} Tage</span>
+                  <div className="space-y-1">
+                    {/* Age progress bar */}
+                    <div className="relative pt-1">
+                     
+                      <div className="overflow-hidden h-8 mb-2 text-xs flex rounded-lg bg-gray-200 border border-gray-300">
+                        {plant.flowering_start_date ? (
+                          <>
+                            {/* Vegetation phase */}
+                            <div 
+                              style={{ 
+                                width: `${Math.min(calculateFloweringAge(plant.start_date, plant.flowering_start_date) * 2, 100)}%` 
+                              }}
+                              className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500 relative min-w-[40px]"
+                            >
+                              <span className="relative z-10 font-bold">
+                                {calculateFloweringAge(plant.start_date, plant.flowering_start_date)}
+                              </span>
+                            </div>
+                            {/* Flowering phase */}
+                            <div 
+                              style={{ 
+                                width: `${Math.min(calculateFloweringDays(plant.flowering_start_date) * 2, 100)}%`,
+                                backgroundColor: '#941e71'
+                              }}
+                              className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center relative min-w-[40px]"
+                            >
+                              <span className="relative z-10 font-bold">
+                                {calculateFloweringDays(plant.flowering_start_date)}
+                              </span>
+                            </div>
+                          </>
+                        ) : (
+                          /* Only vegetation phase */
+                          <div 
+                            style={{ 
+                              width: `${Math.min(calculateAge(plant.start_date) * 2, 100)}%` 
+                            }}
+                            className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500 relative min-w-[40px]"
+                          >
+                            <span className="relative z-10 font-bold">
+                              {calculateAge(plant.start_date)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
+                  </div>
                   
             
                 </div>
