@@ -344,12 +344,14 @@ export default function HelpRequestDetailPage() {
                       </div>
                       <div>
                         <dt className="text-xs font-medium text-gray-500">Alter</dt>
-                        <dd className="text-sm text-gray-900">{plant.age_days || '-'} Tage</dd>
+                        <dd className="text-sm text-gray-900">{plant.age_days ? Math.floor(plant.age_days) : '-'} Tage</dd>
                       </div>
                       <div>
                         <dt className="text-xs font-medium text-gray-500">Erstellt am</dt>
                         <dd className="text-sm text-gray-900">
-                          {plant.created_at ? formatDate(plant.created_at).split(',')[0] : 'N/A'}
+                          {plant.created_at ? 
+                            new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(plant.created_at))
+                            : 'N/A'}
                         </dd>
                       </div>
                       <div>
@@ -358,6 +360,12 @@ export default function HelpRequestDetailPage() {
                           {plant.flowering_start_date ? formatDate(plant.flowering_start_date).split(',')[0] : 'Noch nicht'}
                         </dd>
                       </div>
+                      {plant.substrate && (
+                        <div className="sm:col-span-2">
+                          <dt className="text-xs font-medium text-gray-500">Substrat</dt>
+                          <dd className="text-sm text-gray-900">{plant.substrate}</dd>
+                        </div>
+                      )}
                     </div>
                     
                     {/* Environmental Data */}
@@ -390,13 +398,14 @@ export default function HelpRequestDetailPage() {
                         <h5 className="text-sm font-medium text-gray-700 mb-2">Letzte Messungen</h5>
                         <div className="overflow-x-auto">
                           <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-100">
+                            <thead className="bg-gray-50">
                               <tr>
                                 <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Datum</th>
-                                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gegossen</th>
-                                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">pH-Wert</th>
+                                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Wasser</th>
+                                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">pH</th>
                                 <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Temp.</th>
                                 <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Feucht.</th>
+                                <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dünger</th>
                               </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
@@ -407,6 +416,22 @@ export default function HelpRequestDetailPage() {
                                   <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-900">{measurement.ph || '-'}</td>
                                   <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-900">{measurement.temperature ? `${measurement.temperature}°C` : '-'}</td>
                                   <td className="px-3 py-2 whitespace-nowrap text-xs text-gray-900">{measurement.humidity ? `${measurement.humidity}%` : '-'}</td>
+                                  <td className="px-3 py-2 text-xs text-gray-900">
+                                    {measurement.fertilizers && measurement.fertilizers.length > 0 ? (
+                                      <div className="max-w-[200px]">
+                                        {measurement.fertilizers.map((fertilizer, fidx) => (
+                                          <div key={fidx} className="mb-1 last:mb-0">
+                                            <span className="font-medium">{fertilizer.name}</span>
+                                            {fertilizer.amount && (
+                                              <span className="ml-1">({fertilizer.amount})</span>
+                                            )}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      '-'
+                                    )}
+                                  </td>
                                 </tr>
                               ))}
                             </tbody>

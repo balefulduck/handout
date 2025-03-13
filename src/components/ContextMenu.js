@@ -66,7 +66,7 @@ export default function ContextMenu({
       
       // Fetch user's plants when help modal opens
       setIsLoadingPlants(true);
-      fetch('/api/plants')
+      fetch('/api/plants?includeAllData=true')
         .then(res => {
           if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
@@ -77,7 +77,31 @@ export default function ContextMenu({
           console.log('Plants API response:', data);
           // The API returns { plants: [...] }
           if (data && Array.isArray(data.plants)) {
-            setUserPlants(data.plants);
+            // Make sure to fetch each plant's full data including days with fertilizers
+            Promise.all(
+              data.plants.map(plant => 
+                fetch(`/api/plants/${plant.id}`)
+                  .then(res => res.json())
+                  .then(plantData => ({
+                    ...plant,
+                    days: plantData.days || []
+                  }))
+                  .catch(err => {
+                    console.error(`Error fetching details for plant ${plant.id}:`, err);
+                    return plant;
+                  })
+              )
+            )
+            .then(plantsWithDays => {
+              console.log('Plants with days:', plantsWithDays);
+              setUserPlants(plantsWithDays);
+              setIsLoadingPlants(false);
+            })
+            .catch(err => {
+              console.error('Error fetching plant details:', err);
+              setUserPlants(data.plants);
+              setIsLoadingPlants(false);
+            });
           } else if (Array.isArray(data)) {
             setUserPlants(data);
           } else {
@@ -692,7 +716,8 @@ export default function ContextMenu({
                                 watering_amount: day.watering_amount,
                                 temperature: day.temperature,
                                 humidity: day.humidity,
-                                notes: day.notes
+                                notes: day.notes,
+                                fertilizers: day.fertilizers
                               }));
                               
                               // Collect notes from plant_days to compile growth information
@@ -762,10 +787,10 @@ export default function ContextMenu({
                               measurements: measurements,
                               last_images: lastImages,
                               notes: plant.notes || growNotes || '',
+                              substrate: plant.substrate || '',
                               grow_details: {
                                 ...environmentalData,
-                                // We'll add these fields in the future
-                                grow_medium: '',
+                                grow_medium: plant.substrate || '',
                                 light_schedule: '',
                                 nutrients: ''
                               }
