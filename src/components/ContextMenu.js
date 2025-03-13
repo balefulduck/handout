@@ -389,7 +389,7 @@ export default function ContextMenu({
                 className={`flex flex-col items-center gap-2 transition-colors`}
               >
                 <div className={`p-2 rounded-lg bg-gray-50/95 transition-colors duration-300 ${activePhase === 'seedling' ? 'text-purple' : 'text-gray-600 hover:text-purple'}`}>
-                  <GiPlantSeed className="text-lg" />
+                  <img src="/1.png" alt="Seedling" className="h-6 w-6" />
                 </div>
                 <span className="text-xs text-white font-semibold">Keimling</span>
               </button>
@@ -399,7 +399,7 @@ export default function ContextMenu({
                 className={`flex flex-col items-center gap-2 transition-colors`}
               >
                 <div className={`p-2 rounded-lg bg-gray-50/95 ${activePhase === 'vegetation' ? 'text-yellow-green' : 'text-gray-600 hover:text-yellow-green'}`}>
-                  <GiGrowth className="text-lg" />
+                  <img src="/3.png" alt="Vegetation" className="h-6 w-6" />
                 </div>
                 <span className="text-xs text-white font-semibold">Vegetation</span>
               </button>
@@ -409,7 +409,7 @@ export default function ContextMenu({
                 className={`flex flex-col items-center gap-2 transition-colors`}
               >
                 <div className={`p-2 rounded-lg bg-gray-50/95 ${activePhase === 'flower' ? 'text-olive-green' : 'text-gray-600 hover:text-olive-green'}`}>
-                  <GiFlowerPot className="text-lg" />
+                  <img src="/2.png" alt="Flowering" className="h-6 w-6" />
                 </div>
                 <span className="text-xs text-white font-semibold">Blüte</span>
               </button>
@@ -419,7 +419,7 @@ export default function ContextMenu({
                 className={`flex flex-col items-center gap-2 transition-colors`}
               >
                 <div className={`p-2 rounded-lg bg-gray-50/95 ${activePhase === 'harvest' ? 'text-orange' : 'text-gray-600 hover:text-orange'}`}>
-                  <GiScythe className="text-lg" />
+                  <img src="/4.png" alt="Harvest" className="h-6 w-6" />
                 </div>
                 <span className="text-xs text-white font-semibold">Ernte</span>
               </button>
