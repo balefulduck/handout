@@ -27,6 +27,15 @@ module.exports = {
         'icon-lime': '#ADBC10',    // Updated to new yellow-green
         'icon-olive': '#6F8328',   // Updated to new olive-green
       },
+      animation: {
+        'fadeIn': 'fadeIn 0.2s ease-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: 0, transform: 'translateX(-50%) translateY(5px)' },
+          '100%': { opacity: 1, transform: 'translateX(-50%) translateY(0)' },
+        },
+      },
     },
   },
   plugins: [],

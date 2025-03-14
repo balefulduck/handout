@@ -188,8 +188,8 @@ export default function ContextMenu({
                 </Transition.Child>
                 <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
                   <div className="flex-shrink-0 flex flex-col items-center px-4">
-                    <img src="/drca.svg" alt="DRCA Logo" className="h-16 w-auto mb-2" />
-                    <h2 className="text-custom-orange scale-animation">Handout</h2>
+                    <img src="/drca.svg" alt="DRCA Logo" className="h-32 w-auto mb-2" />
+                    <h2 className="text-custom-orange scale-animation">GrowGuide</h2>
                   </div>
                   <div className="mt-5 px-2 space-y-1">
                     <div className="px-4 py-4 border-t border-gray-200">
@@ -255,15 +255,7 @@ export default function ContextMenu({
                             <h4 className="text-gray-700">Zuletzt angesehen</h4>
                           </div>
                           <div className="flex space-x-2">
-                            <button 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                refreshRecentPlants();
-                              }}
-                              className="text-xs text-olive-green hover:text-yellow-green"
-                            >
-                              Aktualisieren
-                            </button>
+                    
                             <button 
                               onClick={(e) => {
                                 e.preventDefault();
@@ -319,15 +311,7 @@ export default function ContextMenu({
             <span className="sr-only">Open sidebar</span>
             <img src="/menu.png" alt="Menu" className="h-6 w-6" aria-hidden="true" />
           </button>
-          {pathname.startsWith('/plants/') && (
-            <button
-              onClick={() => router.push('/plants')}
-              className="absolute left-10 top-1/2 transform -translate-y-1/2 text-turquoise hover:text-white focus:outline-none z-10 flex items-center gap-1.5 text-sm transition-colors"
-            >
-              <FaArrowLeft className="text-sm" />
-              <span className="font-medium">Zurück</span>
-            </button>
-          )}
+    
           {/* Main navigation with equal width buttons */}
           <div className="grid grid-cols-3">
             <a 

@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import ContextMenu from '@/components/ContextMenu';
 
 export default function UserHelpRequestDetailPage() {
   const [helpRequest, setHelpRequest] = useState(null);
@@ -179,7 +180,8 @@ export default function UserHelpRequestDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen mt-10 bg-gray-100 p-6">
+      <ContextMenu />
       <div className="max-w-7xl mx-auto">
         <div className="mb-6 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-900">Hilfe-Anfrage Details</h1>
