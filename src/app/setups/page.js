@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { FaPlus, FaEdit, FaTrash, FaLeaf, FaCalendarAlt } from 'react-icons/fa';
 import SetupModal from '@/components/SetupModal';
+import ContextMenu from '@/components/ContextMenu';
 
 export default function SetupsPage() {
   const { data: session, status } = useSession();
@@ -15,6 +16,18 @@ export default function SetupsPage() {
   const [showNewSetupModal, setShowNewSetupModal] = useState(false);
   const [editingSetup, setEditingSetup] = useState(null);
   const [availablePlants, setAvailablePlants] = useState([]);
+
+  // Event listener for creating a new setup from ContextMenu
+  useEffect(() => {
+    const handleNewSetupClick = () => {
+      setShowNewSetupModal(true);
+    };
+
+    window.addEventListener('newSetupClick', handleNewSetupClick);
+    return () => {
+      window.removeEventListener('newSetupClick', handleNewSetupClick);
+    };
+  }, []);
 
   // Fetch all setups
   useEffect(() => {
@@ -173,28 +186,19 @@ export default function SetupsPage() {
   }
 
   return (
-    <div className="p-6 pb-32">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4 md:mb-0">Setups</h1>
-          <button
-            onClick={() => setShowNewSetupModal(true)}
-            className="bg-brand-primary text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-primary-hover transition-all duration-300"
-          >
-            <FaPlus /> Neues Setup erstellen
-          </button>
-        </div>
+    <>
+      <ContextMenu />
+      <div className="p-6 pb-32 mt-14">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+            <h1 className="text-2xl font-bold text-gray-800 mb-4 md:mb-0">Setups</h1>
+          </div>
         
         {setups.length === 0 ? (
           <div className="bg-white rounded-lg shadow-md p-6 text-center">
             <p className="text-gray-600 mb-4">Du hast noch keine Setups erstellt.</p>
             <p className="text-gray-500 mb-6">Setups helfen dir, mehrere Pflanzen zu gruppieren und gemeinsam zu verwalten.</p>
-            <button
-              onClick={() => setShowNewSetupModal(true)}
-              className="bg-brand-primary text-white px-4 py-2 rounded-md flex items-center gap-2 mx-auto hover:bg-primary-hover transition-all duration-300"
-            >
-              <FaPlus /> Erstes Setup erstellen
-            </button>
+            <p className="text-gray-500">Klicke auf den Button im Menü unten, um dein erstes Setup zu erstellen.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -282,5 +286,6 @@ export default function SetupsPage() {
         />
       )}
     </div>
+    </>
   );
 }

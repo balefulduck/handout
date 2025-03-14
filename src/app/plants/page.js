@@ -3,15 +3,19 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ContextMenu from '@/components/ContextMenu';
-import { FaSeedling, FaLeaf, FaCalendarAlt } from 'react-icons/fa';
-import { GiFlowerPot } from 'react-icons/gi';
+import { FaSeedling, FaLeaf, FaCalendarAlt, FaPlus, FaEdit, FaWater, FaChevronDown, FaChevronUp, FaUsers, FaTint } from 'react-icons/fa';
+import { GiFlowerPot, GiGreenhouse } from 'react-icons/gi';
+import Link from 'next/link';
 
 export default function PlantsPage() {
   const router = useRouter();
   const [plants, setPlants] = useState([]);
+  const [setups, setSetups] = useState([]);
+  const [expandedSetups, setExpandedSetups] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showNewPlantModal, setShowNewPlantModal] = useState(false);
+  const [individualPlants, setIndividualPlants] = useState([]);
 
   // Form state for new plant
   const [newPlant, setNewPlant] = useState({
@@ -32,22 +36,52 @@ export default function PlantsPage() {
     }));
   };
 
-  // Function to fetch plants from our new API
-  const fetchPlants = async () => {
+  // Function to fetch all data: plants and setups
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/plants');
-      if (!response.ok) {
+      // Fetch plants
+      const plantsResponse = await fetch('/api/plants');
+      if (!plantsResponse.ok) {
         throw new Error('Failed to fetch plants');
       }
-      const data = await response.json();
-      // Handle case where plants might be null or undefined
-      setPlants(data.plants || []);
+      const plantsData = await plantsResponse.json();
+      const allPlants = plantsData.plants || [];
+      setPlants(allPlants);
+      
+      // Fetch setups
+      const setupsResponse = await fetch('/api/plant-setups');
+      if (!setupsResponse.ok) {
+        throw new Error('Failed to fetch setups');
+      }
+      const setupsData = await setupsResponse.json();
+      const allSetups = setupsData.setups || [];
+      setSetups(allSetups);
+      
+      // Set initial expanded state for setups
+      const initialExpandedState = {};
+      allSetups.forEach(setup => {
+        initialExpandedState[setup.id] = true; // Default to expanded
+      });
+      setExpandedSetups(initialExpandedState);
+      
+      // Identify individual plants (not in any setup)
+      const setupPlantIds = new Set();
+      allSetups.forEach(setup => {
+        setup.plants.forEach(plant => {
+          setupPlantIds.add(plant.id);
+        });
+      });
+      
+      const standalone = allPlants.filter(plant => !setupPlantIds.has(plant.id));
+      setIndividualPlants(standalone);
+      
       setError(null); // Clear any previous errors
     } catch (err) {
-      console.error('Error fetching plants:', err);
-      // Don't set error state for empty plants - just show the empty state UI
+      console.error('Error fetching data:', err);
       setPlants([]);
+      setSetups([]);
+      setIndividualPlants([]);
     } finally {
       setLoading(false);
     }
@@ -104,13 +138,31 @@ export default function PlantsPage() {
     window.addEventListener('newPlantClick', handleNewPlantClick);
 
     // Initial fetch
-    fetchPlants();
+    fetchData();
 
     // Clean up event listener
     return () => {
       window.removeEventListener('newPlantClick', handleNewPlantClick);
     };
   }, []);
+  
+  // Toggle setup expansion
+  const toggleSetupExpansion = (setupId) => {
+    setExpandedSetups(prev => ({
+      ...prev,
+      [setupId]: !prev[setupId]
+    }));
+  };
+  
+  // Navigate to setup detail
+  const navigateToSetupDetail = (setupId) => {
+    router.push(`/setups/${setupId}`);
+  };
+  
+  // Navigate to setup new day entry
+  const navigateToNewDayEntry = (setupId) => {
+    router.push(`/setups/${setupId}/new-day`);
+  };
 
   // Calculate plant age in days
   const calculateAge = (startDate) => {
@@ -149,13 +201,27 @@ export default function PlantsPage() {
 
   return (
     <>
-      <div className="p-6 mt-10 pb-32 pattern-diagonal">
+      <div className="p-6 mt-10 pb-32 pattern-diagonal max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4 md:mb-0">Meine Pflanzen</h1>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/setups" className="bg-gray-100 text-gray-700 px-4 py-2 rounded-md flex items-center gap-2 hover:bg-gray-200 transition-all duration-300">
+              <GiGreenhouse /> Setups verwalten
+            </Link>
+            <button
+              onClick={() => setShowNewPlantModal(true)}
+              className="bg-brand-primary text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-primary-hover transition-all duration-300"
+            >
+              <FaPlus /> Neue Pflanze
+            </button>
+          </div>
+        </div>
         
         {loading ? (
           <div className="flex justify-center items-center h-40">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-primary"></div>
           </div>
-        ) : plants.length === 0 ? (
+        ) : (plants.length === 0 && setups.length === 0) ? (
           <div className="text-center p-8 bg-gray-50 rounded-lg shadow text-focus-animation pattern-dots">
             <p className="text-gray-600 mb-4 text-normal">Du hast noch keine Pflanzen hinzugefügt.</p>
             <button 
@@ -166,88 +232,169 @@ export default function PlantsPage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-2">
-            {plants.map((plant) => (
-              <div 
-                key={plant.id}
-                onClick={() => navigateToPlantDetail(plant.id)}
-                className="bg-white border border-gray-200 p-4 rounded-lg shadow hover:shadow-md transition-all duration-300 cursor-pointer interactive-card relative overflow-hidden"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-aptos text-gray-800">{plant.name}</h4>
-                  <span className="px-2 py-1 text-micro rounded-full bg-brand-primary text-white">
-                    {plant.genetic_type || plant.strain_type || 'Unbekannt'}
-                  </span>
-                </div>
-                {plant.breeder && (
-                    <p className="text-sm text-gray-600 font-semibold">{plant.breeder}</p>
-                  )}
-                
-                {plant.substrate && (
-                  <div className="text-xs text-gray-600 mb-1">
-                    <span className="font-semibold">Substrat:</span> {plant.substrate === 'soil' ? 'Erde' : 
-                                                      plant.substrate === 'coco' ? 'Kokos' : 
-                                                      plant.substrate === 'hydro' ? 'Hydrokultur' : 
-                                                      plant.substrate === 'rockwool' ? 'Steinwolle' : 
-                                                      plant.substrate === 'other' ? 'Andere' : 
-                                                      plant.substrate}
-                  </div>
-                )}
-                
-                <div className="mt-3 space-y-2">
-                
-                  <div className="space-y-1">
-                    {/* Age progress bar */}
-                    <div className="relative pt-1">
-                     
-                      <div className="overflow-hidden h-8 mb-2 text-xs flex rounded-lg bg-gray-200 border border-gray-300">
-                        {plant.flowering_start_date ? (
-                          <>
-                            {/* Vegetation phase */}
-                            <div 
-                              style={{ 
-                                width: `${Math.min(calculateFloweringAge(plant.start_date, plant.flowering_start_date) * 2, 100)}%` 
-                              }}
-                              className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500 relative min-w-[40px]"
-                            >
-                              <span className="relative z-10 font-bold">
-                                {calculateFloweringAge(plant.start_date, plant.flowering_start_date)}
-                              </span>
-                            </div>
-                            {/* Flowering phase */}
-                            <div 
-                              style={{ 
-                                width: `${Math.min(calculateFloweringDays(plant.flowering_start_date) * 2, 100)}%`,
-                                backgroundColor: '#941e71'
-                              }}
-                              className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center relative min-w-[40px]"
-                            >
-                              <span className="relative z-10 font-bold">
-                                {calculateFloweringDays(plant.flowering_start_date)}
-                              </span>
-                            </div>
-                          </>
-                        ) : (
-                          /* Only vegetation phase */
-                          <div 
-                            style={{ 
-                              width: `${Math.min(calculateAge(plant.start_date) * 2, 100)}%` 
-                            }}
-                            className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500 relative min-w-[40px]"
+          <div className="space-y-6">
+            {/* Setups Section */}
+            {setups.length > 0 && (
+              <div className="space-y-4">
+                {setups.map((setup) => (
+                  <div key={setup.id} className="bg-white border border-gray-200 rounded-lg shadow overflow-hidden">
+                    {/* Setup Header */}
+                    <div className="bg-brand-primary/10 border-b border-brand-primary/20 p-4">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-3">
+                          <GiGreenhouse className="text-2xl text-brand-primary" />
+                          <div>
+                            <h3 className="font-bold text-gray-800 hover:text-brand-primary transition-colors cursor-pointer" 
+                                onClick={() => navigateToSetupDetail(setup.id)}>
+                              {setup.name}
+                            </h3>
+                            <p className="text-sm text-gray-600">{setup.plants.length} Pflanzen</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <button 
+                            onClick={() => navigateToNewDayEntry(setup.id)}
+                            className="p-2 bg-brand-primary text-white rounded-md hover:bg-primary-hover transition-all text-sm flex items-center gap-1"
                           >
-                            <span className="relative z-10 font-bold">
-                              {calculateAge(plant.start_date)}
+                            <FaCalendarAlt className="text-xs" /> <span>Tageseintrag</span>
+                          </button>
+                          <button 
+                            onClick={() => toggleSetupExpansion(setup.id)}
+                            className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-all"
+                          >
+                            {expandedSetups[setup.id] ? <FaChevronUp /> : <FaChevronDown />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Setup Plants */}
+                    {expandedSetups[setup.id] && (
+                      <div className="divide-y divide-gray-100">
+                        {setup.plants.length > 0 ? (
+                          setup.plants.map((plant) => (
+                            <div 
+                              key={plant.id}
+                              onClick={() => navigateToPlantDetail(plant.id)}
+                              className="p-4 hover:bg-gray-50 transition-colors cursor-pointer flex justify-between items-center"
+                            >
+                              <div className="flex items-center space-x-3">
+                                <FaSeedling className="text-green-500" />
+                                <div>
+                                  <h4 className="font-medium text-gray-800">{plant.name}</h4>
+                                  <div className="flex items-center space-x-2 text-xs text-gray-500">
+                                    {plant.breeder && (
+                                      <span>{plant.breeder}</span>
+                                    )}
+                                    <span className="px-2 py-0.5 rounded-full bg-brand-primary/10 text-brand-primary">
+                                      {plant.genetic_type || plant.strain_type || 'Unbekannt'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center space-x-4">
+                                {/* Age indicator */}
+                                <div className="text-xs text-gray-600">
+                                  <div className="flex items-center">
+                                    <FaLeaf className="mr-1 text-green-500" />
+                                    <span>{calculateAge(plant.start_date)} Tage alt</span>
+                                  </div>
+                                </div>
+                                
+                                {/* Flowering indicator */}
+                                {plant.flowering_start_date && (
+                                  <div className="text-xs text-gray-600">
+                                    <div className="flex items-center">
+                                      <FaLeaf className="mr-1 text-pink-500" />
+                                      <span>{calculateFloweringDays(plant.flowering_start_date)} Tage blüte</span>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="p-6 text-center text-gray-500">
+                            <p>Keine Pflanzen in diesem Setup</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* Individual Plants Section */}
+            {individualPlants.length > 0 && (
+              <div className="bg-white border border-gray-200 rounded-lg shadow overflow-hidden">
+                <div className="bg-gray-100 border-b border-gray-200 p-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-3">
+                      <FaUsers className="text-2xl text-gray-600" />
+                      <div>
+                        <h3 className="font-bold text-gray-800">Einzelne Pflanzen</h3>
+                        <p className="text-sm text-gray-600">{individualPlants.length} Pflanzen ohne Setup</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button 
+                        className="p-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-all text-sm"
+                        onClick={() => setShowNewPlantModal(true)}
+                      >
+                        <FaPlus className="text-xs" /> <span>Pflanze</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="divide-y divide-gray-100">
+                  {individualPlants.map((plant) => (
+                    <div 
+                      key={plant.id}
+                      onClick={() => navigateToPlantDetail(plant.id)}
+                      className="p-4 hover:bg-gray-50 transition-colors cursor-pointer flex justify-between items-center"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <FaSeedling className="text-green-500" />
+                        <div>
+                          <h4 className="font-medium text-gray-800">{plant.name}</h4>
+                          <div className="flex items-center space-x-2 text-xs text-gray-500">
+                            {plant.breeder && (
+                              <span>{plant.breeder}</span>
+                            )}
+                            <span className="px-2 py-0.5 rounded-full bg-brand-primary/10 text-brand-primary">
+                              {plant.genetic_type || plant.strain_type || 'Unbekannt'}
                             </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-4">
+                        {/* Age indicator */}
+                        <div className="text-xs text-gray-600">
+                          <div className="flex items-center">
+                            <FaLeaf className="mr-1 text-green-500" />
+                            <span>{calculateAge(plant.start_date)} Tage alt</span>
+                          </div>
+                        </div>
+                        
+                        {/* Flowering indicator */}
+                        {plant.flowering_start_date && (
+                          <div className="text-xs text-gray-600">
+                            <div className="flex items-center">
+                              <FaLeaf className="mr-1 text-pink-500" />
+                              <span>{calculateFloweringDays(plant.flowering_start_date)} Tage blüte</span>
+                            </div>
                           </div>
                         )}
                       </div>
                     </div>
-                  </div>
-                  
-            
+                  ))}
                 </div>
               </div>
-            ))}
+            )}
           </div>
         )}
       </div>

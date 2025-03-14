@@ -334,8 +334,8 @@ export default function ContextMenu({
             <img src="/menu.png" alt="Menu" className="h-6 w-6" aria-hidden="true" />
           </button>
     
-          {/* Main navigation with equal width buttons */}
-          <div className="grid grid-cols-3">
+          {/* Main navigation with custom width grid */}
+          <div className="grid grid-cols-10">
             <a 
               href="/growguide"
               onClick={(e) => {
@@ -345,7 +345,7 @@ export default function ContextMenu({
                 window.location.href = '/growguide';
                 return false;
               }}
-              className={`flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/growguide' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'} pl-10`}
+              className={`col-span-4 flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/growguide' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'} pl-10`}
             >
               <span className="text-sm font-semibold text-yellow-green px-2 interactive-link">Grow Guide</span>
               {pathname !== '/growguide' && <div className="absolute right-0 top-1/2 -translate-y-1/2 h-4/5 w-px bg-white/20" />}
@@ -359,10 +359,24 @@ export default function ContextMenu({
                 window.location.href = '/plants';
                 return false;
               }}
-              className={`flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/plants' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
+              className={`col-span-2 flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/plants' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
             >
-              <span className="text-sm font-semibold text-turquoise px-2 interactive-link">Pflanzen</span>
+              <span className="text-sm font-semibold text-turquoise px-1 interactive-link">Pflanzen</span>
               {pathname !== '/plants' && <div className="absolute right-0 top-1/2 -translate-y-1/2 h-4/5 w-px bg-white/20" />}
+            </a>
+            <a
+              href="/setups"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Use window.location for a full page navigation to avoid any router conflicts
+                window.location.href = '/setups';
+                return false;
+              }}
+              className={`col-span-2 flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/setups' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
+            >
+              <span className="text-sm font-semibold text-olive-green px-1 interactive-link">Setups</span>
+              {pathname !== '/setups' && <div className="absolute right-0 top-1/2 -translate-y-1/2 h-4/5 w-px bg-white/20" />}
             </a>
             <a
               href="/help"
@@ -373,7 +387,7 @@ export default function ContextMenu({
                 window.location.href = '/help';
                 return false;
               }}
-              className={`flex items-center justify-center py-1.5 transition-colors ${pathname === '/help' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
+              className={`col-span-2 flex items-center justify-center py-1.5 transition-colors ${pathname === '/help' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
             >
               <span className="text-sm font-semibold text-medium-blue px-2 interactive-link">Erste Hilfe</span>
             </a>
@@ -532,6 +546,23 @@ export default function ContextMenu({
                   <BsPlusLg className="text-lg" />
                 </div>
                 <span className="text-xs text-white font-semibold">Neue Pflanze</span>
+              </button>
+            </div>
+          )}
+
+          {pathname === '/setups' && (
+            <div className="grid grid-cols-1 py-2 px-2">
+              <button
+                onClick={() => {
+                  // Dispatch custom event to trigger the new setup modal
+                  window.dispatchEvent(new Event('newSetupClick'));
+                }}
+                className="flex flex-col items-center gap-2 transition-colors"
+              >
+                <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-olive-green">
+                  <BsPlusLg className="text-lg" />
+                </div>
+                <span className="text-xs text-white font-semibold">Neues Setup</span>
               </button>
             </div>
           )}
