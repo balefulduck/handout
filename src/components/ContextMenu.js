@@ -541,7 +541,7 @@ export default function ContextMenu({
               <button
                 onClick={async () => {
                   const requestId = pathname.split('/')[2];
-                  if (confirm('Sind Sie sicher, dass Sie diese Hilfe-Anfrage löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.')) {
+                  if (confirm('Bist Du sicher, dass Du diese Hilfe-Anfrage löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.')) {
                     try {
                       const response = await fetch(`/api/help-requests/${requestId}`, {
                         method: 'DELETE',
@@ -555,7 +555,7 @@ export default function ContextMenu({
                       router.push('/help-requests');
                     } catch (error) {
                       console.error('Error deleting help request:', error);
-                      alert('Fehler beim Löschen der Hilfe-Anfrage. Bitte versuchen Sie es später erneut.');
+                      alert('Fehler beim Löschen der Hilfe-Anfrage. Bitte versuche es später erneut.');
                     }
                   }
                 }}
@@ -624,7 +624,7 @@ export default function ContextMenu({
                       </div>
                       <h3 className="mt-3 text-lg font-medium text-gray-900">Nachricht gesendet!</h3>
                       <p className="mt-2 text-sm text-gray-500">
-                        Vielen Dank für Ihre Nachricht. Wir werden uns so schnell wie möglich bei Ihnen melden.
+                        Vielen Dank für Deine Nachricht. Wir werden uns so schnell wie möglich bei Dir melden.
                       </p>
                       <div className="mt-5">
                         <button
@@ -655,7 +655,7 @@ export default function ContextMenu({
                           Dr. Cannabis Hilfe
                         </Dialog.Title>
                         <p className="mt-2 text-sm text-gray-500">
-                          Haben Sie Probleme mit Ihrer Pflanze? Senden Sie uns eine Nachricht mit Details und Fotos, und wir helfen Ihnen gerne weiter.
+                          Hast Du Probleme mit Deiner Pflanze? Sende uns eine Nachricht mit Details und Fotos, und wir helfen Dir gerne weiter.
                         </p>
                       </div>
                       {submitError && (
@@ -945,7 +945,7 @@ export default function ContextMenu({
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700">
-                            Betroffene Pflanzen auswählen
+                            Wähle die betroffene Pflanze(n), um uns alle Parameter deines Grows mitzusenden.
                           </label>
                           {isLoadingPlants ? (
                             <div className="mt-2 flex items-center text-sm text-gray-500">
