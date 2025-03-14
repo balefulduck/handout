@@ -121,7 +121,7 @@ export default function HarvestPage() {
   if (loading) {
     return (
       <div className="p-6 flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-custom-orange"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-primary"></div>
       </div>
     );
   }
@@ -129,12 +129,12 @@ export default function HarvestPage() {
   if (error || !plant) {
     return (
       <div className="p-6">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+        <div className="alert-error px-4 py-3 rounded">
           Error: {error || "Pflanze nicht gefunden"}
         </div>
         <button
           onClick={() => router.push('/plants')}
-          className="mt-4 px-4 py-2 bg-custom-orange text-white rounded hover:bg-orange-600"
+          className="mt-4 px-4 py-2 bg-brand-primary text-white rounded hover:bg-primary-hover transition-all duration-300 hover:shadow-md"
         >
           Zurück zur Pflanzenübersicht
         </button>
@@ -150,30 +150,32 @@ export default function HarvestPage() {
         existingHarvest={existingHarvest}
         onSaveHarvest={handleSubmit}
       />
-      <div className="p-6 pb-32">
+      <div className="p-6 pb-32 pattern-diagonal">
         <div className="flex items-center mb-6">
-          <h1 className="text-2xl font-bold font-aptos">
+          <h1 className="font-aptos text-focus-animation interactive-heading">
             {existingHarvest ? 'Ernte bearbeiten' : 'Pflanze ernten'}: {plant.name}
           </h1>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6 interactive-card relative overflow-hidden">
+          <div className="absolute inset-0 pattern-dots opacity-[0.03] pointer-events-none"></div>
+          <div className="relative z-10">
           <div className="flex items-center mb-4">
-            <GiFlowerPot className="text-2xl text-purple-500 mr-2" />
-            <h2 className="text-xl font-bold text-gray-800">Erntedaten</h2>
+            <GiFlowerPot className="text-2xl text-brand-accent mr-2" />
+            <h2 className="text-gray-800 text-focus-animation">Erntedaten</h2>
           </div>
 
           <form onSubmit={handleSubmit}>
             {/* Consumption Method Group */}
             <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3">Konsummethode</h3>
+              <h3 className="mb-3 text-focus-animation">Konsummethode</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Material</label>
+                  <label className="block text-small font-medium text-gray-700 mb-1">Material</label>
                   <select
                     value={harvestData.consumption_material}
                     onChange={(e) => setHarvestData({...harvestData, consumption_material: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md input-focus-animation"
                     required
                   >
                     <option value="flower">Blüte</option>
@@ -183,11 +185,11 @@ export default function HarvestPage() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Methode</label>
+                  <label className="block text-small font-medium text-gray-700 mb-1">Methode</label>
                   <select
                     value={harvestData.consumption_method}
                     onChange={(e) => setHarvestData({...harvestData, consumption_method: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md input-focus-animation"
                     required
                   >
                     <option value="smoking">Rauchen</option>
@@ -199,7 +201,7 @@ export default function HarvestPage() {
             
             {/* Description */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Beschreibung</label>
+              <label className="block text-small font-medium text-gray-700 mb-1">Beschreibung</label>
               <textarea
                 value={harvestData.description}
                 onChange={(e) => setHarvestData({...harvestData, description: e.target.value})}
@@ -211,7 +213,7 @@ export default function HarvestPage() {
             
             {/* Quality Metrics */}
             <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3">Qualitätsmerkmale</h3>
+              <h3 className="mb-3 text-focus-animation">Qualitätsmerkmale</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Knospendichte (1-5)</label>
@@ -224,7 +226,7 @@ export default function HarvestPage() {
                     onChange={(e) => setHarvestData({...harvestData, bud_density: parseInt(e.target.value)})}
                     className="w-full"
                   />
-                  <div className="flex justify-between text-xs text-gray-500">
+                  <div className="flex justify-between text-micro text-gray-500">
                     <span>Locker (1)</span>
                     <span>Mittel (3)</span>
                     <span>Dicht (5)</span>
@@ -236,7 +238,7 @@ export default function HarvestPage() {
                   <select
                     value={harvestData.trichome_color}
                     onChange={(e) => setHarvestData({...harvestData, trichome_color: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md input-focus-animation"
                   >
                     <option value="clear">Klar</option>
                     <option value="cloudy">Trüb</option>
@@ -257,7 +259,7 @@ export default function HarvestPage() {
                     type="date"
                     value={harvestData.curing_begin}
                     onChange={(e) => setHarvestData({...harvestData, curing_begin: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md input-focus-animation"
                     required
                   />
                 </div>
@@ -268,7 +270,7 @@ export default function HarvestPage() {
                     type="date"
                     value={harvestData.curing_end}
                     onChange={(e) => setHarvestData({...harvestData, curing_end: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md input-focus-animation"
                   />
                 </div>
                 
@@ -279,13 +281,14 @@ export default function HarvestPage() {
                     step="0.1"
                     value={harvestData.dry_weight}
                     onChange={(e) => setHarvestData({...harvestData, dry_weight: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md input-focus-animation"
                     placeholder="0.0"
                   />
                 </div>
               </div>
             </div>
           </form>
+          </div>
         </div>
       </div>
     </>
