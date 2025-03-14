@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import ContextMenu from '@/components/ContextMenu';
+import DrcInfoTag from '@/components/DrcInfoTag';
 
 export default function HelpPage() {
   const [expandedCards, setExpandedCards] = useState({});
@@ -29,8 +30,26 @@ export default function HelpPage() {
     {
       id: 3,
       problem: 'Gekräuselte Blätter',
-      cause: 'pH-Wert nicht optimal oder Temperaturstress',
-      solution: 'pH-Wert des Wassers auf 6.0-6.5 einstellen. Temperatur zwischen 20-28°C halten.'
+      cause: <>
+        <DrcInfoTag 
+          term="pH" 
+          color="olive-green"
+          bgMode="light"
+          tooltipContent="Der pH-Wert gibt an, wie sauer oder basisch eine Lösung ist. Für Cannabis ist ein pH-Wert zwischen 6.0-6.5 bei Erde und 5.5-6.0 bei Hydrokultur optimal."
+        >
+          pH
+        </DrcInfoTag>-Wert nicht optimal oder Temperaturstress
+      </>,
+      solution: <>
+        <DrcInfoTag 
+          term="pH" 
+          color="olive-green"
+          bgMode="light"
+          tooltipContent="Der pH-Wert gibt an, wie sauer oder basisch eine Lösung ist. Für Cannabis ist ein pH-Wert zwischen 6.0-6.5 bei Erde und 5.5-6.0 bei Hydrokultur optimal."
+        >
+          pH
+        </DrcInfoTag>-Wert des Wassers auf 6.0-6.5 einstellen. Temperatur zwischen 20-28°C halten.
+      </>
     },
     {
       id: 4,
@@ -63,7 +82,14 @@ export default function HelpPage() {
             <li>Überprüfe regelmäßig die Blätter auf Anzeichen von Problemen</li>
             <li>Halte ein Pflanzentagebuch für besseres Monitoring</li>
             <li>Stelle sicher, dass die Belüftung ausreichend ist</li>
-            <li>Kontrolliere regelmäßig pH-Wert und Nährstoffversorgung</li>
+            <li>Kontrolliere regelmäßig <DrcInfoTag 
+              term="pH" 
+              color="olive-green"
+              bgMode="light"
+              tooltipContent="Der pH-Wert gibt an, wie sauer oder basisch eine Lösung ist. Für Cannabis ist ein pH-Wert zwischen 6.0-6.5 bei Erde und 5.5-6.0 bei Hydrokultur optimal."
+            >
+              pH
+            </DrcInfoTag>-Wert und Nährstoffversorgung</li>
           </ul>
         </div>
       </div>
