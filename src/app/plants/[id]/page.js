@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import ContextMenu from '@/components/ContextMenu';
 import DayEntryMenu from '@/components/DayEntryMenu';
-import { FaSeedling, FaCalendarAlt, FaEdit, FaTrash, FaPlus, FaTint, FaTemperatureHigh, FaLeaf, FaChartLine } from 'react-icons/fa';
+import { FaSeedling, FaCalendarAlt, FaEdit, FaTrash, FaPlus, FaTint, FaTemperatureHigh, FaLeaf, FaChartLine, FaCut, FaSun, FaFlask } from 'react-icons/fa';
 import { GiFlowerPot, GiWateringCan } from 'react-icons/gi';
 import StatisticsTab from '@/components/StatisticsTab';
 import { addToRecentlyViewed } from '@/utils/recentlyViewedPlants';
@@ -25,8 +25,11 @@ export default function PlantDetailPage() {
     watering_amount: '',
     temperature: '',
     humidity: '',
+    ph_value: '',
     notes: '',
-    fertilizers: []
+    fertilizers: [],
+    topped: false,
+    flowering: false
   });
   const [newFertilizer, setNewFertilizer] = useState({
     name: '',
@@ -416,30 +419,40 @@ export default function PlantDetailPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Datum</label>
-                    <input
-                      type="date"
-                      value={newDay.date}
-                      onChange={(e) => setNewDay({...newDay, date: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                      required
-                    />
+                    <div className="bg-white rounded-lg border border-gray-200 p-2">
+                      <input
+                        type="date"
+                        value={newDay.date}
+                        onChange={(e) => setNewDay({...newDay, date: e.target.value})}
+                        className="w-full px-3 py-2 bg-transparent rounded focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                        required
+                      />
+                    </div>
                   </div>
 
                   {/* Watering and Fertilizer Section */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Bewässerung</label>
                     <div className="space-y-3">
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <GiWateringCan className="text-gray-400" />
+                      <div className="bg-white rounded-lg border border-gray-200 p-3">
+                        <div className="flex items-center gap-3 mb-2">
+                          <GiWateringCan className="text-brand-primary text-xl" />
+                          <span className="font-medium">{newDay.watering_amount || '0'} ml</span>
                         </div>
                         <input
-                          type="number"
-                          value={newDay.watering_amount}
+                          type="range"
+                          min="0"
+                          max="1000"
+                          step="50"
+                          value={newDay.watering_amount || 0}
                           onChange={(e) => setNewDay({...newDay, watering_amount: e.target.value})}
-                          className="w-full pl-10 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                          placeholder="Menge in ml"
+                          className="w-full accent-brand-primary"
                         />
+                        <div className="flex justify-between text-xs text-gray-500">
+                          <span>0</span>
+                          <span>500</span>
+                          <span>1000</span>
+                        </div>
                       </div>
 
                       {newDay.watering_amount > 0 && (
@@ -462,7 +475,7 @@ export default function PlantDetailPage() {
                                         };
                                         setNewDay({...newDay, fertilizers: updatedFertilizers});
                                       }}
-                                      className="w-20 px-2 py-1 border border-gray-300 rounded"
+                                      className="w-20 px-2 py-1 bg-transparent rounded focus:outline-none focus:ring-1 focus:ring-brand-primary"
                                       placeholder="ml"
                                     />
                                   </div>
@@ -536,7 +549,7 @@ export default function PlantDetailPage() {
                                       placeholder="Name"
                                       value={newFertilizer.name}
                                       onChange={(e) => setNewFertilizer({...newFertilizer, name: e.target.value})}
-                                      className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-custom-orange"
+                                      className="flex-1 px-2 py-1 text-sm bg-transparent rounded focus:outline-none focus:ring-1 focus:ring-brand-primary"
                                     />
                                     <button
                                       type="button"
@@ -564,49 +577,132 @@ export default function PlantDetailPage() {
                     </div>
                   </div>
                   
+                  {/* Plant Care with interactive icons */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Pflanzenpflege</label>
+                    <div className="bg-white rounded-lg border border-gray-200 p-3">
+                      <div className="flex flex-wrap gap-4 mt-2">
+                        <button
+                          type="button"
+                          onClick={() => setNewDay(prev => ({ ...prev, topped: !prev.topped }))}
+                          className={`flex flex-col items-center justify-center p-3 rounded-lg transition-all ${newDay.topped ? 'bg-brand-primary text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                        >
+                          <FaCut className={`text-2xl mb-1 ${newDay.topped ? 'text-white' : 'text-gray-500'}`} />
+                          <span className="text-sm font-medium">Getoppt</span>
+                        </button>
+                        
+                        <button
+                          type="button"
+                          onClick={() => setNewDay(prev => ({ ...prev, flowering: !prev.flowering }))}
+                          className={`flex flex-col items-center justify-center p-3 rounded-lg transition-all ${newDay.flowering ? 'bg-brand-primary text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                        >
+                          <FaSun className={`text-2xl mb-1 ${newDay.flowering ? 'text-white' : 'text-gray-500'}`} />
+                          <span className="text-sm font-medium">Blüte</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Temperatur (°C)</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <FaTemperatureHigh className="text-gray-400" />
+                    <div className="bg-white rounded-lg border border-gray-200 p-3">
+                      <div className="flex items-center gap-3 mb-2">
+                        <FaTemperatureHigh className="text-brand-primary text-xl" />
+                        <span className="font-medium">{newDay.temperature || '20'}°C</span>
                       </div>
                       <input
-                        type="number"
-                        step="0.1"
-                        value={newDay.temperature}
+                        type="range"
+                        min="10"
+                        max="35"
+                        step="0.5"
+                        value={newDay.temperature || 20}
                         onChange={(e) => setNewDay({...newDay, temperature: e.target.value})}
-                        className="w-full pl-10 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                        placeholder="20"
+                        className="w-full accent-brand-primary"
                       />
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>10°C</span>
+                        <span>22.5°C</span>
+                        <span>35°C</span>
+                      </div>
                     </div>
                   </div>
                   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Luftfeuchtigkeit (%)</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <FaTint className="text-gray-400" />
+                    <div className="bg-white rounded-lg border border-gray-200 p-3">
+                      <div className="flex items-center gap-3 mb-2">
+                        <FaTint className="text-brand-primary text-xl" />
+                        <span className="font-medium">{newDay.humidity || '50'}%</span>
                       </div>
                       <input
-                        type="number"
-                        value={newDay.humidity}
+                        type="range"
+                        min="0"
+                        max="100"
+                        step="5"
+                        value={newDay.humidity || 50}
                         onChange={(e) => setNewDay({...newDay, humidity: e.target.value})}
-                        className="w-full pl-10 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                        placeholder="50"
+                        className="w-full accent-brand-primary"
                       />
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>0%</span>
+                        <span>50%</span>
+                        <span>100%</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* pH Value Selection */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">pH-Wert</label>
+                    <div className="bg-white rounded-lg border border-gray-200 p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <FaFlask className="text-brand-primary text-xl" />
+                          <span className="font-medium">pH-Wert</span>
+                        </div>
+                        <div className="text-brand-primary font-medium bg-white px-3 py-1 rounded-full border border-brand-primary/20">
+                          {newDay.ph_value ? newDay.ph_value : '---'}
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-7 gap-1 py-1">
+                        {Array.from({ length: 14 }, (_, i) => (5 + i * 0.2).toFixed(1)).map(value => (
+                          <button
+                            key={`ph-${value}`}
+                            type="button"
+                            onClick={() => setNewDay({...newDay, ph_value: value})}
+                            className={`
+                              px-1 py-1.5 text-xs rounded-md transition-all flex justify-center
+                              ${newDay.ph_value === value 
+                                ? 'bg-brand-primary text-white font-medium shadow-md' 
+                                : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}
+                            `}
+                          >
+                            {value}
+                          </button>
+                        ))}
+                      </div>
+                      
+                      <div className="flex justify-between text-xs text-gray-500 mt-2">
+                        <span>Sauer (5.0)</span>
+                        <span>Neutral (6.5)</span>
+                        <span>Basisch (7.5)</span>
+                      </div>
                     </div>
                   </div>
                 </div>
                 
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Notizen</label>
-                  <textarea
-                    value={newDay.notes}
-                    onChange={(e) => setNewDay({...newDay, notes: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                    rows="3"
-                    placeholder="Beobachtungen oder Notizen zum Tag..."
-                  ></textarea>
+                  <div className="bg-white rounded-lg border border-gray-200 p-2">
+                    <textarea
+                      value={newDay.notes}
+                      onChange={(e) => setNewDay({...newDay, notes: e.target.value})}
+                      className="w-full px-3 py-2 bg-transparent rounded focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                      rows="3"
+                      placeholder="Beobachtungen oder Notizen zum Tag..."
+                    ></textarea>
+                  </div>
                 </div>
                 
                 <div className="flex justify-end space-x-2">

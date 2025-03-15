@@ -62,14 +62,19 @@ export default function HelpPage() {
   return (
     <>
     <div className="p-8 pb-32 max-w-4xl mx-auto">
-      <h1 className="mt-10 mb-6 text-medium-blue interactive-heading">Hilfe & Problemlösung</h1>
+      <h1 className="mt-10 mb-6 text-medium-blue">Hilfe & Problemlösung</h1>
       
       <div className="bg-medium-blue/10 border-l-4 border-medium-blue p-5 mb-10 rounded-r-lg text-focus-animation">
-        <p className="text-large mb-3">
+        <p className="text-base mb-3">
           Verfärbte oder verformte Blätter können Anzeichen für Probleme sein.
         </p>
-        <p className="text-large">
+        <p className="text-base">
           Nur eine frühzeitige Diagnose und konsequente Behandlung kann Auswirkungen auf die Gesundheit Deiner Pflanzen minimieren.
+        </p>
+
+        <br className="my-5" />
+        <p className="text-base">
+          Nutze die kostenlose Dr. Cannabis-Hilfe für weitere Informationen und unmittelbare Unterstützung.
         </p>
       </div>
 
