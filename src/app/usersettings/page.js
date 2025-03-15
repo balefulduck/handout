@@ -10,7 +10,6 @@ export default function UserSettingsPage() {
   const { data: session } = useSession();
   const [settingsData, setSettingsData] = useState({
     waterMax: 1000,
-    darkMode: false,
     notifications: true,
     email: '',
     name: '',
@@ -246,28 +245,7 @@ export default function UserSettingsPage() {
                 </h2>
                 
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <label htmlFor="darkMode" className="font-medium text-gray-700">
-                        Dark Mode
-                      </label>
-                      <p className="text-sm text-gray-500">Dark Mode für die gesamte App aktivieren</p>
-                    </div>
-                    <div className="relative inline-block w-12 mr-2 align-middle select-none">
-                      <input
-                        type="checkbox"
-                        id="darkMode"
-                        name="darkMode"
-                        checked={settingsData.darkMode}
-                        onChange={handleInputChange}
-                        className="absolute block w-6 h-6 bg-white border-4 rounded-full appearance-none cursor-pointer checked:right-0 checked:border-brand-primary"
-                      />
-                      <label
-                        htmlFor="darkMode"
-                        className="block h-6 overflow-hidden bg-gray-300 rounded-full cursor-pointer"
-                      ></label>
-                    </div>
-                  </div>
+                  {/* Dark Mode option removed */}
                   
                   <div className="flex items-center justify-between opacity-50">
                     <div>
@@ -370,7 +348,7 @@ export default function UserSettingsPage() {
               </div>
               
               {/* Save info notice */}
-              <div className="p-6 flex justify-center text-sm text-gray-500">
+              <div className="p-6 mb-5 flex justify-center text-sm text-gray-500">
                 <p>Klicke auf "Speichern" in der Menüleiste unten, um deine Änderungen zu speichern.</p>
               </div>
             </form>

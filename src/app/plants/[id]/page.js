@@ -134,7 +134,9 @@ export default function PlantDetailPage() {
   
   // Handle adding a new day entry
   const handleAddDayEntry = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
     
     try {
       const response = await fetch(`/api/plants/${params.id}/days`, {
@@ -323,7 +325,9 @@ export default function PlantDetailPage() {
         plant={plant}
         harvestData={harvestData}
         onStartFlowering={handleStartFlowering}
-        onShowNewDayForm={() => setShowNewDayForm(true)}
+        onShowNewDayForm={(show = true) => setShowNewDayForm(show)}
+        showNewDayForm={showNewDayForm}
+        onSaveNewDay={handleAddDayEntry}
       />
       <div className="p-6 mt-10 pb-32 pattern-diagonal">
   
@@ -705,21 +709,7 @@ export default function PlantDetailPage() {
                   </div>
                 </div>
                 
-                <div className="flex justify-end space-x-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowNewDayForm(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                  >
-                    Abbrechen
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-primary-hover transition-all duration-300 hover:shadow-md"
-                  >
-                    Speichern
-                  </button>
-                </div>
+                {/* Save and cancel buttons moved to ContextMenu */}
               </form>
             </div>
           )}

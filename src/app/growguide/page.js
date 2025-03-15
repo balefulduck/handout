@@ -64,14 +64,14 @@ export default function GrowGuidePage() {
   };
 
   return (
-    <div className="min-h-screen pt-7 bg-gray-50">
+    <div className="min-h-screen mt-10 pt-7 bg-gray-50">
 
       <ContextMenu activePhase={activePhase} onPhaseSelect={handlePhaseSelect} />
 
       <main className="max-w-7xl mx-auto px-6 py-10 pb-24">
         {/* Page Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-medium-blue mb-2">Grow Guide</h1>
+          <h2 className="text-medium-blue mb-2">Grow Guide</h2>
           <p className="max-w-2xl mx-auto text-gray-600 text-base">Wähle eine Wachstumsphase im Kontextmenü am unteren Bildschirmrand um detaillierte Informationen zu den wichtigsten Parametern deines Grows zu erhalten.</p>
         </div>
         
@@ -79,7 +79,7 @@ export default function GrowGuidePage() {
         <div className="mb-10 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           {activePhase && (
             <div className="mb-6">
-              <h2 className="mb-2 text-cool-gray text-pulse-animation">{getPhaseTitle()}</h2>
+              <h4 className="mb-2 text-cool-gray text-pulse-animation">{getPhaseTitle()}</h4>
               <div className="h-1 w-24 bg-gradient-to-r from-purple to-medium-blue rounded transition-all duration-500 hover:w-32"></div>
             </div>
           )}

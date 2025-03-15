@@ -21,6 +21,8 @@ export default function ContextMenu({
   harvestData,
   onStartFlowering,
   onShowNewDayForm,
+  showNewDayForm,
+  onSaveNewDay,
   // Harvest page specific props
   onSaveHarvest,
   existingHarvest,
@@ -400,7 +402,7 @@ export default function ContextMenu({
               }}
               className={`col-span-2 flex items-center justify-center py-1.5 transition-colors ${pathname === '/help' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
             >
-              <span className="text-sm font-semibold text-medium-blue px-2 interactive-link">Erste Hilfe</span>
+              <span className="text-sm font-semibold text-medium-blue px-2 interactive-link">Dr. Cannabis Hilfe</span>
             </a>
           </div>
         </div>
@@ -453,38 +455,63 @@ export default function ContextMenu({
 
           {pathname.startsWith('/plants/') && pathname.split('/').length === 3 && plant && (
             <div className="grid grid-cols-3 gap-3 py-2 px-2">
-              <button
-                onClick={onShowNewDayForm}
-                className="flex flex-col items-center gap-2 transition-colors"
-              >
-                <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-orange">
-                  <FaPlus className="text-lg" />
-                </div>
-                <span className="text-xs text-white font-semibold">Neuer Tageseintrag</span>
-              </button>
+              {!showNewDayForm ? (
+                <>
+                  <button
+                    onClick={onShowNewDayForm}
+                    className="flex flex-col items-center gap-2 transition-colors"
+                  >
+                    <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-orange">
+                      <FaPlus className="text-lg" />
+                    </div>
+                    <span className="text-xs text-white font-semibold">Neuer Tageseintrag</span>
+                  </button>
 
-              {!plant.flowering_start_date && (
-                <button
-                  onClick={onStartFlowering}
-                  className="flex flex-col items-center gap-2 transition-colors"
-                >
-                  <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-purple">
-                    <GiFlowerPot className="text-lg" />
-                  </div>
-                  <span className="text-xs text-white font-semibold">Blüte starten</span>
-                </button>
-              )}
+                  {!plant.flowering_start_date && (
+                    <button
+                      onClick={onStartFlowering}
+                      className="flex flex-col items-center gap-2 transition-colors"
+                    >
+                      <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-purple">
+                        <GiFlowerPot className="text-lg" />
+                      </div>
+                      <span className="text-xs text-white font-semibold">Blüte starten</span>
+                    </button>
+                  )}
 
-              {plant.flowering_start_date && !harvestData && (
-                <button
-                  onClick={() => router.push(`/plants/${params.id}/harvest`)}
-                  className="flex flex-col items-center gap-2 transition-colors"
-                >
-                  <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-turquoise">
-                    <FaLeaf className="text-lg" />
-                  </div>
-                  <span className="text-xs text-white font-semibold">Ernten</span>
-                </button>
+                  {plant.flowering_start_date && !harvestData && (
+                    <button
+                      onClick={() => router.push(`/plants/${params.id}/harvest`)}
+                      className="flex flex-col items-center gap-2 transition-colors"
+                    >
+                      <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-turquoise">
+                        <FaLeaf className="text-lg" />
+                      </div>
+                      <span className="text-xs text-white font-semibold">Ernten</span>
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => onShowNewDayForm(false)}
+                    className="flex flex-col items-center gap-2 transition-colors"
+                  >
+                    <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-red-500">
+                      <FaArrowLeft className="text-lg" />
+                    </div>
+                    <span className="text-xs text-white font-semibold">Abbrechen</span>
+                  </button>
+                  <button
+                    onClick={onSaveNewDay}
+                    className="flex flex-col items-center gap-2 transition-colors"
+                  >
+                    <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-green-500">
+                      <FaSave className="text-lg" />
+                    </div>
+                    <span className="text-xs text-white font-semibold">Speichern</span>
+                  </button>
+                </>
               )}
             </div>
           )}
