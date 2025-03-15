@@ -6,7 +6,7 @@ import { PiPlantBold } from "react-icons/pi";
 import { LuSunMedium } from "react-icons/lu";
 import { GiPlantSeed, GiGrowth, GiFlowerPot, GiScythe, GiWateringCan, GiSprout } from "react-icons/gi";
 import { BsChatDots, BsPlusLg } from "react-icons/bs";
-import { FaFirstAid, FaLeaf, FaPlus, FaArrowLeft, FaClock } from "react-icons/fa";
+import { FaFirstAid, FaLeaf, FaPlus, FaArrowLeft, FaClock, FaCog, FaSave } from "react-icons/fa";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/solid";
 import { useRouter, usePathname, useParams } from 'next/navigation';
 import { Dialog, Transition } from '@headlessui/react';
@@ -236,7 +236,14 @@ export default function ContextMenu({
                           )}
                         </div>
                       </div>
-                      <div className="mt-3">
+                      <div className="mt-3 space-y-2">
+                        <button
+                          onClick={() => router.push('/usersettings')}
+                          className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-small font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-olive-green"
+                        >
+                          <FaCog className="mr-2" />
+                          Einstellungen
+                        </button>
                         <button
                           onClick={handleLogout}
                           className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-small font-medium text-white bg-purple hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple"
@@ -563,6 +570,26 @@ export default function ContextMenu({
                   <BsPlusLg className="text-lg" />
                 </div>
                 <span className="text-xs text-white font-semibold">Neues Setup</span>
+              </button>
+            </div>
+          )}
+          
+          {pathname === '/usersettings' && (
+            <div className="grid grid-cols-1 py-2 px-2">
+              <button
+                onClick={() => {
+                  // Trigger the form submission
+                  const form = document.querySelector('form');
+                  if (form) {
+                    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                  }
+                }}
+                className="flex flex-col items-center gap-2 transition-colors"
+              >
+                <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-brand-primary">
+                  <FaSave className="text-lg" />
+                </div>
+                <span className="text-xs text-white font-semibold">Speichern</span>
               </button>
             </div>
           )}

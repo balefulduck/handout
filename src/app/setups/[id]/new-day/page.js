@@ -29,6 +29,9 @@ export default function NewSetupDayEntryPage() {
     notes: ''
   });
   
+  // Default maximum water amount (dynamically adjustable)
+  const [wateringMax, setWateringMax] = useState(1000);
+  
   const [customDistribution, setCustomDistribution] = useState(false);
   const [plantWaterDistribution, setPlantWaterDistribution] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -52,6 +55,10 @@ export default function NewSetupDayEntryPage() {
         
         const data = await response.json();
         setSetup(data.setup || null);
+        // Set the wateringMax to the setup's water_limit if it exists
+        if (data.setup && data.setup.water_limit) {
+          setWateringMax(data.setup.water_limit);
+        }
         setError(null);
       } catch (err) {
         console.error('Error fetching setup data:', err);
@@ -73,6 +80,20 @@ export default function NewSetupDayEntryPage() {
       [name]: type === 'checkbox' ? checked : value
     };
     
+    // Dynamically adjust maximum if user enters a larger value
+    if (name === 'watering_amount') {
+      const numValue = parseInt(value);
+      if (!isNaN(numValue) && numValue > wateringMax) {
+        // Round up to the nearest multiple of 500
+        const newMax = Math.ceil(numValue / 500) * 500;
+        // Update the wateringMax
+        setWateringMax(newMax);
+        
+        // Persist this higher maximum for future use
+        updateSetupWaterLimit(newMax);
+      }
+    }
+    
     setFormData(updatedFormData);
     
     // Reset plant water distribution when water amount changes
@@ -82,6 +103,30 @@ export default function NewSetupDayEntryPage() {
   };
   
   // Initialize equal water distribution across all plants
+  // Function to update the setup's water_limit in the database
+  const updateSetupWaterLimit = async (newLimit) => {
+    if (!setup || !setup.id) return;
+    
+    try {
+      const response = await fetch(`/api/plant-setups/${setup.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: setup.name, // Keep the existing name
+          water_limit: newLimit // Update the water limit
+        }),
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to update setup water limit:', await response.text());
+      }
+    } catch (error) {
+      console.error('Error updating setup water limit:', error);
+    }
+  };
+  
   const initializeEqualDistribution = (totalAmount) => {
     if (!setup?.plants?.length) return;
     
@@ -429,34 +474,56 @@ export default function NewSetupDayEntryPage() {
                     <label htmlFor="watering_amount" className="block text-gray-700 font-medium">
                       Wassermenge: <span className="text-brand-primary font-bold">{formData.watering_amount} ml</span>
                     </label>
-                    <div className="text-xs text-gray-500">
-                      {parseInt(formData.watering_amount) > 0 ? "Gewässert" : "Nicht gewässert"}
+                    <div className="flex items-center gap-2">
+                      {parseInt(formData.watering_amount) > wateringMax * 0.8 && (
+                        <button 
+                          type="button" 
+                          onClick={() => setWateringMax(wateringMax + 500)}
+                          className="text-xs px-2 py-1 bg-brand-primary/10 text-brand-primary rounded-full hover:bg-brand-primary/20 transition"
+                        >
+                          + Erhöhen
+                        </button>
+                      )}
+                      <div className="text-xs text-gray-500">
+                        {parseInt(formData.watering_amount) > 0 ? "Gewässert" : "Nicht gewässert"}
+                      </div>
                     </div>
                   </div>
                   
                   <div className="h-2 bg-gray-200 rounded-full overflow-hidden w-full mt-2 mb-1 relative">
                     <div 
                       className="absolute top-0 left-0 h-full bg-gradient-to-r from-brand-primary/50 to-brand-primary" 
-                      style={{ width: `${Math.min(100, parseInt(formData.watering_amount) / 10)}%` }}
+                      style={{ width: `${Math.min(100, (parseInt(formData.watering_amount) / wateringMax) * 100)}%` }}
                     ></div>
                   </div>
                   
-                  <input
-                    type="range"
-                    id="watering_amount"
-                    name="watering_amount"
-                    value={formData.watering_amount}
-                    onChange={handleInputChange}
-                    min="0"
-                    max="1000"
-                    step="10"
-                    className="w-full accent-brand-primary cursor-pointer"
-                  />
+                  <div className="flex items-center gap-2 w-full">
+                    <input
+                      type="range"
+                      id="watering_amount"
+                      name="watering_amount"
+                      value={formData.watering_amount}
+                      onChange={handleInputChange}
+                      min="0"
+                      max={wateringMax}
+                      step="10"
+                      className="flex-1 accent-brand-primary cursor-pointer"
+                    />
+                    <input
+                      type="number"
+                      name="watering_amount"
+                      value={formData.watering_amount}
+                      onChange={handleInputChange}
+                      min="0"
+                      className="w-20 px-2 py-1 border border-gray-300 rounded text-right"
+                    />
+                    <span className="text-gray-700">ml</span>
+                  </div>
                   
-                  <div className="flex justify-between text-xs text-gray-500">
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
                     <span>0 ml</span>
-                    <span>500 ml</span>
-                    <span>1000 ml</span>
+                    <span>{Math.round(wateringMax/2)} ml</span>
+                    <span>{wateringMax} ml</span>
                   </div>
                 </div>
                 
@@ -511,6 +578,7 @@ export default function NewSetupDayEntryPage() {
                                   step="5"
                                   className="w-full accent-brand-primary"
                                 />
+                              
                               </div>
                               <div className="w-16 text-right font-medium">
                                 {plant.amount} ml
