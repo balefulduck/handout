@@ -85,11 +85,28 @@ export default function NewSetupDayEntryPage() {
   const initializeEqualDistribution = (totalAmount) => {
     if (!setup?.plants?.length) return;
     
-    const amount = totalAmount > 0 ? Math.floor(parseInt(totalAmount) / setup.plants.length) : 0;
-    const distributions = setup.plants.map(plant => ({
+    const totalWater = parseInt(totalAmount);
+    if (isNaN(totalWater) || totalWater <= 0) {
+      // If total water is invalid, set all to 0
+      const distributions = setup.plants.map(plant => ({
+        plantId: plant.id,
+        plantName: plant.name || `Pflanze ${plant.id}`,
+        amount: '0'
+      }));
+      setPlantWaterDistribution(distributions);
+      return;
+    }
+    
+    // Calculate even distribution with potential remainder
+    const plantCount = setup.plants.length;
+    const baseAmount = Math.floor(totalWater / plantCount);
+    const remainder = totalWater % plantCount;
+    
+    // Create distributions with base amount and distribute remainder
+    const distributions = setup.plants.map((plant, index) => ({
       plantId: plant.id,
       plantName: plant.name || `Pflanze ${plant.id}`,
-      amount: amount.toString()
+      amount: (baseAmount + (index < remainder ? 1 : 0)).toString()
     }));
     
     setPlantWaterDistribution(distributions);
@@ -100,12 +117,46 @@ export default function NewSetupDayEntryPage() {
     if (setup?.plants?.length && formData.watering_amount) {
       initializeEqualDistribution(formData.watering_amount);
     }
-  }, [setup]);
+  }, [setup, formData.watering_amount]);
   
   // Handle custom water distribution changes
   const handleDistributionChange = (index, value) => {
+    const totalWater = parseInt(formData.watering_amount);
+    const newValue = parseInt(value);
+    
+    // Create a new distribution array
     const newDistribution = [...plantWaterDistribution];
-    newDistribution[index].amount = value;
+    
+    // Set the new value for the changed plant
+    newDistribution[index].amount = newValue.toString();
+    
+    // Calculate remaining water to distribute
+    const remainingWater = totalWater - newValue;
+    
+    // Count plants that need adjustment (all except the one being changed)
+    const plantsToAdjust = newDistribution.filter((_, i) => i !== index);
+    
+    if (plantsToAdjust.length > 0) {
+      // Get current total for plants that need adjustment
+      const currentOtherTotal = plantsToAdjust.reduce((sum, plant) => sum + parseInt(plant.amount || 0), 0);
+      
+      // If current total is not zero, distribute proportionally
+      if (currentOtherTotal > 0) {
+        plantsToAdjust.forEach((plant, i) => {
+          const otherIndex = i >= index ? i + 1 : i; // Map back to original index
+          const proportion = parseInt(plant.amount) / currentOtherTotal;
+          newDistribution[otherIndex].amount = Math.round(remainingWater * proportion).toString();
+        });
+      } else {
+        // If current total is zero, distribute equally
+        const equalShare = Math.floor(remainingWater / plantsToAdjust.length);
+        plantsToAdjust.forEach((_, i) => {
+          const otherIndex = i >= index ? i + 1 : i; // Map back to original index
+          newDistribution[otherIndex].amount = equalShare.toString();
+        });
+      }
+    }
+    
     setPlantWaterDistribution(newDistribution);
   };
 
@@ -131,6 +182,15 @@ export default function NewSetupDayEntryPage() {
     if (!formData.date) {
       alert('Bitte wähle ein Datum aus.');
       return;
+    }
+    
+    // Check if water distribution adds up to total when custom distribution is enabled
+    if (customDistribution && parseInt(formData.watering_amount) > 0) {
+      const totalDistributed = plantWaterDistribution.reduce((sum, plant) => sum + parseInt(plant.amount || 0), 0);
+      if (totalDistributed !== parseInt(formData.watering_amount)) {
+        const proceed = confirm('Die Wassermenge der einzelnen Pflanzen entspricht nicht der Gesamtmenge. Möchtest du trotzdem fortfahren?');
+        if (!proceed) return;
+      }
     }
     
     setSubmitting(true);
@@ -461,6 +521,9 @@ export default function NewSetupDayEntryPage() {
                           <div className="text-right text-sm text-gray-500">
                             Gesamt: {plantWaterDistribution.reduce((sum, plant) => sum + parseInt(plant.amount || 0), 0)} ml 
                             von {formData.watering_amount} ml
+                            {plantWaterDistribution.reduce((sum, plant) => sum + parseInt(plant.amount || 0), 0) !== parseInt(formData.watering_amount) && 
+                              <span className="text-red-500 ml-2 font-medium">(Warnung: Summe stimmt nicht mit Gesamtmenge überein)</span>
+                            }
                           </div>
                         </div>
                       </div>

@@ -202,21 +202,7 @@ export default function PlantsPage() {
   return (
     <>
       <div className="p-6 mt-10 pb-32 pattern-diagonal max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4 md:mb-0">Meine Pflanzen</h1>
-          <div className="flex flex-wrap gap-2">
-            <Link href="/setups" className="bg-gray-100 text-gray-700 px-4 py-2 rounded-md flex items-center gap-2 hover:bg-gray-200 transition-all duration-300">
-              <GiGreenhouse /> Setups verwalten
-            </Link>
-            <button
-              onClick={() => setShowNewPlantModal(true)}
-              className="bg-brand-primary text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-primary-hover transition-all duration-300"
-            >
-              <FaPlus /> Neue Pflanze
-            </button>
-          </div>
-        </div>
-        
+     
         {loading ? (
           <div className="flex justify-center items-center h-40">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-primary"></div>
@@ -279,7 +265,6 @@ export default function PlantsPage() {
                               className="p-4 hover:bg-gray-50 transition-colors cursor-pointer flex justify-between items-center"
                             >
                               <div className="flex items-center space-x-3">
-                                <FaSeedling className="text-green-500" />
                                 <div>
                                   <h4 className="font-medium text-gray-800">{plant.name}</h4>
                                   <div className="flex items-center space-x-2 text-xs text-gray-500">
@@ -332,20 +317,12 @@ export default function PlantsPage() {
                 <div className="bg-gray-100 border-b border-gray-200 p-4">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center space-x-3">
-                      <FaUsers className="text-2xl text-gray-600" />
                       <div>
                         <h3 className="font-bold text-gray-800">Einzelne Pflanzen</h3>
                         <p className="text-sm text-gray-600">{individualPlants.length} Pflanzen ohne Setup</p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <button 
-                        className="p-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-all text-sm"
-                        onClick={() => setShowNewPlantModal(true)}
-                      >
-                        <FaPlus className="text-xs" /> <span>Pflanze</span>
-                      </button>
-                    </div>
+                   
                   </div>
                 </div>
                 
@@ -357,7 +334,6 @@ export default function PlantsPage() {
                       className="p-4 hover:bg-gray-50 transition-colors cursor-pointer flex justify-between items-center"
                     >
                       <div className="flex items-center space-x-3">
-                        <FaSeedling className="text-green-500" />
                         <div>
                           <h4 className="font-medium text-gray-800">{plant.name}</h4>
                           <div className="flex items-center space-x-2 text-xs text-gray-500">
