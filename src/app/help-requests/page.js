@@ -162,7 +162,7 @@ export default function UserHelpRequestsPage() {
 
         {helpRequests.length === 0 ? (
           <div className="bg-white shadow rounded-lg p-6 text-center">
-            <p className="text-gray-500 mb-4">Sie haben noch keine Hilfe-Anfragen gestellt.</p>
+            <p className="text-gray-500 mb-4">Du hast noch keine Hilfe-Anfragen gestellt.</p>
             <Link 
               href="/plants"
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-olive-green hover:bg-yellow-green focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-olive-green"

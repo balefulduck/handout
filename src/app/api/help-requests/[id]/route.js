@@ -3,6 +3,8 @@ import { authOptions } from '../../auth/[...nextauth]/route';
 import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 // This ensures we only use the database on the server side
 if (typeof window === 'undefined') {
@@ -236,6 +238,110 @@ export async function PATCH(request, { params }) {
     }, { status: 200 });
   } catch (error) {
     console.error('Error updating help request:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+// DELETE /api/help-requests/[id] - Delete a help request (owner or admin only)
+export async function DELETE(request, { params }) {
+  try {
+    if (typeof window !== 'undefined') {
+      throw new Error('Cannot delete help request on client side');
+    }
+
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 });
+    }
+
+    // Get the help request with user information
+    const helpRequest = db.prepare(`
+      SELECT hr.*, u.username as username, u.id as user_id 
+      FROM help_requests hr
+      JOIN users u ON hr.user_id = u.id
+      WHERE hr.id = ?
+    `).get(params.id);
+
+    if (!helpRequest) {
+      return NextResponse.json({ error: "Hilfe-Anfrage nicht gefunden" }, { status: 404 });
+    }
+
+    // Check if user is the owner of the help request or an admin
+    const isOwner = helpRequest.username === session.user.name;
+    
+    // Check if user is admin
+    let isAdmin = false;
+    try {
+      // Check if the is_admin column exists
+      const columnsResult = db.prepare("PRAGMA table_info(users)").all();
+      const hasIsAdminColumn = columnsResult.some(col => col.name === 'is_admin');
+      
+      if (hasIsAdminColumn) {
+        const user = db.prepare("SELECT is_admin FROM users WHERE username = ?").get(session.user.name);
+        isAdmin = user?.is_admin === 1;
+      } else {
+        // For testing purposes, consider specific usernames as admins if the column doesn't exist
+        isAdmin = session.user.name === 'workshop' || session.user.name === 'admin';
+      }
+    } catch (dbError) {
+      console.error('Database error during admin check:', dbError);
+      // Allow access for specific users even if there's a DB error
+      isAdmin = session.user.name === 'workshop' || session.user.name === 'admin';
+    }
+
+    // Only allow owner or admin to delete
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json({ error: "Nicht autorisiert" }, { status: 403 });
+    }
+
+    // Start a transaction
+    db.prepare('BEGIN TRANSACTION').run();
+
+    try {
+      // Check if the help request has photos
+      if (helpRequest.photos) {
+        try {
+          // Parse the photos JSON
+          const photos = JSON.parse(helpRequest.photos);
+          
+          // Delete the photo files
+          for (const photo of photos) {
+            if (photo.fileName) {
+              const filePath = path.join(process.cwd(), 'public', 'uploads', 'help-requests', photo.fileName);
+              try {
+                await fs.unlink(filePath);
+              } catch (err) {
+                console.error(`Could not delete file ${filePath}:`, err);
+                // Continue even if file deletion fails
+              }
+            }
+          }
+        } catch (err) {
+          console.error('Error parsing photos or deleting files:', err);
+          // Continue with help request deletion even if file deletion fails
+        }
+      }
+
+      // Delete the help request
+      const result = db.prepare('DELETE FROM help_requests WHERE id = ?').run(params.id);
+      
+      if (result.changes === 0) {
+        // If no rows were affected, roll back and return an error
+        db.prepare('ROLLBACK').run();
+        return NextResponse.json({ error: "Löschen fehlgeschlagen" }, { status: 500 });
+      }
+
+      // Commit the transaction
+      db.prepare('COMMIT').run();
+
+      return NextResponse.json({ message: "Hilfe-Anfrage erfolgreich gelöscht" }, { status: 200 });
+    } catch (error) {
+      // Rollback on error
+      db.prepare('ROLLBACK').run();
+      throw error;
+    }
+  } catch (error) {
+    console.error('Error deleting help request:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
