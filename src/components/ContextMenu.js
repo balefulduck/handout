@@ -23,7 +23,11 @@ export default function ContextMenu({
   onShowNewDayForm,
   // Harvest page specific props
   onSaveHarvest,
-  existingHarvest
+  existingHarvest,
+  // Setup new day entry props
+  setup,
+  onSaveDay,
+  submitting
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -496,6 +500,36 @@ export default function ContextMenu({
                 </div>
                 <span className="text-xs text-white font-semibold">
                   {existingHarvest ? 'Erntedaten aktualisieren' : 'Ernte speichern'}
+                </span>
+              </button>
+            </div>
+          )}
+
+          {pathname.startsWith('/setups/') && pathname.endsWith('/new-day') && (
+            <div className="grid grid-cols-2 gap-3 py-2 px-2">
+              <button
+                onClick={() => router.push(`/setups/${params.id}`)}
+                className="flex flex-col items-center gap-2 transition-colors"
+              >
+                <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-red-500">
+                  <FaArrowLeft className="text-lg" />
+                </div>
+                <span className="text-xs text-white font-semibold">Abbrechen</span>
+              </button>
+              <button
+                onClick={onSaveDay}
+                disabled={submitting}
+                className="flex flex-col items-center gap-2 transition-colors"
+              >
+                <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-green-500">
+                  {submitting ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-gray-600"></div>
+                  ) : (
+                    <FaSave className="text-lg" />
+                  )}
+                </div>
+                <span className="text-xs text-white font-semibold">
+                  {submitting ? 'Speichern...' : 'Tageseintrag speichern'}
                 </span>
               </button>
             </div>

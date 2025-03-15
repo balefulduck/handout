@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { FaPlus, FaTimes, FaArrowLeft, FaInfoCircle, FaWater, FaSeedling, FaTint, FaCalendarAlt, FaCalendarDay, FaPencilAlt, FaFlask, FaCut, FaSun } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
+import ContextMenu from '@/components/ContextMenu';
 
 export default function NewSetupDayEntryPage() {
   const { data: session, status } = useSession();
@@ -15,6 +16,7 @@ export default function NewSetupDayEntryPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [fertilizers, setFertilizers] = useState([{ name: '', amount: '' }]);
+  const [activePhase, setActivePhase] = useState('new-day');
   
   const today = new Date().toISOString().split('T')[0];
   
@@ -323,19 +325,27 @@ export default function NewSetupDayEntryPage() {
   }
 
   return (
-    <div className="p-6 pb-32">
-      <div className="max-w-3xl mx-auto">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center">
-            <button
-              onClick={() => router.push(`/setups/${params.id}`)}
-              className="mr-4 text-gray-600 hover:text-gray-800"
-            >
-              <FaArrowLeft size={20} />
-            </button>
-            <h1 className="text-2xl font-bold text-gray-800">Neuer Tageseintrag</h1>
+    <>
+      <ContextMenu 
+        activePhase={activePhase}
+        onPhaseSelect={setActivePhase}
+        setup={setup}
+        onSaveDay={handleSubmit}
+        submitting={submitting}
+      />
+      <div className="p-6 mt-10 pb-32">
+        <div className="max-w-3xl mx-auto">
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex items-center">
+              <button
+                onClick={() => router.push(`/setups/${params.id}`)}
+                className="mr-4 text-gray-600 hover:text-gray-800"
+              >
+                <FaArrowLeft size={20} />
+              </button>
+              <h1 className="text-2xl font-bold text-gray-800">Neuer Tageseintrag</h1>
+            </div>
           </div>
-        </div>
         
         {/* Setup info */}
         <div className="bg-white rounded-lg shadow-md p-4 mb-6">
@@ -831,36 +841,10 @@ export default function NewSetupDayEntryPage() {
             {/* This section is now moved above immediately after the water slider */}
           </div>
           
-          <div className="sticky bottom-0 left-0 right-0 px-6 py-4 bg-white border-t border-gray-200 flex justify-between shadow-lg">
-            <button
-              type="button"
-              onClick={() => router.push(`/setups/${params.id}`)}
-              className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-            >
-              Abbrechen
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              className={`px-5 py-2.5 bg-brand-primary text-white rounded-lg hover:bg-primary-hover flex items-center gap-2 shadow-md hover:shadow-lg transition-all ${
-                submitting ? 'opacity-75 cursor-not-allowed' : ''
-              }`}
-            >
-              {submitting ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
-                  Speichern...
-                </>
-              ) : (
-                <>
-                  <FaPlus className="text-sm" />
-                  Tageseintrag speichern
-                </>
-              )}
-            </button>
-          </div>
+          {/* Bottom save button removed - now in ContextMenu */}
         </form>
       </div>
     </div>
+    </>
   );
 }
