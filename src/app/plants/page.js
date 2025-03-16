@@ -116,7 +116,7 @@ export default function PlantsPage() {
       setShowNewPlantModal(false);
       
       // Refresh plants list
-      fetchPlants();
+      fetchData();
     } catch (err) {
       setError(err.message);
       console.error('Error creating plant:', err);
