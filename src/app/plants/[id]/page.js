@@ -17,6 +17,9 @@ export default function PlantDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showNewDayForm, setShowNewDayForm] = useState(false);
+  const [lastDayEntry, setLastDayEntry] = useState(null);
+  const [loadingLastEntry, setLoadingLastEntry] = useState(false);
+  const [showQuickEntry, setShowQuickEntry] = useState(true);
   const [harvestData, setHarvestData] = useState(null);
   const [previousFertilizers, setPreviousFertilizers] = useState([]);
   const [showFertilizerSelect, setShowFertilizerSelect] = useState(false);
@@ -36,6 +39,13 @@ export default function PlantDetailPage() {
     amount: ''
   });
   const [activeTab, setActiveTab] = useState('details'); // Add tab state: 'details' or 'statistics'
+  
+  // Fetch the most recent day entry when opening the form
+  useEffect(() => {
+    if (showNewDayForm && days.length > 0) {
+      fetchMostRecentEntry();
+    }
+  }, [showNewDayForm, days]);
 
   // Fetch plant data
   useEffect(() => {
@@ -130,6 +140,45 @@ export default function PlantDetailPage() {
     const diffTime = Math.abs(today - start);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
+  };
+  
+  // Fetch the most recent day entry for quick entry feature
+  const fetchMostRecentEntry = async () => {
+    if (!params.id || days.length === 0) return null;
+    
+    try {
+      setLoadingLastEntry(true);
+      
+      // Sort days by date (newest first)
+      const sortedDays = [...days].sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      // If we have any days, return the most recent one
+      if (sortedDays.length > 0) {
+        setLastDayEntry(sortedDays[0]);
+        return sortedDays[0];
+      }
+      
+      return null;
+    } catch (err) {
+      console.error('Error preparing most recent entry:', err);
+      return null;
+    } finally {
+      setLoadingLastEntry(false);
+    }
+  };
+  
+  // Use the most recent day entry data for quick entry
+  const useLastEntryData = () => {
+    if (!lastDayEntry) return;
+    
+    // Create a new day entry based on the last entry's data
+    // but with today's date
+    setNewDay({
+      ...lastDayEntry,
+      id: undefined, // Remove the ID as this is a new entry
+      day_number: undefined, // Remove day number as it will be calculated by the API
+      date: new Date().toISOString().split('T')[0], // Set today's date
+    });
   };
   
   // Handle adding a new day entry
@@ -419,6 +468,105 @@ export default function PlantDetailPage() {
             {showNewDayForm && (
               <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
               <h3 className="mb-3 text-focus-animation text-text-primary">Neuer Tageseintrag</h3>
+              
+              {/* Quick Entry Snapshot */}
+              {lastDayEntry && showQuickEntry && (
+                <div className="mb-6 border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="bg-white p-3 border-b border-gray-200">
+                    <h4 className="text-md font-medium flex items-center gap-2">
+                      <FaCalendarAlt className="text-brand-primary" />
+                      Quick Entry
+                      <span className="text-xs text-gray-500 font-normal ml-1">
+                        basierend auf dem letzten Eintrag vom {new Date(lastDayEntry.date).toLocaleDateString('de-DE')}                      
+                      </span>
+                    </h4>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-4">
+                    {/* Snapshot of previous data */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                      {/* Watering snapshot */}
+                      {lastDayEntry.watering_amount > 0 && (
+                        <div className="bg-white rounded-lg border border-gray-200 p-3 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <GiWateringCan className="text-brand-primary" />
+                            <span>{lastDayEntry.watering_amount} ml</span>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Temperature snapshot */}
+                      {lastDayEntry.temperature && (
+                        <div className="bg-white rounded-lg border border-gray-200 p-3 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <FaTemperatureHigh className="text-brand-primary" />
+                            <span>{lastDayEntry.temperature}°C</span>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Humidity snapshot */}
+                      {lastDayEntry.humidity && (
+                        <div className="bg-white rounded-lg border border-gray-200 p-3 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <FaTint className="text-brand-primary" />
+                            <span>{lastDayEntry.humidity}%</span>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* pH value snapshot */}
+                      {lastDayEntry.ph_value && (
+                        <div className="bg-white rounded-lg border border-gray-200 p-3 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <FaFlask className="text-brand-primary" />
+                            <span>pH {lastDayEntry.ph_value}</span>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Plant care options */}
+                      <div className="bg-white rounded-lg border border-gray-200 p-3 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {lastDayEntry.topped && (
+                            <div className="flex items-center gap-1 bg-brand-primary/10 px-2 py-1 rounded">
+                              <FaCut className="text-brand-primary text-xs" />
+                              <span className="text-xs">Getoppt</span>
+                            </div>
+                          )}
+                          {lastDayEntry.flowering && (
+                            <div className="flex items-center gap-1 bg-brand-primary/10 px-2 py-1 rounded">
+                              <FaSun className="text-brand-primary text-xs" />
+                              <span className="text-xs">Blüte</span>
+                            </div>
+                          )}
+                          {!lastDayEntry.topped && !lastDayEntry.flowering && (
+                            <span className="text-xs text-gray-500">Keine Pflegemaßnahmen</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between mt-4">
+                      <button 
+                        type="button" 
+                        className="px-4 py-2 text-sm bg-brand-primary text-white rounded-md hover:bg-primary-hover transition-all duration-300 shadow-sm"
+                        onClick={useLastEntryData}
+                      >
+                        Daten übernehmen
+                      </button>
+                      <button 
+                        type="button" 
+                        className="px-4 py-2 text-sm bg-white text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-all duration-300"
+                        onClick={() => setShowQuickEntry(false)}
+                      >
+                        Zum Formular
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <form onSubmit={handleAddDayEntry}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
