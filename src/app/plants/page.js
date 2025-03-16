@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ContextMenu from '@/components/ContextMenu';
-import { FaSeedling, FaLeaf, FaCalendarAlt, FaPlus, FaEdit, FaWater, FaChevronDown, FaChevronUp, FaUsers, FaTint } from 'react-icons/fa';
+import { FaSeedling, FaLeaf, FaCalendarAlt, FaPlus, FaEdit, FaWater, FaChevronDown, FaChevronUp, FaUsers, FaTint, FaCopy } from 'react-icons/fa';
 import { GiFlowerPot, GiGreenhouse } from 'react-icons/gi';
 import Link from 'next/link';
 
@@ -26,7 +26,8 @@ export default function PlantsPage() {
     genetic_type: 'hybrid', // Default value
     expected_flowering_days: 60, // Default value
     start_date: new Date().toISOString().split('T')[0], // Today's date as default
-    substrate: '' // New substrate field
+    substrate: 'soil', // Default to soil
+    copies: 1 // Number of plant copies to create
   });
 
   // Function to handle new plant form input changes
@@ -89,39 +90,74 @@ export default function PlantsPage() {
     }
   };
 
-  // Function to create a new plant
+  // Function to create new plant(s)
   const createPlant = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     try {
-      const response = await fetch('/api/plants', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newPlant),
-      });
+      setLoading(true);
+      const copies = Math.max(1, parseInt(newPlant.copies) || 1);
+      let successCount = 0;
+      
+      // Create multiple plants if copies > 1
+      for (let i = 0; i < copies; i++) {
+        // Create a copy of the plant data without the copies field
+        const plantData = {...newPlant};
+        delete plantData.copies; // Remove copies field before sending to API
+        
+        // Modify name for multiple copies
+        if (copies > 1) {
+          const baseName = plantData.name || 'Pflanze';
+          plantData.name = `${baseName} ${i+1}`;
+        }
+        
+        const response = await fetch('/api/plants', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(plantData),
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create plant');
+        if (response.ok) {
+          successCount++;
+        } else {
+          const errorData = await response.json();
+          setError(errorData.error || `Fehler beim Erstellen der Pflanze ${i+1}`);
+          console.error(`Error creating plant copy ${i+1}:`, errorData);
+        }
       }
 
-      // Reset form and close modal
-      setNewPlant({
-        name: '',
-        breeder: '',
-        genetic_type: 'hybrid',
-        expected_flowering_days: 60,
-        start_date: new Date().toISOString().split('T')[0],
-        substrate: ''
-      });
-      setShowNewPlantModal(false);
+      // Only close modal and reset form if at least one plant was created successfully
+      if (successCount > 0) {
+        // Reset form and close modal
+        setNewPlant({
+          name: '',
+          breeder: '',
+          genetic_type: 'hybrid',
+          expected_flowering_days: 60,
+          start_date: new Date().toISOString().split('T')[0],
+          substrate: '',
+          copies: 1
+        });
+        setShowNewPlantModal(false);
+        setCurrentStep(1);
+        
+        // Success message based on how many plants were created
+        if (successCount === 1) {
+          // No special message needed for one plant
+        } else {
+          // Maybe add a toast or alert here if you have a notification system
+          console.log(`Successfully created ${successCount} plants`);
+        }
+      }
       
       // Refresh plants list
       fetchData();
     } catch (err) {
       setError(err.message);
-      console.error('Error creating plant:', err);
+      console.error('Error creating plants:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -408,6 +444,13 @@ export default function PlantsPage() {
               
               <form onSubmit={(e) => {
                 e.preventDefault();
+                
+                // Validate name field before proceeding
+                if (currentStep === 1 && !newPlant.name.trim()) {
+                  // Don't proceed if name is empty on step 1
+                  return;
+                }
+                
                 if (currentStep < totalSteps) {
                   setCurrentStep(currentStep + 1);
                 } else {
@@ -415,43 +458,115 @@ export default function PlantsPage() {
                   setCurrentStep(1);
                 }
               }}>
-                {/* Step 1: Date, Name and Breeder */}
+                {/* Step 1: Name, Copies and Date with Hierarchical Levels */}
                 {currentStep === 1 && (
-                  <div className="space-y-4">
-
- {/* Plant Name & Breeder - Connected fields */}
- <div className="mb-6 relative">
-                      <div className="relative mb-2">
-                        <input
-                          type="text"
-                          id="name"
-                          name="name"
-                          placeholder="Name der Pflanze"
-                          value={newPlant.name}
-                          onChange={handleInputChange}
-                          required
-                          className="w-full text-large font-medium py-2 px-1 border-0 border-b-2 border-gray-700 bg-transparent placeholder-lilac-500"
-                        />
-                      </div>
-
-                      <div className="relative pl-6 border-l-2 border-gray-200 ml-1">
-                        <input
-                          type="text"
-                          id="breeder"
-                          name="breeder"
-                          placeholder="Züchter (optional)"
-                          value={newPlant.breeder}
-                          onChange={handleInputChange}
-                          className="w-full py-2 px-0 border-0 border-b border-dashed border-gray-200 bg-transparent text-gray-600 placeholder-gray-300 text-sm"
-                        />
+                  <div className="space-y-5">
+                  
+                    {/* L1: Plant Name & Breeder - Primary importance */}
+                    <div className="mb-6 relative">
+                      <div className="border-2 border-brand-primary/40 rounded-lg bg-brand-primary/10 relative p-4">
+                        <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-semibold flex items-center gap-2">
+                          <FaSeedling className="text-brand-primary" />
+                          <span>{newPlant.copies > 1 ? "Name der Pflanzen" : "Name der Pflanze"}</span>
+                        </div>
+                        
+                        <div className="mt-1">
+                          {/* Main name input (L1) - Mandatory */}
+                          <div className="relative">
+                            <input
+                              type="text"
+                              id="name"
+                              name="name"
+                              placeholder={newPlant.copies > 1 ? "Basis-Name für alle Pflanzen" : "Name der Pflanze"}
+                              value={newPlant.name}
+                              onChange={handleInputChange}
+                              required
+                              className={`w-full text-lg font-medium py-2 px-2 border ${!newPlant.name && currentStep === 1 ? 'border-red-300 bg-red-50' : 'border-gray-300'} rounded-md bg-white shadow-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary`}
+                            />
+                            {!newPlant.name && currentStep === 1 && (
+                              <div className="text-xs text-red-500 mt-1 ml-1">* Pflichtfeld</div>
+                            )}
+                          </div>
+                          
+                          {newPlant.copies > 1 && (
+                            <div className="text-xs text-gray-600 mt-1 ml-1">
+                              Namen werden durchnummeriert: {newPlant.name || "Pflanze"} 1, {newPlant.name || "Pflanze"} 2, ...
+                            </div>
+                          )}
+                          
+                          {/* Breeder input (L2) - nested under name */}
+                          <div className="relative pl-6 border-l-2 border-gray-200 ml-1 mt-3">
+                            <div className="text-sm font-medium text-gray-600 mb-1">Züchter</div>
+                            <input
+                              type="text"
+                              id="breeder"
+                              name="breeder"
+                              placeholder="Optional"
+                              value={newPlant.breeder}
+                              onChange={handleInputChange}
+                              className="w-full py-2 px-2 text-sm border border-dashed border-gray-200 rounded bg-transparent text-gray-600"
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Start Date */}
+                    {/* L2: Copies Selection with Tappable Cards */}
+                    <div className="mb-6 relative">
+                      <div className="border-2 border-brand-primary/20 rounded-lg bg-brand-primary/5 relative p-4">
+                        <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-medium flex items-center gap-2">
+                          <FaCopy className="text-brand-primary" />
+                          <span>Kopien</span>
+                        </div>
+                        
+                        <div className="mt-2">
+                          <div className="text-sm text-gray-600 mb-3">
+                            {newPlant.copies > 1 
+                              ? `${newPlant.copies} identische Pflanzen erstellen` 
+                              : "Eine Pflanze erstellen"}
+                          </div>
+                          
+                          {/* Tappable number cards */}
+                          <div className="grid grid-cols-5 gap-2">
+                            {[1, 2, 3, 4, 5].map(num => (
+                              <button
+                                key={`copy-${num}`}
+                                type="button"
+                                onClick={() => setNewPlant({...newPlant, copies: num})}
+                                className={`py-2 px-0 rounded-md border ${newPlant.copies === num 
+                                  ? 'bg-brand-primary text-white border-brand-primary' 
+                                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'} 
+                                  transition-colors duration-200 text-center font-medium`}
+                              >
+                                {num}
+                              </button>
+                            ))}
+                          </div>
+                          
+                          <div className="grid grid-cols-5 gap-2 mt-2">
+                            {[6, 7, 8, 9, 10].map(num => (
+                              <button
+                                key={`copy-${num}`}
+                                type="button"
+                                onClick={() => setNewPlant({...newPlant, copies: num})}
+                                className={`py-2 px-0 rounded-md border ${newPlant.copies === num 
+                                  ? 'bg-brand-primary text-white border-brand-primary' 
+                                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'} 
+                                  transition-colors duration-200 text-center font-medium`}
+                              >
+                                {num}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* L3: Start Date - Least emphasis */}
                     <div className="mb-6">
-                      <div className="border-2 border-brand-primary/20 rounded-lg bg-brand-primary/5 relative">
-                        <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-medium flex items-center gap-2 z-10">
-                          <FaCalendarAlt className="text-brand-primary" />
+                      <div className="border-2 border-gray-200 rounded-lg bg-gray-50 relative">
+                        <div className="absolute -top-3 left-4 bg-white px-2 text-gray-600 font-medium flex items-center gap-2 z-10">
+                          <FaCalendarAlt className="text-gray-500" />
                           <span>Startdatum</span>
                         </div>
                         
@@ -460,20 +575,20 @@ export default function PlantsPage() {
                           <div className="flex justify-between items-center cursor-pointer">
                             <div className="flex flex-col">
                               <div className="flex items-baseline gap-2">
-                                <span className="text-base font-bold text-gray-800">
+                                <span className="text-sm font-medium text-gray-700">
                                   {new Date(newPlant.start_date).toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}
                                 </span>
-                                <span className="text-sm text-gray-600">
+                                <span className="text-xs text-gray-500">
                                   {new Date(newPlant.start_date).toLocaleDateString('de-DE', { year: 'numeric' })}
                                 </span>
                               </div>
-                              <div className="text-sm text-gray-500">
+                              <div className="text-xs text-gray-500">
                                 {new Date(newPlant.start_date).toLocaleDateString('de-DE', { weekday: 'long' })}
                               </div>
                             </div>
                           </div>
                           
-                          <div className="mt-4 bg-white rounded-lg border border-gray-200 p-2">
+                          <div className="mt-3 bg-white rounded-lg border border-gray-200 p-1">
                             <input
                               type="date"
                               id="start_date"
@@ -481,14 +596,12 @@ export default function PlantsPage() {
                               value={newPlant.start_date}
                               onChange={handleInputChange}
                               max={new Date().toISOString().split('T')[0]}
-                              className="w-full text-xs px-3 py-2 bg-transparent rounded focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                              className="w-full text-xs px-3 py-2 bg-transparent rounded focus:outline-none"
                             />
                           </div>
                         </div>
                       </div>
                     </div>
-                    
-                   
                   </div>
                 )}
                 
@@ -530,73 +643,9 @@ export default function PlantsPage() {
                   </div>
                 )}
                 
-                {/* Step 3: Genetic Type and Flowering Time */}
+                {/* Step 3: Expected Flowering Time */}
                 {currentStep === 3 && (
                   <div className="space-y-8">
-                    {/* Genetic Type Slider */}
-                    <div className="border-2 border-brand-primary/20 rounded-lg bg-brand-primary/5 relative p-4">
-                      <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-medium flex items-center gap-2">
-                        <FaLeaf className="text-brand-primary" />
-                        <span>Genetischer Typ</span>
-                      </div>
-                      
-                      {/* Custom Slider with 10% increments for indica/sativa ratio */}
-                      <div className="mt-3">
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="text-sm font-medium text-indigo-700">Indica</span>
-                          <span className="text-sm font-medium text-red-600">Sativa</span>
-                        </div>
-                        
-                        {/* Store the indica percentage directly in state */}
-                        <div className="flex items-center gap-2">
-                          <input 
-                            type="range" 
-                            min="0" 
-                            max="100" 
-                            step="10"
-                            value={newPlant.genetic_type === 'indica' ? 100 : 
-                                   newPlant.genetic_type === 'sativa' ? 0 : 
-                                   newPlant.genetic_type === 'hybrid' ? 50 : 
-                                   newPlant.genetic_type.includes('%') ? parseInt(newPlant.genetic_type) : 50}
-                            onChange={(e) => {
-                              const indicaPercentage = parseInt(e.target.value);
-                              let type;
-                              
-                              // Determine type based on percentage
-                              if (indicaPercentage === 100) {
-                                type = 'indica';
-                              } else if (indicaPercentage === 0) {
-                                type = 'sativa';
-                              } else if (indicaPercentage === 50) {
-                                type = 'hybrid';
-                              } else {
-                                // Store as percentage string
-                                type = `${indicaPercentage}%`;
-                              }
-                              
-                              setNewPlant({...newPlant, genetic_type: type});
-                            }}
-                            className="w-full h-2 bg-gradient-to-r from-indigo-600 via-purple-500 to-red-500 rounded-md appearance-none cursor-pointer accent-brand-primary"
-                          />
-                        </div>
-                        
-                        <div className="flex justify-between mt-2">
-                          <span className="text-sm font-medium text-gray-700">
-                            {newPlant.genetic_type === 'indica' ? '100' : 
-                             newPlant.genetic_type === 'sativa' ? '0' : 
-                             newPlant.genetic_type === 'hybrid' ? '50' : 
-                             newPlant.genetic_type.includes('%') ? newPlant.genetic_type.replace('%', '') : '50'}% Indica
-                          </span>
-                          <span className="text-sm font-medium text-gray-700">
-                            {newPlant.genetic_type === 'indica' ? '0' : 
-                             newPlant.genetic_type === 'sativa' ? '100' : 
-                             newPlant.genetic_type === 'hybrid' ? '50' : 
-                             newPlant.genetic_type.includes('%') ? (100 - parseInt(newPlant.genetic_type)) : '50'}% Sativa
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    
                     {/* Expected Flowering Time */}
                     <div className="border-2 border-brand-primary/20 rounded-lg bg-brand-primary/5 relative p-4">
                       <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-medium flex items-center gap-2">
