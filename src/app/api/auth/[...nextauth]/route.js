@@ -76,7 +76,33 @@ export const authOptions = {
   pages: {
     signIn: '/login'
   },
-  debug: true
+  // Properly configure URLs for different environments
+  // This prevents incorrect redirects after logout
+  useSecureCookies: process.env.NODE_ENV === "production",
+  // Add URL configuration based on environment
+  ...(process.env.NEXTAUTH_URL
+    ? {
+        // If NEXTAUTH_URL is set in environment, use it
+        url: process.env.NEXTAUTH_URL,
+      }
+    : {
+        // In development, default to localhost
+        url: process.env.NODE_ENV === "production"
+          ? process.env.VERCEL_URL || "https://" + process.env.VERCEL_URL || "https://yourapp.yourdomain.com"
+          : "http://localhost:3000",
+      }),
+  cookies: {
+    sessionToken: {
+      name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+  },
+  debug: process.env.NODE_ENV !== "production"
 };
 
 const handler = NextAuth(authOptions);
