@@ -377,20 +377,7 @@ export default function ContextMenu({
               <span className="text-sm font-semibold text-turquoise px-1 interactive-link">Pflanzen</span>
               {pathname !== '/plants' && <div className="absolute right-0 top-1/2 -translate-y-1/2 h-4/5 w-px bg-white/20" />}
             </a>
-            <a
-              href="/setups"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                // Use window.location for a full page navigation to avoid any router conflicts
-                window.location.href = '/setups';
-                return false;
-              }}
-              className={`col-span-2 flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/setups' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
-            >
-              <span className="text-sm font-semibold text-olive-green px-1 interactive-link">Setups</span>
-              {pathname !== '/setups' && <div className="absolute right-0 top-1/2 -translate-y-1/2 h-4/5 w-px bg-white/20" />}
-            </a>
+           
             <a
               href="/help"
               onClick={(e) => {

@@ -15,6 +15,8 @@ export default function PlantsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showNewPlantModal, setShowNewPlantModal] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 3;
   const [individualPlants, setIndividualPlants] = useState([]);
 
   // Form state for new plant
@@ -375,115 +377,304 @@ export default function PlantsPage() {
         )}
       </div>
 
-      {/* New Plant Modal */}
+      {/* New Plant Modal - Multi-step with Fullscreen Mobile */}
       {showNewPlantModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto relative">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-md h-full md:h-auto md:max-h-[90vh] md:rounded-lg shadow-lg overflow-y-auto relative">
             <div className="absolute inset-0 pattern-grid opacity-5 pointer-events-none"></div>
-            <div className="relative z-10 p-6">
-              <h3 className="mb-4 text-gray-800 interactive-heading">Neue Pflanze hinzufügen</h3>
+            <div className="relative z-10 p-4 md:p-6">
+              <div className="flex items-center justify-between mb-2">
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setShowNewPlantModal(false);
+                    setCurrentStep(1);
+                  }}
+                  className="rounded-full p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </div>
               
-              <form onSubmit={createPlant}>
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={newPlant.name}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="breeder" className="block text-sm font-medium text-gray-700 mb-1">Züchter</label>
-                    <input
-                      type="text"
-                      id="breeder"
-                      name="breeder"
-                      value={newPlant.breeder}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="genetic_type" className="block text-sm font-medium text-gray-700 mb-1">Genetischer Typ</label>
-                    <select
-                      id="genetic_type"
-                      name="genetic_type"
-                      value={newPlant.genetic_type}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                    >
-                      <option value="indica">Indica</option>
-                      <option value="sativa">Sativa</option>
-                      <option value="hybrid">Hybrid</option>
-                      <option value="ruderalis">Ruderalis</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="expected_flowering_days" className="block text-sm font-medium text-gray-700 mb-1">Erwartete Blütezeit (Tage)</label>
-                    <input
-                      type="number"
-                      id="expected_flowering_days"
-                      name="expected_flowering_days"
-                      value={newPlant.expected_flowering_days}
-                      onChange={handleInputChange}
-                      min="1"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="start_date" className="block text-sm font-medium text-gray-700 mb-1">Startdatum</label>
-                    <input
-                      type="date"
-                      id="start_date"
-                      name="start_date"
-                      value={newPlant.start_date}
-                      onChange={handleInputChange}
-                      max={new Date().toISOString().split('T')[0]}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="substrate" className="block text-sm font-medium text-gray-700 mb-1">Substrat</label>
-                    <select
-                      id="substrate"
-                      name="substrate"
-                      value={newPlant.substrate}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                    >
-                      <option value="">Bitte wählen</option>
-                      <option value="soil">Erde</option>
-                      <option value="coco">Kokos</option>
-                      <option value="hydro">Hydrokultur</option>
-                      <option value="rockwool">Steinwolle</option>
-                      <option value="other">Andere</option>
-                    </select>
-                  </div>
+              {/* Progress Indicator */}
+              <div className="w-full bg-gray-200 rounded-full h-1.5 mb-6">
+                <div 
+                  className="bg-brand-primary h-1.5 rounded-full transition-all duration-300 ease-in-out" 
+                  style={{ width: `${(currentStep / totalSteps) * 100}%` }}>
                 </div>
+              </div>
+              
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                if (currentStep < totalSteps) {
+                  setCurrentStep(currentStep + 1);
+                } else {
+                  createPlant(e);
+                  setCurrentStep(1);
+                }
+              }}>
+                {/* Step 1: Date, Name and Breeder */}
+                {currentStep === 1 && (
+                  <div className="space-y-4">
+
+ {/* Plant Name & Breeder - Connected fields */}
+ <div className="mb-6 relative">
+                      <div className="relative mb-2">
+                        <input
+                          type="text"
+                          id="name"
+                          name="name"
+                          placeholder="Name der Pflanze"
+                          value={newPlant.name}
+                          onChange={handleInputChange}
+                          required
+                          className="w-full text-large font-medium py-2 px-1 border-0 border-b-2 border-gray-700 bg-transparent placeholder-lilac-500"
+                        />
+                      </div>
+
+                      <div className="relative pl-6 border-l-2 border-gray-200 ml-1">
+                        <input
+                          type="text"
+                          id="breeder"
+                          name="breeder"
+                          placeholder="Züchter (optional)"
+                          value={newPlant.breeder}
+                          onChange={handleInputChange}
+                          className="w-full py-2 px-0 border-0 border-b border-dashed border-gray-200 bg-transparent text-gray-600 placeholder-gray-300 text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Start Date */}
+                    <div className="mb-6">
+                      <div className="border-2 border-brand-primary/20 rounded-lg bg-brand-primary/5 relative">
+                        <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-medium flex items-center gap-2 z-10">
+                          <FaCalendarAlt className="text-brand-primary" />
+                          <span>Startdatum</span>
+                        </div>
+                        
+                        <div className="p-4">
+                          {/* Current Date Display */}
+                          <div className="flex justify-between items-center cursor-pointer">
+                            <div className="flex flex-col">
+                              <div className="flex items-baseline gap-2">
+                                <span className="text-base font-bold text-gray-800">
+                                  {new Date(newPlant.start_date).toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}
+                                </span>
+                                <span className="text-sm text-gray-600">
+                                  {new Date(newPlant.start_date).toLocaleDateString('de-DE', { year: 'numeric' })}
+                                </span>
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {new Date(newPlant.start_date).toLocaleDateString('de-DE', { weekday: 'long' })}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="mt-4 bg-white rounded-lg border border-gray-200 p-2">
+                            <input
+                              type="date"
+                              id="start_date"
+                              name="start_date"
+                              value={newPlant.start_date}
+                              onChange={handleInputChange}
+                              max={new Date().toISOString().split('T')[0]}
+                              className="w-full text-xs px-3 py-2 bg-transparent rounded focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                   
+                  </div>
+                )}
                 
-                <div className="mt-6 flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowNewPlantModal(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-custom-orange"
-                  >
-                    Abbrechen
-                  </button>
+                {/* Step 2: Substrate */}
+                {currentStep === 2 && (
+                  <div>
+                    {/* Substrate */}
+                    <div className="border-2 border-brand-primary/20 rounded-lg bg-brand-primary/5 relative p-4">
+                      <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-medium flex items-center gap-2">
+                        <FaSeedling className="text-brand-primary" />
+                        <span>Substrat</span>
+                      </div>
+                      
+                      {/* Substrate Selection */}
+                      <div className="mt-3">
+                        <div className="flex flex-wrap gap-2">
+                          {[
+                            { value: 'soil', label: 'Erde', icon: '🌱' },
+                            { value: 'coco', label: 'Kokos', icon: '🥥' },
+                            { value: 'hydro', label: 'Hydrokultur', icon: '💧' },
+                            { value: 'rockwool', label: 'Steinwolle', icon: '🧱' },
+                            { value: 'other', label: 'Andere', icon: '🔄' }
+                          ].map((option) => (
+                            <button
+                              key={option.value}
+                              type="button"
+                              onClick={() => setNewPlant({...newPlant, substrate: option.value})}
+                              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${newPlant.substrate === option.value 
+                                ? 'bg-brand-primary text-white shadow-sm' 
+                                : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'}`}
+                            >
+                              <span>{option.icon}</span>
+                              <span>{option.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Step 3: Genetic Type and Flowering Time */}
+                {currentStep === 3 && (
+                  <div className="space-y-8">
+                    {/* Genetic Type Slider */}
+                    <div className="border-2 border-brand-primary/20 rounded-lg bg-brand-primary/5 relative p-4">
+                      <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-medium flex items-center gap-2">
+                        <FaLeaf className="text-brand-primary" />
+                        <span>Genetischer Typ</span>
+                      </div>
+                      
+                      {/* Custom Slider with 10% increments for indica/sativa ratio */}
+                      <div className="mt-3">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm font-medium text-indigo-700">Indica</span>
+                          <span className="text-sm font-medium text-red-600">Sativa</span>
+                        </div>
+                        
+                        {/* Store the indica percentage directly in state */}
+                        <div className="flex items-center gap-2">
+                          <input 
+                            type="range" 
+                            min="0" 
+                            max="100" 
+                            step="10"
+                            value={newPlant.genetic_type === 'indica' ? 100 : 
+                                   newPlant.genetic_type === 'sativa' ? 0 : 
+                                   newPlant.genetic_type === 'hybrid' ? 50 : 
+                                   newPlant.genetic_type.includes('%') ? parseInt(newPlant.genetic_type) : 50}
+                            onChange={(e) => {
+                              const indicaPercentage = parseInt(e.target.value);
+                              let type;
+                              
+                              // Determine type based on percentage
+                              if (indicaPercentage === 100) {
+                                type = 'indica';
+                              } else if (indicaPercentage === 0) {
+                                type = 'sativa';
+                              } else if (indicaPercentage === 50) {
+                                type = 'hybrid';
+                              } else {
+                                // Store as percentage string
+                                type = `${indicaPercentage}%`;
+                              }
+                              
+                              setNewPlant({...newPlant, genetic_type: type});
+                            }}
+                            className="w-full h-2 bg-gradient-to-r from-indigo-600 via-purple-500 to-red-500 rounded-md appearance-none cursor-pointer accent-brand-primary"
+                          />
+                        </div>
+                        
+                        <div className="flex justify-between mt-2">
+                          <span className="text-sm font-medium text-gray-700">
+                            {newPlant.genetic_type === 'indica' ? '100' : 
+                             newPlant.genetic_type === 'sativa' ? '0' : 
+                             newPlant.genetic_type === 'hybrid' ? '50' : 
+                             newPlant.genetic_type.includes('%') ? newPlant.genetic_type.replace('%', '') : '50'}% Indica
+                          </span>
+                          <span className="text-sm font-medium text-gray-700">
+                            {newPlant.genetic_type === 'indica' ? '0' : 
+                             newPlant.genetic_type === 'sativa' ? '100' : 
+                             newPlant.genetic_type === 'hybrid' ? '50' : 
+                             newPlant.genetic_type.includes('%') ? (100 - parseInt(newPlant.genetic_type)) : '50'}% Sativa
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Expected Flowering Time */}
+                    <div className="border-2 border-brand-primary/20 rounded-lg bg-brand-primary/5 relative p-4">
+                      <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-medium flex items-center gap-2">
+                        <GiFlowerPot className="text-brand-primary" />
+                        <span>Blütezeit</span>
+                      </div>
+                      
+                      <div className="mt-3">
+                        <div className="flex flex-col">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-brand-primary font-bold text-xl">{newPlant.expected_flowering_days} Tage</span>
+                            <div className="flex gap-2">
+                              <button 
+                                type="button" 
+                                onClick={() => setNewPlant({...newPlant, expected_flowering_days: Math.max(30, newPlant.expected_flowering_days - 5)})}  
+                                className="h-8 w-8 rounded-full flex items-center justify-center border border-gray-300 hover:bg-gray-100"
+                              >-</button>
+                              <button 
+                                type="button" 
+                                onClick={() => setNewPlant({...newPlant, expected_flowering_days: Math.min(120, newPlant.expected_flowering_days + 5)})} 
+                                className="h-8 w-8 rounded-full flex items-center justify-center border border-gray-300 hover:bg-gray-100"
+                              >+</button>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <input
+                          type="range"
+                          min="40"
+                          max="100"
+                          step="1"
+                          value={newPlant.expected_flowering_days}
+                          onChange={(e) => setNewPlant({...newPlant, expected_flowering_days: parseInt(e.target.value)})}
+                          className="w-full h-2 bg-gradient-to-r from-green-400 to-purple-500 rounded-md appearance-none cursor-pointer accent-brand-primary"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Navigation Buttons */}
+                <div className="mt-8 flex justify-between items-center">
+                  {currentStep > 1 ? (
+                    <button
+                      type="button"
+                      onClick={() => setCurrentStep(currentStep - 1)}
+                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 flex items-center gap-1"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+                      </svg>
+                      Zurück
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowNewPlantModal(false);
+                        setCurrentStep(1);
+                      }}
+                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50"
+                    >
+                      Abbrechen
+                    </button>
+                  )}
+                  
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-custom-orange text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-custom-orange"
+                    className="px-5 py-2.5 bg-brand-primary text-white rounded-md font-medium hover:bg-opacity-90 shadow-sm flex items-center gap-1"
                   >
-                    Pflanze hinzufügen
+                    {currentStep < totalSteps ? (
+                      <>
+                        Weiter
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                      </>
+                    ) : 'Pflanze hinzufügen'}
                   </button>
                 </div>
               </form>
