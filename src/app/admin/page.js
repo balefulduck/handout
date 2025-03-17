@@ -1,9 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter, usePathname, useParams } from 'next/navigation';
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('strains'); // 'strains' or 'users'
+
+  const router = useRouter();
   
   // Strain management state
   const [strains, setStrains] = useState([]);
@@ -318,6 +321,17 @@ export default function AdminPage() {
         >
           User Management
         </button>
+        <button
+          className={`px-6 py-3 font-medium ${
+            activeTab === 'help-requests'
+              ? 'text-custom-orange border-b-2 border-custom-orange'
+              : 'text-gray-500 hover:text-custom-orange'
+          }`}
+          onClick={() => router.push('/admin/help-requests')}
+        >
+          Help Requests
+        </button>
+
       </div>
       
       {/* Strain Management Section */}

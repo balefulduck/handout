@@ -179,26 +179,8 @@ export async function POST(request, { params }) {
 
     const setupDayId = result.lastInsertRowid;
 
-    // Add fertilizers if provided
-    if (data.fertilizers && Array.isArray(data.fertilizers) && data.fertilizers.length > 0) {
-      const insertFertilizer = db.prepare(`
-        INSERT INTO fertilizer_usage (
-          setup_day_id,
-          fertilizer_name,
-          amount
-        ) VALUES (?, ?, ?)
-      `);
-
-      for (const fertilizer of data.fertilizers) {
-        if (fertilizer.name) {
-          insertFertilizer.run(
-            setupDayId,
-            fertilizer.name,
-            fertilizer.amount || null
-          );
-        }
-      }
-    }
+    // Note: We don't create fertilizer records directly attached to setup days
+    // Fertilizers will be created for each individual plant day instead
 
     // Get plants in this setup
     const plants = db.prepare(`
@@ -207,10 +189,25 @@ export async function POST(request, { params }) {
       WHERE m.setup_id = ?
     `).all(setupId);
 
+    // Prepare the day data for individual plants
+    const plantDayData = {
+      date: data.date,
+      watered: data.watered ? 1 : 0,
+      topped: data.topped ? 1 : 0,
+      ph_value: data.ph_value || null,
+      watering_amount: data.watering_amount || null,
+      temperature: data.temperature || null,
+      humidity: data.humidity || null,
+      notes: data.notes || null,
+      fertilizers: data.fertilizers || []
+    };
+    
     // Create individual plant day entries for each plant in the setup
     const plantDays = [];
+    const skippedPlants = [];
+    
     for (const plant of plants) {
-      // Calculate day number for this plant
+      // Calculate day number for this plant (for reference only)
       const dayNumber = db.prepare(`
         SELECT julianday(?) - julianday(?) + 1 as day_number
       `).get(data.date, plant.start_date).day_number;
@@ -222,10 +219,11 @@ export async function POST(request, { params }) {
 
       if (existingPlantDay) {
         console.log(`Plant ${plant.id} already has an entry for ${data.date}, skipping`);
+        skippedPlants.push(plant.id);
         continue;
       }
 
-      // Create plant day entry
+      // Create plant day entry with proper day number calculation
       const insertPlantDay = db.prepare(`
         INSERT INTO plant_days (
           plant_id,
@@ -246,13 +244,13 @@ export async function POST(request, { params }) {
         plant.id,
         data.date,
         dayNumber,
-        data.watered ? 1 : 0,
-        data.topped ? 1 : 0,
-        data.ph_value || null,
-        data.watering_amount || null,
-        data.temperature || null,
-        data.humidity || null,
-        data.notes || null,
+        plantDayData.watered,
+        plantDayData.topped,
+        plantDayData.ph_value,
+        plantDayData.watering_amount,
+        plantDayData.temperature,
+        plantDayData.humidity,
+        plantDayData.notes,
         setupDayId
       );
 
@@ -260,7 +258,7 @@ export async function POST(request, { params }) {
         const plantDayId = plantDayResult.lastInsertRowid;
         
         // Add fertilizers for this plant day
-        if (data.fertilizers && Array.isArray(data.fertilizers) && data.fertilizers.length > 0) {
+        if (plantDayData.fertilizers && Array.isArray(plantDayData.fertilizers) && plantDayData.fertilizers.length > 0) {
           const insertFertilizer = db.prepare(`
             INSERT INTO fertilizer_usage (
               plant_day_id,
@@ -269,7 +267,7 @@ export async function POST(request, { params }) {
             ) VALUES (?, ?, ?)
           `);
 
-          for (const fertilizer of data.fertilizers) {
+          for (const fertilizer of plantDayData.fertilizers) {
             if (fertilizer.name) {
               insertFertilizer.run(
                 plantDayId,
@@ -286,12 +284,14 @@ export async function POST(request, { params }) {
       }
     }
 
-    // Get the created day entry with fertilizers
+    // Get the created day entry
     const dayEntry = db.prepare("SELECT * FROM setup_day_entries WHERE id = ?").get(setupDayId);
     
+    // Collect all fertilizers used across all plants for this setup day
     const fertilizers = db.prepare(`
-      SELECT * FROM fertilizer_usage
-      WHERE setup_day_id = ?
+      SELECT fu.* FROM fertilizer_usage fu
+      JOIN plant_days pd ON fu.plant_day_id = pd.id
+      WHERE pd.setup_entry_id = ?
     `).all(setupDayId);
 
     return new Response(JSON.stringify({ 
@@ -300,6 +300,7 @@ export async function POST(request, { params }) {
         fertilizers
       },
       affectedPlants: plants.length,
+      skippedPlants: skippedPlants,
       createdPlantDays: plantDays.length
     }), {
       status: 201,

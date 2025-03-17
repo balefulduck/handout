@@ -6,7 +6,7 @@ import { PiPlantBold } from "react-icons/pi";
 import { LuSunMedium } from "react-icons/lu";
 import { GiPlantSeed, GiGrowth, GiFlowerPot, GiScythe, GiWateringCan, GiSprout } from "react-icons/gi";
 import { BsChatDots, BsPlusLg } from "react-icons/bs";
-import { FaFirstAid, FaLeaf, FaPlus, FaArrowLeft, FaClock } from "react-icons/fa";
+import { FaFirstAid, FaLeaf, FaPlus, FaArrowLeft, FaClock, FaCog, FaSave } from "react-icons/fa";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/solid";
 import { useRouter, usePathname, useParams } from 'next/navigation';
 import { Dialog, Transition } from '@headlessui/react';
@@ -21,9 +21,15 @@ export default function ContextMenu({
   harvestData,
   onStartFlowering,
   onShowNewDayForm,
+  showNewDayForm,
+  onSaveNewDay,
   // Harvest page specific props
   onSaveHarvest,
-  existingHarvest
+  existingHarvest,
+  // Setup new day entry props
+  setup,
+  onSaveDay,
+  submitting
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -260,7 +266,14 @@ export default function ContextMenu({
                           )}
                         </div>
                       </div>
-                      <div className="mt-3">
+                      <div className="mt-3 space-y-2">
+                        <button
+                          onClick={() => router.push('/usersettings')}
+                          className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-small font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-olive-green"
+                        >
+                          <FaCog className="mr-2" />
+                          Einstellungen
+                        </button>
                         <button
                           onClick={handleLogout}
                           className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-small font-medium text-white bg-purple hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple"
@@ -358,8 +371,8 @@ export default function ContextMenu({
             <img src="/menu.png" alt="Menu" className="h-6 w-6" aria-hidden="true" />
           </button>
     
-          {/* Main navigation with equal width buttons */}
-          <div className="grid grid-cols-3">
+          {/* Main navigation with custom width grid */}
+          <div className="grid grid-cols-10">
             <a 
               href="/growguide"
               onClick={(e) => {
@@ -369,7 +382,7 @@ export default function ContextMenu({
                 window.location.href = '/growguide';
                 return false;
               }}
-              className={`flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/growguide' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'} pl-10`}
+              className={`col-span-4 flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/growguide' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'} pl-10`}
             >
               <span className="text-sm font-semibold text-yellow-green px-2 interactive-link">Grow Guide</span>
               {pathname !== '/growguide' && <div className="absolute right-0 top-1/2 -translate-y-1/2 h-4/5 w-px bg-white/20" />}
@@ -383,11 +396,12 @@ export default function ContextMenu({
                 window.location.href = '/plants';
                 return false;
               }}
-              className={`flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/plants' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
+              className={`col-span-2 flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/plants' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
             >
-              <span className="text-sm font-semibold text-turquoise px-2 interactive-link">Pflanzen</span>
+              <span className="text-sm font-semibold text-turquoise px-1 interactive-link">Pflanzen</span>
               {pathname !== '/plants' && <div className="absolute right-0 top-1/2 -translate-y-1/2 h-4/5 w-px bg-white/20" />}
             </a>
+           
             <a
               href="/help"
               onClick={(e) => {
@@ -397,9 +411,9 @@ export default function ContextMenu({
                 window.location.href = '/help';
                 return false;
               }}
-              className={`flex items-center justify-center py-1.5 transition-colors ${pathname === '/help' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
+              className={`col-span-2 flex items-center justify-center py-1.5 transition-colors ${pathname === '/help' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
             >
-              <span className="text-sm font-semibold text-medium-blue px-2 interactive-link">Erste Hilfe</span>
+              <span className="text-sm font-semibold text-medium-blue px-2 interactive-link">Dr. Cannabis Hilfe</span>
             </a>
           </div>
         </div>
@@ -452,38 +466,63 @@ export default function ContextMenu({
 
           {pathname.startsWith('/plants/') && pathname.split('/').length === 3 && plant && (
             <div className="grid grid-cols-3 gap-3 py-2 px-2">
-              <button
-                onClick={onShowNewDayForm}
-                className="flex flex-col items-center gap-2 transition-colors"
-              >
-                <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-orange">
-                  <FaPlus className="text-lg" />
-                </div>
-                <span className="text-xs text-white font-semibold">Neuer Tageseintrag</span>
-              </button>
+              {!showNewDayForm ? (
+                <>
+                  <button
+                    onClick={onShowNewDayForm}
+                    className="flex flex-col items-center gap-2 transition-colors"
+                  >
+                    <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-orange">
+                      <FaPlus className="text-lg" />
+                    </div>
+                    <span className="text-xs text-white font-semibold">Neuer Tageseintrag</span>
+                  </button>
 
-              {!plant.flowering_start_date && (
-                <button
-                  onClick={onStartFlowering}
-                  className="flex flex-col items-center gap-2 transition-colors"
-                >
-                  <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-purple">
-                    <GiFlowerPot className="text-lg" />
-                  </div>
-                  <span className="text-xs text-white font-semibold">Blüte starten</span>
-                </button>
-              )}
+                  {!plant.flowering_start_date && (
+                    <button
+                      onClick={onStartFlowering}
+                      className="flex flex-col items-center gap-2 transition-colors"
+                    >
+                      <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-purple">
+                        <GiFlowerPot className="text-lg" />
+                      </div>
+                      <span className="text-xs text-white font-semibold">Blüte starten</span>
+                    </button>
+                  )}
 
-              {plant.flowering_start_date && !harvestData && (
-                <button
-                  onClick={() => router.push(`/plants/${params.id}/harvest`)}
-                  className="flex flex-col items-center gap-2 transition-colors"
-                >
-                  <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-turquoise">
-                    <FaLeaf className="text-lg" />
-                  </div>
-                  <span className="text-xs text-white font-semibold">Ernten</span>
-                </button>
+                  {plant.flowering_start_date && !harvestData && (
+                    <button
+                      onClick={() => router.push(`/plants/${params.id}/harvest`)}
+                      className="flex flex-col items-center gap-2 transition-colors"
+                    >
+                      <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-turquoise">
+                        <FaLeaf className="text-lg" />
+                      </div>
+                      <span className="text-xs text-white font-semibold">Ernten</span>
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => onShowNewDayForm(false)}
+                    className="flex flex-col items-center gap-2 transition-colors"
+                  >
+                    <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-red-500">
+                      <FaArrowLeft className="text-lg" />
+                    </div>
+                    <span className="text-xs text-white font-semibold">Abbrechen</span>
+                  </button>
+                  <button
+                    onClick={onSaveNewDay}
+                    className="flex flex-col items-center gap-2 transition-colors"
+                  >
+                    <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-green-500">
+                      <FaSave className="text-lg" />
+                    </div>
+                    <span className="text-xs text-white font-semibold">Speichern</span>
+                  </button>
+                </>
               )}
             </div>
           )}
@@ -499,6 +538,36 @@ export default function ContextMenu({
                 </div>
                 <span className="text-xs text-white font-semibold">
                   {existingHarvest ? 'Erntedaten aktualisieren' : 'Ernte speichern'}
+                </span>
+              </button>
+            </div>
+          )}
+
+          {pathname.startsWith('/setups/') && pathname.endsWith('/new-day') && (
+            <div className="grid grid-cols-2 gap-3 py-2 px-2">
+              <button
+                onClick={() => router.push(`/setups/${params.id}`)}
+                className="flex flex-col items-center gap-2 transition-colors"
+              >
+                <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-red-500">
+                  <FaArrowLeft className="text-lg" />
+                </div>
+                <span className="text-xs text-white font-semibold">Abbrechen</span>
+              </button>
+              <button
+                onClick={onSaveDay}
+                disabled={submitting}
+                className="flex flex-col items-center gap-2 transition-colors"
+              >
+                <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-green-500">
+                  {submitting ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-gray-600"></div>
+                  ) : (
+                    <FaSave className="text-lg" />
+                  )}
+                </div>
+                <span className="text-xs text-white font-semibold">
+                  {submitting ? 'Speichern...' : 'Tageseintrag speichern'}
                 </span>
               </button>
             </div>
@@ -560,12 +629,49 @@ export default function ContextMenu({
             </div>
           )}
 
+          {pathname === '/setups' && (
+            <div className="grid grid-cols-1 py-2 px-2">
+              <button
+                onClick={() => {
+                  // Dispatch custom event to trigger the new setup modal
+                  window.dispatchEvent(new Event('newSetupClick'));
+                }}
+                className="flex flex-col items-center gap-2 transition-colors"
+              >
+                <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-olive-green">
+                  <BsPlusLg className="text-lg" />
+                </div>
+                <span className="text-xs text-white font-semibold">Neues Setup</span>
+              </button>
+            </div>
+          )}
+          
+          {pathname === '/usersettings' && (
+            <div className="grid grid-cols-1 py-2 px-2">
+              <button
+                onClick={() => {
+                  // Trigger the form submission
+                  const form = document.querySelector('form');
+                  if (form) {
+                    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                  }
+                }}
+                className="flex flex-col items-center gap-2 transition-colors"
+              >
+                <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-brand-primary">
+                  <FaSave className="text-lg" />
+                </div>
+                <span className="text-xs text-white font-semibold">Speichern</span>
+              </button>
+            </div>
+          )}
+
           {pathname.startsWith('/help-requests/') && pathname.split('/').length === 3 && (
             <div className="grid grid-cols-1 py-2 px-2">
               <button
                 onClick={async () => {
                   const requestId = pathname.split('/')[2];
-                  if (confirm('Sind Sie sicher, dass Sie diese Hilfe-Anfrage löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.')) {
+                  if (confirm('Bist Du sicher, dass Du diese Hilfe-Anfrage löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.')) {
                     try {
                       const response = await fetch(`/api/help-requests/${requestId}`, {
                         method: 'DELETE',
@@ -579,7 +685,7 @@ export default function ContextMenu({
                       router.push('/help-requests');
                     } catch (error) {
                       console.error('Error deleting help request:', error);
-                      alert('Fehler beim Löschen der Hilfe-Anfrage. Bitte versuchen Sie es später erneut.');
+                      alert('Fehler beim Löschen der Hilfe-Anfrage. Bitte versuche es später erneut.');
                     }
                   }
                 }}
@@ -648,7 +754,7 @@ export default function ContextMenu({
                       </div>
                       <h3 className="mt-3 text-lg font-medium text-gray-900">Nachricht gesendet!</h3>
                       <p className="mt-2 text-sm text-gray-500">
-                        Vielen Dank für Ihre Nachricht. Wir werden uns so schnell wie möglich bei Ihnen melden.
+                        Vielen Dank für Deine Nachricht. Wir werden uns so schnell wie möglich bei Dir melden.
                       </p>
                       <div className="mt-5">
                         <button
@@ -679,7 +785,7 @@ export default function ContextMenu({
                           Dr. Cannabis Hilfe
                         </Dialog.Title>
                         <p className="mt-2 text-sm text-gray-500">
-                          Haben Sie Probleme mit Ihrer Pflanze? Senden Sie uns eine Nachricht mit Details und Fotos, und wir helfen Ihnen gerne weiter.
+                          Hast Du Probleme mit Deiner Pflanze? Sende uns eine Nachricht mit Details und Fotos, und wir helfen Dir gerne weiter.
                         </p>
                       </div>
                       {submitError && (
@@ -970,7 +1076,7 @@ export default function ContextMenu({
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700">
-                            Betroffene Pflanzen auswählen
+                            Wähle die betroffene Pflanze(n), um uns alle Parameter deines Grows mitzusenden.
                           </label>
                           {isLoadingPlants ? (
                             <div className="mt-2 flex items-center text-sm text-gray-500">
