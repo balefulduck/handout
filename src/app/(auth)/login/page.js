@@ -54,8 +54,22 @@ export default function LoginPage() {
           })
         });
 
-        // Let the middleware handle the redirect
-        router.refresh();
+        // Instead of relying solely on middleware for redirect,
+        // explicitly navigate to the growguide page
+        try {
+          // First refresh to update the auth state
+          router.refresh();
+          
+          // Then explicitly navigate to the growguide page
+          setTimeout(() => {
+            console.log('Explicitly navigating to /growguide');
+            router.push('/growguide');
+          }, 500);
+        } catch (redirectError) {
+          console.error('Redirect error:', redirectError);
+          // Fallback navigation if the router.push fails
+          window.location.href = '/growguide';
+        }
 
         // Log post-refresh state
         await fetch('/api/debug/auth', {

@@ -88,7 +88,7 @@ export const authOptions = {
     : {
         // In development, default to localhost
         url: process.env.NODE_ENV === "production"
-          ? process.env.VERCEL_URL || "https://" + process.env.VERCEL_URL || "https://yourapp.yourdomain.com"
+          ? "https://" + process.env.DOMAIN || "https://www.drc420.team"
           : "http://localhost:3000",
       }),
   cookies: {
@@ -99,6 +99,7 @@ export const authOptions = {
         sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",
+        domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined,
       },
     },
   },

@@ -212,12 +212,20 @@ export default function PlantDetailPage() {
     if (e) e.preventDefault();
     
     try {
+      // Ensure pH value is properly formatted as a string
+      const formattedDay = {
+        ...newDay,
+        ph_value: newDay.ph_value ? String(newDay.ph_value) : '',
+        humidity: newDay.humidity ? String(newDay.humidity) : '',
+        temperature: newDay.temperature ? String(newDay.temperature) : ''
+      };
+      
       const response = await fetch(`/api/plants/${params.id}/days`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newDay),
+        body: JSON.stringify(formattedDay),
       });
       
       if (!response.ok) {
@@ -1042,7 +1050,7 @@ export default function PlantDetailPage() {
                     <div className="space-y-3">
                       <div className="bg-white rounded-lg border border-gray-200 p-3">
                         <div className="flex items-center gap-3 mb-2">
-                          <GiWateringCan className="text-brand-primary text-xl" />
+                          <GiWateringCan className="mr-2" />
                           <span className="font-medium">{newDay.watering_amount || '0'} ml</span>
                         </div>
                         <input
@@ -1347,6 +1355,18 @@ export default function PlantDetailPage() {
                             <div className="flex items-center text-sm text-gray-600">
                               <FaTint className="mr-2" />
                               <span>{day.humidity}%</span>
+                            </div>
+                          )}
+                          {day.ph_value && (
+                            <div className="flex items-center text-sm text-gray-600">
+                              <FaFlask className="mr-2" />
+                              <span>pH {day.ph_value}</span>
+                            </div>
+                          )}
+                          {day.fertilizers && day.fertilizers.length > 0 && (
+                            <div className="flex items-center text-sm text-gray-600">
+                              <FaLeaf className="mr-2" />
+                              <span>{day.fertilizers.length} Dünger</span>
                             </div>
                           )}
                           {day.notes && (
