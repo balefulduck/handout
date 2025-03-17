@@ -263,7 +263,7 @@ export default function PlantsPage() {
                 {setups.map((setup) => (
                   <div key={setup.id} className="bg-white border border-gray-200 rounded-lg shadow overflow-hidden">
                     {/* Setup Header */}
-                    <div className="bg-brand-primary/10 border-b border-brand-primary/20 p-4">
+                    <div className="bg-brand-primary/10 border-b border-brand-primary/20 p-4 bg-stone-100">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center space-x-3">
                           <GiGreenhouse className="text-2xl text-brand-primary" />
