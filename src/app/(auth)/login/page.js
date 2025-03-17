@@ -48,77 +48,52 @@ export default function LoginPage() {
         // Store successful authentication in sessionStorage
         sessionStorage.setItem('auth_success', 'true');
         
-        // Log pre-redirect state
-        await fetch('/api/debug/auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            event: 'pre_redirect',
-            url: window.location.href
-          })
-        });
-
-        // Force update auth state
-        router.refresh();
-        
-        // Set up an event listener to detect if anything is preventing navigation
-        const beforeUnloadHandler = (e) => {
-          console.log('beforeunload fired - navigation starting');
-          sessionStorage.setItem('navigation_started', 'true');
-        };
-        
-        window.addEventListener('beforeunload', beforeUnloadHandler);
-        
-        // Most basic approach - set a field in the form that indicates 
-        // success and update the UI to show redirect is happening
+        // Add visual feedback that login was successful
         try {
-          // Add a visible indicator that redirect is in progress
           const loginForm = document.querySelector('form');
           if (loginForm) {
             loginForm.innerHTML = '<div class="p-4 bg-green-100 text-green-800 rounded">Anmeldung erfolgreich! Leite weiter...</div>';
           }
-          
-          console.log('LOGIN SUCCESS: Redirecting to /growguide');
-          
-          // Try the absolute URL approach
-          const baseUrl = window.location.origin;
-          const targetUrl = `${baseUrl}/growguide`;
-          console.log('Redirecting to absolute URL:', targetUrl);
-          
-          // Use setTimeout to ensure this code runs after any potential framework code
-          setTimeout(() => {
-            try {
-              // Remove the event listener to prevent memory leaks
-              window.removeEventListener('beforeunload', beforeUnloadHandler);
-              
-              // Try the most direct method
-              window.location.href = targetUrl;
-              
-              // Final fallback if we're still here
-              setTimeout(() => {
-                if (window.location.pathname === '/login') {
-                  console.log('FINAL FALLBACK: Using document.location');
-                  document.location = targetUrl;
-                }
-              }, 500);
-            } catch (err) {
-              console.error('Redirect error:', err);
-            }
-          }, 300);
         } catch (error) {
           console.error('UI update error:', error);
-          // If UI update fails, still try to redirect
+        }
+        
+        // Use a POST request to a custom API endpoint to trigger server-side redirect
+        try {
+          console.log('Attempting server-side redirect via API');
+          
+          fetch('/api/auth/redirect', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ destination: '/growguide' }),
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log('Redirect response:', data);
+            
+            // If server-side redirect doesn't work, try client-side as fallback
+            if (data.redirectUrl) {
+              console.log('Using server-provided redirect URL:', data.redirectUrl);
+              window.location.href = data.redirectUrl;
+            } else {
+              // Local fallback if the server doesn't provide a URL
+              console.log('Server did not provide redirect URL, using fallback');
+              window.location.href = '/growguide';
+            }
+          })
+          .catch(error => {
+            console.error('Server redirect error:', error);
+            // Fallback to client-side redirect
+            window.location.href = '/growguide';
+          });
+          
+        } catch (error) {
+          console.error('Redirect API error:', error);
+          // Final fallback
           window.location.href = '/growguide';
         }
-
-        // Log post-redirect attempt
-        await fetch('/api/debug/auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            event: 'post_redirect_attempt'
-          })
-        });
       }
     } catch (error) {
       // Log any errors

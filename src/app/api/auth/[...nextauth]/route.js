@@ -71,6 +71,18 @@ export const authOptions = {
     async session({ session, token }) {
       session.user.id = token.id;
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // Force redirect to /growguide after sign in
+      if (url.startsWith(baseUrl)) {
+        // If this is an internal URL, decide where to redirect
+        if (url.includes('/api/auth/signin') || url.includes('/api/auth/callback') || url.includes('/login')) {
+          console.log('Auth callback - redirecting to /growguide');
+          return `${baseUrl}/growguide`;
+        }
+      }
+      // Default redirect behavior
+      return url.startsWith(baseUrl) ? url : baseUrl;
     }
   },
   pages: {
@@ -94,6 +106,25 @@ export const authOptions = {
   cookies: {
     sessionToken: {
       name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+        domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined,
+      },
+    },
+    callbackUrl: {
+      name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.callback-url`,
+      options: {
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+        domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined,
+      },
+    },
+    csrfToken: {
+      name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.csrf-token`,
       options: {
         httpOnly: true,
         sameSite: "lax",
