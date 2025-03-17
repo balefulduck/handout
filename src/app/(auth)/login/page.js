@@ -45,41 +45,78 @@ export default function LoginPage() {
       }
 
       if (res.ok) {
+        // Store successful authentication in sessionStorage
+        sessionStorage.setItem('auth_success', 'true');
+        
         // Log pre-redirect state
         await fetch('/api/debug/auth', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            event: 'pre_redirect'
+            event: 'pre_redirect',
+            url: window.location.href
           })
         });
 
         // Force update auth state
         router.refresh();
         
-        // Wait a moment to ensure the auth state is refreshed
-        setTimeout(() => {
-          console.log('Redirecting after successful login');
-          
-          // In production, use direct window.location for more reliable redirects
-          // This bypasses any potential issues with Next.js router in production
-          if (window.location.hostname !== 'localhost' && 
-              window.location.hostname !== '127.0.0.1') {
-            console.log('Using window.location.href for production redirect');
-            window.location.href = '/growguide';
-          } else {
-            // Only use Next.js router in development
-            console.log('Using Next.js router for development redirect');
-            router.push('/growguide');
+        // Set up an event listener to detect if anything is preventing navigation
+        const beforeUnloadHandler = (e) => {
+          console.log('beforeunload fired - navigation starting');
+          sessionStorage.setItem('navigation_started', 'true');
+        };
+        
+        window.addEventListener('beforeunload', beforeUnloadHandler);
+        
+        // Most basic approach - set a field in the form that indicates 
+        // success and update the UI to show redirect is happening
+        try {
+          // Add a visible indicator that redirect is in progress
+          const loginForm = document.querySelector('form');
+          if (loginForm) {
+            loginForm.innerHTML = '<div class="p-4 bg-green-100 text-green-800 rounded">Anmeldung erfolgreich! Leite weiter...</div>';
           }
-        }, 800); // Increased timeout to ensure auth state is updated
+          
+          console.log('LOGIN SUCCESS: Redirecting to /growguide');
+          
+          // Try the absolute URL approach
+          const baseUrl = window.location.origin;
+          const targetUrl = `${baseUrl}/growguide`;
+          console.log('Redirecting to absolute URL:', targetUrl);
+          
+          // Use setTimeout to ensure this code runs after any potential framework code
+          setTimeout(() => {
+            try {
+              // Remove the event listener to prevent memory leaks
+              window.removeEventListener('beforeunload', beforeUnloadHandler);
+              
+              // Try the most direct method
+              window.location.href = targetUrl;
+              
+              // Final fallback if we're still here
+              setTimeout(() => {
+                if (window.location.pathname === '/login') {
+                  console.log('FINAL FALLBACK: Using document.location');
+                  document.location = targetUrl;
+                }
+              }, 500);
+            } catch (err) {
+              console.error('Redirect error:', err);
+            }
+          }, 300);
+        } catch (error) {
+          console.error('UI update error:', error);
+          // If UI update fails, still try to redirect
+          window.location.href = '/growguide';
+        }
 
-        // Log post-refresh state
+        // Log post-redirect attempt
         await fetch('/api/debug/auth', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            event: 'post_refresh'
+            event: 'post_redirect_attempt'
           })
         });
       }
