@@ -13,23 +13,86 @@ export default function LoginPage() {
     const formData = new FormData(e.currentTarget);
     
     try {
-      // Simplify the approach - use callbackUrl parameter with signIn
+      // Log pre-login state
+      await fetch('/api/debug/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'pre_login',
+          username: formData.get('username')
+        })
+      });
+
       const res = await signIn('credentials', {
         username: formData.get('username'),
         password: formData.get('password'),
-        callbackUrl: '/growguide',
-        redirect: true, // Enable automatic redirect handling by NextAuth
+        redirect: false,
       });
-      
-      // Note: With redirect: true, the code below may not execute
-      // as NextAuth will handle the redirect automatically
-      
-      if (res?.error) {
+
+      // Log post-login state
+      await fetch('/api/debug/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'post_login',
+          response: res
+        })
+      });
+
+      if (res.error) {
         setError(res.error);
+        return;
       }
-      
+
+      if (res.ok) {
+        // Log pre-redirect state
+        await fetch('/api/debug/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event: 'pre_redirect'
+          })
+        });
+
+        // Force update auth state
+        router.refresh();
+        
+        // Wait a moment to ensure the auth state is refreshed
+        setTimeout(() => {
+          console.log('Redirecting after successful login');
+          
+          // In production, use direct window.location for more reliable redirects
+          // This bypasses any potential issues with Next.js router in production
+          if (window.location.hostname !== 'localhost' && 
+              window.location.hostname !== '127.0.0.1') {
+            console.log('Using window.location.href for production redirect');
+            window.location.href = '/growguide';
+          } else {
+            // Only use Next.js router in development
+            console.log('Using Next.js router for development redirect');
+            router.push('/growguide');
+          }
+        }, 800); // Increased timeout to ensure auth state is updated
+
+        // Log post-refresh state
+        await fetch('/api/debug/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event: 'post_refresh'
+          })
+        });
+      }
     } catch (error) {
-      console.error('Login error:', error);
+      // Log any errors
+      await fetch('/api/debug/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'error',
+          error: error.message
+        })
+      });
       setError('Ein Fehler ist aufgetreten');
     }
   };
