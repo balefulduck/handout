@@ -99,7 +99,24 @@ export const authOptions = {
         sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",
-        domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined,
+        domain: process.env.NODE_ENV === "production" ? undefined : undefined,
+      },
+    },
+    callbackUrl: {
+      name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.callback-url`,
+      options: {
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+    csrfToken: {
+      name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.csrf-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
       },
     },
   },

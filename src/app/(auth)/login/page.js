@@ -13,83 +13,23 @@ export default function LoginPage() {
     const formData = new FormData(e.currentTarget);
     
     try {
-      // Log pre-login state
-      await fetch('/api/debug/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event: 'pre_login',
-          username: formData.get('username')
-        })
-      });
-
+      // Simplify the approach - use callbackUrl parameter with signIn
       const res = await signIn('credentials', {
         username: formData.get('username'),
         password: formData.get('password'),
-        redirect: false,
+        callbackUrl: '/growguide',
+        redirect: true, // Enable automatic redirect handling by NextAuth
       });
-
-      // Log post-login state
-      await fetch('/api/debug/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event: 'post_login',
-          response: res
-        })
-      });
-
-      if (res.error) {
+      
+      // Note: With redirect: true, the code below may not execute
+      // as NextAuth will handle the redirect automatically
+      
+      if (res?.error) {
         setError(res.error);
-        return;
       }
-
-      if (res.ok) {
-        // Log pre-redirect state
-        await fetch('/api/debug/auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            event: 'pre_redirect'
-          })
-        });
-
-        // Instead of relying solely on middleware for redirect,
-        // explicitly navigate to the growguide page
-        try {
-          // First refresh to update the auth state
-          router.refresh();
-          
-          // Then explicitly navigate to the growguide page
-          setTimeout(() => {
-            console.log('Explicitly navigating to /growguide');
-            router.push('/growguide');
-          }, 500);
-        } catch (redirectError) {
-          console.error('Redirect error:', redirectError);
-          // Fallback navigation if the router.push fails
-          window.location.href = '/growguide';
-        }
-
-        // Log post-refresh state
-        await fetch('/api/debug/auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            event: 'post_refresh'
-          })
-        });
-      }
+      
     } catch (error) {
-      // Log any errors
-      await fetch('/api/debug/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event: 'error',
-          error: error.message
-        })
-      });
+      console.error('Login error:', error);
       setError('Ein Fehler ist aufgetreten');
     }
   };

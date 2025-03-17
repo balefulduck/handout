@@ -27,7 +27,10 @@ export async function middleware(request) {
   if (token) {
     // If user is authenticated and tries to access auth pages
     if (isAuthPage) {
+      console.log('User is authenticated and trying to access login page, redirecting to /growguide');
       return NextResponse.redirect(new URL('/growguide', request.url));
+    } else {
+      return NextResponse.next();
     }
   }
 
