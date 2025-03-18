@@ -1,8 +1,13 @@
+// File: /src/components/PlantDiagnosticWizard/Steps/StepDiagnosis.js
 'use client';
 
-import { FaCheckCircle, FaExclamationTriangle, FaLightbulb, FaQuestionCircle } from 'react-icons/fa';
+import { useState } from 'react';
+import { FaCheckCircle, FaExclamationTriangle, FaLightbulb, FaQuestionCircle, FaImages, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import Image from 'next/image';
 
 export default function StepDiagnosis({ diagnosis, onRequestHelp, onBack }) {
+  const [showingImageIndex, setShowingImageIndex] = useState(0);
+  
   if (!diagnosis) return null;
 
   // Determine severity styling
@@ -20,6 +25,20 @@ export default function StepDiagnosis({ diagnosis, onRequestHelp, onBack }) {
   };
 
   const severityClass = getSeverityColor(diagnosis.severity);
+  
+  // Handle reference image navigation
+  const hasImages = diagnosis.images && diagnosis.images.length > 0;
+  const nextImage = () => {
+    if (hasImages) {
+      setShowingImageIndex((prev) => (prev + 1) % diagnosis.images.length);
+    }
+  };
+  
+  const prevImage = () => {
+    if (hasImages) {
+      setShowingImageIndex((prev) => (prev === 0 ? diagnosis.images.length - 1 : prev - 1));
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -36,6 +55,46 @@ export default function StepDiagnosis({ diagnosis, onRequestHelp, onBack }) {
           </div>
         </div>
       </div>
+
+      {/* Reference Images Gallery */}
+      {hasImages && (
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center">
+            <FaImages className="text-olive-green mr-2" />
+            <h3 className="font-medium">Referenzbilder</h3>
+          </div>
+          <div className="relative aspect-video bg-gray-100">
+            <Image 
+              src={diagnosis.images[showingImageIndex]} 
+              alt={`Referenzbild für ${diagnosis.title}`}
+              fill
+              className="object-contain"
+            />
+            
+            {diagnosis.images.length > 1 && (
+              <>
+                <button 
+                  onClick={prevImage}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 text-white hover:bg-black/50"
+                >
+                  <FaChevronLeft />
+                </button>
+                <button 
+                  onClick={nextImage}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 text-white hover:bg-black/50"
+                >
+                  <FaChevronRight />
+                </button>
+                <div className="absolute bottom-2 w-full flex justify-center">
+                  <div className="bg-black/30 rounded-full px-3 py-1 text-white text-sm">
+                    {showingImageIndex + 1} / {diagnosis.images.length}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Possible Causes */}
       <div className="border border-gray-200 rounded-lg">

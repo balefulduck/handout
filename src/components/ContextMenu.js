@@ -167,6 +167,50 @@ export default function ContextMenu({
       console.error('Error updating email:', error);
     }
   };
+  
+  // Add event listener for diagnostic help
+  useEffect(() => {
+    const handleDiagnosticHelp = (event) => {
+      const helpData = event.detail;
+      // Open help modal
+      setHelpModalOpen(true);
+      
+      // Pre-fill the message with diagnostic information
+      if (helpData && helpData.diagnosisInfo) {
+        const { symptom, refinement, diagnosis, severity } = helpData.diagnosisInfo;
+        const diagnosisMessage = `
+Pflanzen-Diagnose Anfrage:
+- Problem: ${symptom}
+- Details: ${refinement}
+- Diagnose: ${diagnosis}
+- Schweregrad: ${severity}
+
+Ich benötige weitere Unterstützung bei diesem Problem.
+`;
+        
+        setHelpFormData(prevData => ({
+          ...prevData,
+          subject: `Diagnose Hilfe: ${diagnosis}`,
+          message: diagnosisMessage
+        }));
+        
+        // If plant data is available, pre-select the affected plant
+        if (helpData.plantData && helpData.plantData.id) {
+          const plantId = helpData.plantData.id;
+          // Find the plant in userPlants
+          const plantToSelect = userPlants.find(p => p.id === plantId);
+          if (plantToSelect && !selectedPlants.some(p => p.id === plantId)) {
+            setSelectedPlants([...selectedPlants, plantToSelect]);
+          }
+        }
+      }
+    };
+    
+    window.addEventListener('diagnosticHelpClick', handleDiagnosticHelp);
+    return () => {
+      window.removeEventListener('diagnosticHelpClick', handleDiagnosticHelp);
+    };
+  }, [userPlants, selectedPlants]);
 
   return (
     <>
