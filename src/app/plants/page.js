@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import ContextMenu from '@/components/ContextMenu';
-import { FaSeedling, FaLeaf, FaCalendarAlt, FaPlus, FaEdit, FaWater, FaChevronDown, FaChevronUp, FaUsers, FaTint, FaCopy } from 'react-icons/fa';
+import { FaSeedling, FaLeaf, FaCalendarAlt, FaPlus, FaEdit, FaWater, FaChevronDown, FaChevronUp, FaUsers, FaTint, FaCopy, FaEllipsisV, FaTrash, FaExchangeAlt } from 'react-icons/fa';
 import { GiFlowerPot, GiGreenhouse } from 'react-icons/gi';
 import Link from 'next/link';
 import { Bebas_Neue } from 'next/font/google';
@@ -172,6 +172,81 @@ export default function PlantsPage() {
   const navigateToPlantDetail = (plantId) => {
     router.push(`/plants/${plantId}`);
   };
+  
+  // Handle plant deletion
+  const handleDeletePlant = async (e, plantId) => {
+    e.stopPropagation(); // Prevent navigation to plant detail
+    
+    if (!confirm('Möchtest du diese Pflanze wirklich löschen?')) {
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/plants/${plantId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete plant');
+      }
+      
+      // Refresh plants list after successful deletion
+      fetchData();
+    } catch (err) {
+      console.error('Error deleting plant:', err);
+      setError(`Fehler beim Löschen der Pflanze: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Plant Options Modal Component
+  const PlantOptionsMenu = ({ plant, onClose }) => {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={onClose}>
+        <div 
+          className="bg-white w-full max-w-xs mx-auto rounded-lg shadow-lg overflow-hidden" 
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="p-4 border-b border-gray-200">
+            <div className="flex justify-between items-center">
+              <h3 className="font-semibold text-lg text-gray-800">{plant.name}</h3>
+              <button 
+                onClick={onClose}
+                className="rounded-full p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <div className="divide-y divide-gray-100">
+            <button 
+              onClick={(e) => handleDeletePlant(e, plant.id)}
+              className="w-full text-left px-4 py-3 text-red-600 hover:bg-gray-50 flex items-center"
+            >
+              <FaTrash className="mr-3 text-sm" /> <span>Löschen</span>
+            </button>
+            <button 
+              disabled
+              className="w-full text-left px-4 py-3 text-gray-400 flex items-center cursor-not-allowed"
+            >
+              <FaPlus className="mr-3 text-sm" /> <span>Zu Setup hinzufügen</span>
+            </button>
+            <button 
+              disabled
+              className="w-full text-left px-4 py-3 text-gray-400 flex items-center cursor-not-allowed"
+            >
+              <FaExchangeAlt className="mr-3 text-sm" /> <span>Zu anderem Setup verschieben</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   // Listen for the "Neue Pflanze" button click from ContextMenu
   useEffect(() => {
@@ -323,24 +398,39 @@ export default function PlantsPage() {
                                 </div>
                               </div>
                               
-                              <div className="flex items-center space-x-4">
-                                {/* Age indicator */}
-                                <div className="text-xs text-gray-600">
-                                  <div className="flex items-center">
-                                    <FaLeaf className="mr-1 text-green-500" />
-                                    <span>{calculateAge(plant.start_date)} Tage alt</span>
-                                  </div>
+                              <div className="flex items-center">
+                                {/* Plant Options Menu Trigger */}
+                                <div className="relative">
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setExpandedSetups(prev => {
+                                        const newState = {...prev};
+                                        // Close all other menus first
+                                        Object.keys(newState).forEach(key => {
+                                          if (key.startsWith('plant-menu-')) {
+                                            newState[key] = false;
+                                          }
+                                        });
+                                        // Toggle this menu
+                                        newState[`plant-menu-${plant.id}`] = !prev[`plant-menu-${plant.id}`];
+                                        return newState;
+                                      });
+                                    }}
+                                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all"
+                                  >
+                                    <FaEllipsisV size={14} />
+                                  </button>
+                                  {expandedSetups[`plant-menu-${plant.id}`] && (
+                                    <PlantOptionsMenu 
+                                      plant={plant} 
+                                      onClose={() => setExpandedSetups(prev => ({
+                                        ...prev,
+                                        [`plant-menu-${plant.id}`]: false
+                                      }))} 
+                                    />
+                                  )}
                                 </div>
-                                
-                                {/* Flowering indicator */}
-                                {plant.flowering_start_date && (
-                                  <div className="text-xs text-gray-600">
-                                    <div className="flex items-center">
-                                      <FaLeaf className="mr-1 text-pink-500" />
-                                      <span>{calculateFloweringDays(plant.flowering_start_date)} Tage blüte</span>
-                                    </div>
-                                  </div>
-                                )}
                               </div>
                             </div>
                           ))
@@ -392,24 +482,39 @@ export default function PlantsPage() {
                         </div>
                       </div>
                       
-                      <div className="flex items-center space-x-4">
-                        {/* Age indicator */}
-                        <div className="text-xs text-gray-600">
-                          <div className="flex items-center">
-                            <FaLeaf className="mr-1 text-green-500" />
-                            <span>{calculateAge(plant.start_date)} Tage alt</span>
-                          </div>
+                      <div className="flex items-center">
+                        {/* Plant Options Menu Trigger */}
+                        <div className="relative">
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setExpandedSetups(prev => {
+                                const newState = {...prev};
+                                // Close all other menus first
+                                Object.keys(newState).forEach(key => {
+                                  if (key.startsWith('plant-menu-')) {
+                                    newState[key] = false;
+                                  }
+                                });
+                                // Toggle this menu
+                                newState[`plant-menu-${plant.id}`] = !prev[`plant-menu-${plant.id}`];
+                                return newState;
+                              });
+                            }}
+                            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all"
+                          >
+                            <FaEllipsisV size={14} />
+                          </button>
+                          {expandedSetups[`plant-menu-${plant.id}`] && (
+                            <PlantOptionsMenu 
+                              plant={plant} 
+                              onClose={() => setExpandedSetups(prev => ({
+                                ...prev,
+                                [`plant-menu-${plant.id}`]: false
+                              }))} 
+                            />
+                          )}
                         </div>
-                        
-                        {/* Flowering indicator */}
-                        {plant.flowering_start_date && (
-                          <div className="text-xs text-gray-600">
-                            <div className="flex items-center">
-                              <FaLeaf className="mr-1 text-pink-500" />
-                              <span>{calculateFloweringDays(plant.flowering_start_date)} Tage blüte</span>
-                            </div>
-                          </div>
-                        )}
                       </div>
                     </div>
                   ))}
