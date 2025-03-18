@@ -360,7 +360,7 @@ export default function PlantsPage() {
                         <div className="flex items-center space-x-2">
                           <button 
                             onClick={() => navigateToNewDayEntry(setup.id)}
-                            className="p-2 bg-brand-primary text-white rounded-md hover:bg-primary-hover transition-all text-sm flex items-center gap-1"
+                            className="p-2 bg-brand-primary text-white rounded-md hover:bg-primary-hover transition-all text-sm flex items-center gap-1 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/30 before:to-transparent before:opacity-50 before:pointer-events-none"
                           >
                             <FaCalendarAlt className="text-xs" /> <span>Tageseintrag</span>
                           </button>

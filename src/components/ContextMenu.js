@@ -403,7 +403,7 @@ Ich benötige weitere Unterstützung bei diesem Problem.
         </Dialog>
       </Transition.Root>
 
-      <div className="fixed top-0 left-0 right-0 z-50 bg-cool-gray shadow-lg">
+      <div className="fixed top-0 left-0 p-1 right-0 z-50 bg-cool-gray shadow-lg before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/30 before:to-transparent before:opacity-50 before:pointer-events-none overflow-hidden">
         <div className="max-w-7xl mx-auto relative">
           {/* Hamburger icon positioned absolutely to avoid affecting the flex layout */}
           <button
@@ -412,7 +412,7 @@ Ich benötige weitere Unterstützung bei diesem Problem.
             onClick={() => setSidebarOpen(true)}
           >
             <span className="sr-only">Open sidebar</span>
-            <img src="/menu.png" alt="Menu" className="h-6 w-6" aria-hidden="true" />
+            <img src="/menu.png" alt="Menu" className="h-9 w-9" aria-hidden="true" />
           </button>
     
           {/* Responsive navigation with flex layout */}
@@ -465,7 +465,7 @@ Ich benötige weitere Unterstützung bei diesem Problem.
           </div>
         </div>
       </div>
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-cool-gray shadow-lg border-t border-gray-200">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-cool-gray shadow-lg border-t border-gray-200 before:absolute before:inset-0 before:bg-gradient-to-t before:from-white/30 before:to-transparent before:opacity-50 before:pointer-events-none overflow-hidden">
         <div className="max-w-7xl mx-auto px-4">
           {pathname === '/growguide' && (
             <div className="grid grid-cols-4 gap-3 py-2 px-2">
