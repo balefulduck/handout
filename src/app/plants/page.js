@@ -6,6 +6,13 @@ import ContextMenu from '@/components/ContextMenu';
 import { FaSeedling, FaLeaf, FaCalendarAlt, FaPlus, FaEdit, FaWater, FaChevronDown, FaChevronUp, FaUsers, FaTint, FaCopy } from 'react-icons/fa';
 import { GiFlowerPot, GiGreenhouse } from 'react-icons/gi';
 import Link from 'next/link';
+import { Bebas_Neue } from 'next/font/google';
+
+const bebasNeue = Bebas_Neue({
+  weight: ['400'],
+  subsets: ['latin'],
+  display: 'swap',
+});
 
 export default function PlantsPage() {
   const router = useRouter();
@@ -268,7 +275,7 @@ export default function PlantsPage() {
                         <div className="flex items-center space-x-3">
                           <GiGreenhouse className="text-2xl text-brand-primary" />
                           <div>
-                            <h3 className="font-bold text-gray-800 hover:text-brand-primary transition-colors cursor-pointer" 
+                            <h3 className={`${bebasNeue.className} font-bold text-gray-800 hover:text-brand-primary transition-colors cursor-pointer`} 
                                 onClick={() => navigateToSetupDetail(setup.id)}>
                               {setup.name}
                             </h3>
@@ -304,7 +311,7 @@ export default function PlantsPage() {
                             >
                               <div className="flex items-center space-x-3">
                                 <div>
-                                  <h4 className="font-medium text-gray-800">{plant.name}</h4>
+                                  <h4 className="font-semibold text-gray-800">{plant.name}</h4>
                                   <div className="flex items-center space-x-2 text-xs text-gray-500">
                                     {plant.breeder && (
                                       <span>{plant.breeder}</span>
@@ -356,7 +363,7 @@ export default function PlantsPage() {
                   <div className="flex justify-between items-center">
                     <div className="flex items-center space-x-3">
                       <div>
-                        <h3 className="font-bold text-gray-800">Einzelne Pflanzen</h3>
+                        <h3 className={`${bebasNeue.className} font-bold text-gray-800`}>Einzelne Pflanzen</h3>
                         <p className="text-sm text-gray-600">{individualPlants.length} Pflanzen ohne Setup</p>
                       </div>
                     </div>
@@ -373,7 +380,7 @@ export default function PlantsPage() {
                     >
                       <div className="flex items-center space-x-3">
                         <div>
-                          <h4 className="font-medium text-gray-800">{plant.name}</h4>
+                          <h4 className="font-semibold text-gray-800">{plant.name}</h4>
                           <div className="flex items-center space-x-2 text-xs text-gray-500">
                             {plant.breeder && (
                               <span>{plant.breeder}</span>

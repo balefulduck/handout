@@ -361,7 +361,7 @@ export default function ContextMenu({
 
       <div className="fixed top-0 left-0 right-0 z-50 bg-cool-gray shadow-lg">
         <div className="max-w-7xl mx-auto relative">
-          {/* Hamburger icon positioned absolutely to avoid affecting the grid layout */}
+          {/* Hamburger icon positioned absolutely to avoid affecting the flex layout */}
           <button
             type="button"
             className="absolute left-2 top-1/2 transform -translate-y-1/2 text-white focus:outline-none z-10"
@@ -371,8 +371,8 @@ export default function ContextMenu({
             <img src="/menu.png" alt="Menu" className="h-6 w-6" aria-hidden="true" />
           </button>
     
-          {/* Main navigation with custom width grid */}
-          <div className="grid grid-cols-10">
+          {/* Responsive navigation with flex layout */}
+          <div className="flex pl-10">
             <a 
               href="/growguide"
               onClick={(e) => {
@@ -382,9 +382,10 @@ export default function ContextMenu({
                 window.location.href = '/growguide';
                 return false;
               }}
-              className={`col-span-4 flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/growguide' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'} pl-10`}
+              className={`flex-1 flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/growguide' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
             >
-              <span className="text-sm font-semibold text-yellow-green px-2 interactive-link">Grow Guide</span>
+              <PiPlantBold className="md:hidden text-yellow-green text-lg" />
+              <span className="hidden md:block text-xs lg:text-sm font-semibold text-yellow-green px-1 lg:px-2 interactive-link">Grow Guide</span>
               {pathname !== '/growguide' && <div className="absolute right-0 top-1/2 -translate-y-1/2 h-4/5 w-px bg-white/20" />}
             </a>
             <a
@@ -396,9 +397,10 @@ export default function ContextMenu({
                 window.location.href = '/plants';
                 return false;
               }}
-              className={`col-span-2 flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/plants' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
+              className={`flex-1 flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/plants' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
             >
-              <span className="text-sm font-semibold text-turquoise px-1 interactive-link">Pflanzen</span>
+              <GiSprout className="md:hidden text-turquoise text-lg" />
+              <span className="hidden md:block text-xs lg:text-sm font-semibold text-turquoise px-1 interactive-link">Pflanzen</span>
               {pathname !== '/plants' && <div className="absolute right-0 top-1/2 -translate-y-1/2 h-4/5 w-px bg-white/20" />}
             </a>
            
@@ -411,9 +413,10 @@ export default function ContextMenu({
                 window.location.href = '/help';
                 return false;
               }}
-              className={`col-span-2 flex items-center justify-center py-1.5 transition-colors ${pathname === '/help' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
+              className={`flex-1 flex items-center justify-center py-1.5 transition-colors ${pathname === '/help' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
             >
-              <span className="text-sm font-semibold text-medium-blue px-2 interactive-link">Dr. Cannabis Hilfe</span>
+              <FaFirstAid className="md:hidden text-medium-blue text-lg" />
+              <span className="hidden md:block text-xs lg:text-sm font-semibold text-medium-blue px-1 lg:px-2 interactive-link whitespace-nowrap">Dr. Cannabis Hilfe</span>
             </a>
           </div>
         </div>

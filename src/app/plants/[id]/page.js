@@ -926,7 +926,7 @@ export default function PlantDetailPage() {
                           type="submit"
                           className="px-5 py-2.5 bg-brand-primary text-white rounded-md font-medium hover:bg-opacity-90 shadow-sm"
                         >
-                          Tageseintrag speichern
+                          Speichern
                         </button>
                       )}
                     </div>
@@ -1324,10 +1324,11 @@ export default function PlantDetailPage() {
           )}
           
           {/* Day Entries List */}
+
           {days.length > 0 && (
             <div className="mt-8">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {days.map((day) => (
+                {days.sort((a, b) => new Date(b.date) - new Date(a.date)).map((day) => (
                   <div
                     key={day.id}
                     onClick={() => router.push(`/plants/${params.id}/days/${day.id}`)}
