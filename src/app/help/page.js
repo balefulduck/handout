@@ -3,9 +3,13 @@
 import { useState } from 'react';
 import ContextMenu from '@/components/ContextMenu';
 import DrcInfoTag from '@/components/DrcInfoTag';
+import { FaLeaf, FaSeedling, FaSearch } from 'react-icons/fa';
+import { GiGrowth } from 'react-icons/gi';
+import PlantDiagnosticWizard from '@/components/PlantDiagnosticWizard';
 
 export default function HelpPage() {
   const [expandedCards, setExpandedCards] = useState({});
+  const [showDiagnosticWizard, setShowDiagnosticWizard] = useState(false);
   
   // Function to toggle card expansion
   const toggleCard = (id) => {
@@ -61,82 +65,57 @@ export default function HelpPage() {
 
   return (
     <>
-    <div className="p-8 pb-32 max-w-4xl mx-auto">
-      <h1 className="mt-10 mb-6 text-medium-blue">Hilfe & Problemlösung</h1>
+    <div className="p-8 pb-32 mt-10 max-w-4xl mx-auto">
+    
       
-      <div className="bg-medium-blue/10 border-l-4 border-medium-blue p-5 mb-10 rounded-r-lg text-focus-animation">
-        <p className="text-base mb-3">
-          Verfärbte oder verformte Blätter können Anzeichen für Probleme sein.
-        </p>
-        <p className="text-base">
-          Nur eine frühzeitige Diagnose und konsequente Behandlung kann Auswirkungen auf die Gesundheit Deiner Pflanzen minimieren.
-        </p>
-
-        <br className="my-5" />
-        <p className="text-base">
-          Nutze die kostenlose Dr. Cannabis-Hilfe für weitere Informationen und unmittelbare Unterstützung.
-        </p>
-      </div>
-
-      <div className="mt-8 mb-10 help rounded-lg shadow-sm overflow-hidden border border-gray-100">
-        <div className="bg-medium-blue p-4">
-          <h3 className="font-aptos text-white">Allgemeine Tipps:</h3>
+      {/* New Diagnostic Tool Section */}
+      <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8 border border-gray-100">
+        <div className="bg-olive-green p-5 text-white">
+          <h2 className="text-xl font-semibold">Pflanzen-Diagnose</h2>
+          <p className="mt-1 text-white/90">Probleme bei deiner Pflanze schnell identifizieren</p>
         </div>
-        <div className="p-5 border-x border-b border-medium-blue/20 rounded-b-lg bg-white">
-          <ul className="list-disc pl-5 space-y-2 text-gray-700 text-normal">
-            <li>Überprüfe regelmäßig die Blätter auf Anzeichen von Problemen</li>
-            <li>Halte ein Pflanzentagebuch für besseres Monitoring</li>
-            <li>Stelle sicher, dass die Belüftung ausreichend ist</li>
-            <li>Kontrolliere regelmäßig <DrcInfoTag 
-              term="pH" 
-              color="olive-green"
-              bgMode="light"
-              tooltipContent="Der pH-Wert gibt an, wie sauer oder basisch eine Lösung ist. Für Cannabis ist ein pH-Wert zwischen 6.0-6.5 bei Erde und 5.5-6.0 bei Hydrokultur optimal."
-            >
-              pH
-            </DrcInfoTag>-Wert und Nährstoffversorgung</li>
-          </ul>
-        </div>
-      </div>
-
-      <div className="space-y-6 mt-10">
-        {troubleshootingItems.map((item) => (
-          <div 
-            key={item.id} 
-            className="rounded-lg shadow overflow-hidden interactive-card"
-          >
-            <div 
-              className="bg-turquoise p-4 cursor-pointer transition-all duration-300 hover:bg-turquoise/90"
-              onClick={() => toggleCard(item.id)}
-            >
-              <div className="flex justify-between items-center">
-                <h4 className="font-aptos text-white text-pulse-animation">{item.problem}</h4>
-                <span className="text-white text-xl">
-                  {expandedCards[item.id] ? '−' : '+'}
-                </span>
+        
+        <div className="p-6">
+          <div className="flex flex-col md:flex-row gap-6 items-center">
+            <div className="flex-1">
+              <h3 className="text-lg font-medium mb-2 text-gray-800">Was stimmt nicht mit deiner Pflanze?</h3>
+              <p className="text-gray-600 mb-4">
+                Unser Diagnose-Assistent hilft dir, die mögliche Ursache des Problems zu identifizieren und zeigt dir 
+                Lösungsschritte.
+              </p>
+              <button 
+                onClick={() => setShowDiagnosticWizard(true)}
+                className="px-5 py-2.5 bg-olive-green text-white rounded-md hover:bg-yellow-green transition-all duration-300 flex items-center"
+              >
+                <FaSearch className="mr-2" /> Diagnose starten
+              </button>
+            </div>
+            
+            <div className="flex-shrink-0 grid grid-cols-2 gap-3">
+              <div className="p-3 bg-gray-50 rounded-lg text-center">
+                <FaLeaf className="text-3xl text-olive-green mx-auto mb-2" />
+                <p className="text-sm font-medium">Blattverfärbungen</p>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-lg text-center">
+                <GiGrowth className="text-3xl text-olive-green mx-auto mb-2" />
+                <p className="text-sm font-medium">Wachstumsprobleme</p>
               </div>
             </div>
-            {expandedCards[item.id] && (
-              <div className="p-6 border-x border-b border-turquoise/20 rounded-b-lg bg-white">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h5 className="text-gray-900 mb-1">Mögliche Ursache:</h5>
-                    <p className="text-gray-700 text-normal">{item.cause}</p>
-                  </div>
-                  <div>
-                    <h5 className="text-gray-900 mb-1">Lösung:</h5>
-                    <p className="text-gray-700 text-normal">{item.solution}</p>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
-        ))}
+        </div>
       </div>
+      
 
 
     </div>
     <ContextMenu />
+    
+    {/* Plant Diagnostic Wizard Modal */}
+    {showDiagnosticWizard && (
+      <PlantDiagnosticWizard 
+        onClose={() => setShowDiagnosticWizard(false)} 
+      />
+    )}
     </>
   );
 }
