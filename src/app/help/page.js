@@ -5,11 +5,11 @@ import ContextMenu from '@/components/ContextMenu';
 import DrcInfoTag from '@/components/DrcInfoTag';
 import { FaLeaf, FaSeedling, FaSearch } from 'react-icons/fa';
 import { GiGrowth } from 'react-icons/gi';
-import PlantDiagnosticWizard from '@/components/PlantDiagnosticWizard';
+import HelpRequestModal from '@/components/HelpRequestModal';
 
 export default function HelpPage() {
   const [expandedCards, setExpandedCards] = useState({});
-  const [showDiagnosticWizard, setShowDiagnosticWizard] = useState(false);
+  const [showHelpRequestModal, setShowHelpRequestModal] = useState(false);
   
   // Function to toggle card expansion
   const toggleCard = (id) => {
@@ -80,14 +80,14 @@ export default function HelpPage() {
             <div className="flex-1">
               <h3 className="text-lg font-medium mb-2 text-gray-800">Was stimmt nicht mit deiner Pflanze?</h3>
               <p className="text-gray-600 mb-4">
-                Unser Diagnose-Assistent hilft dir, die mögliche Ursache des Problems zu identifizieren und zeigt dir 
-                Lösungsschritte.
+                Unser Hilfe-Assistent ermöglicht es dir, eine detaillierte Anfrage an unser Team zu senden.
+                Du kannst Fotos hinzufügen und betroffene Pflanzen auswählen.
               </p>
               <button 
-                onClick={() => setShowDiagnosticWizard(true)}
+                onClick={() => setShowHelpRequestModal(true)}
                 className="px-5 py-2.5 bg-olive-green text-white rounded-md hover:bg-yellow-green transition-all duration-300 flex items-center"
               >
-                <FaSearch className="mr-2" /> Diagnose starten
+                <FaSearch className="mr-2" /> Hilfe anfordern
               </button>
             </div>
             
@@ -110,10 +110,10 @@ export default function HelpPage() {
     </div>
     <ContextMenu />
     
-    {/* Plant Diagnostic Wizard Modal */}
-    {showDiagnosticWizard && (
-      <PlantDiagnosticWizard 
-        onClose={() => setShowDiagnosticWizard(false)} 
+    {/* Help Request Modal */}
+    {showHelpRequestModal && (
+      <HelpRequestModal 
+        onClose={() => setShowHelpRequestModal(false)} 
       />
     )}
     </>
