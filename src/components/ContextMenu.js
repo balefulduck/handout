@@ -660,7 +660,7 @@ Ich benötige weitere Unterstützung bei diesem Problem.
           )}
 
           {pathname === '/plants' && (
-            <div className="grid grid-cols-1 py-2 px-2">
+            <div className="grid grid-cols-2 py-2 px-2 gap-3">
               <button
                 onClick={() => {
                   // Dispatch custom event to trigger the new plant modal
@@ -672,6 +672,19 @@ Ich benötige weitere Unterstützung bei diesem Problem.
                   <BsPlusLg className="text-lg" />
                 </div>
                 <span className="text-xs text-white font-semibold">Neue Pflanze</span>
+              </button>
+              
+              <button
+                onClick={() => {
+                  // Dispatch custom event to trigger the new setup modal
+                  window.dispatchEvent(new Event('newSetupClick'));
+                }}
+                className="flex flex-col items-center gap-2 transition-colors"
+              >
+                <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-olive-green">
+                  <BsPlusLg className="text-lg" />
+                </div>
+                <span className="text-xs text-white font-semibold">Neues Setup</span>
               </button>
             </div>
           )}

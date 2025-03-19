@@ -7,6 +7,7 @@ import { FaSeedling, FaLeaf, FaCalendarAlt, FaPlus, FaEdit, FaWater, FaCog, FaCh
 import { GiFlowerPot, GiGreenhouse } from 'react-icons/gi';
 import Link from 'next/link';
 import { Bebas_Neue } from 'next/font/google';
+import SetupModal from '@/components/SetupModal';
 
 const bebasNeue = Bebas_Neue({
   weight: ['400'],
@@ -22,9 +23,15 @@ export default function PlantsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showNewPlantModal, setShowNewPlantModal] = useState(false);
+  const [showSetupModal, setShowSetupModal] = useState(false);
+  const [editingSetup, setEditingSetup] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 3;
   const [individualPlants, setIndividualPlants] = useState([]);
+  const [newSetup, setNewSetup] = useState({
+    name: '',
+    description: '',
+  });
 
   // Form state for new plant
   const [newPlant, setNewPlant] = useState({
@@ -45,6 +52,15 @@ export default function PlantsPage() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewPlant(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Function to handle new setup form input changes
+  const handleSetupInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewSetup(prev => ({
       ...prev,
       [name]: value
     }));
@@ -172,6 +188,42 @@ export default function PlantsPage() {
     }
   };
 
+  // Function to create new setup
+  const createSetup = async (e) => {
+    if (e) e.preventDefault();
+    try {
+      setLoading(true);
+      const response = await fetch('/api/plant-setups', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newSetup),
+      });
+
+      if (response.ok) {
+        // Reset form and close modal
+        setNewSetup({
+          name: '',
+          description: '',
+        });
+        setShowSetupModal(false);
+        
+        // Refresh setups list
+        fetchData();
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Fehler beim Erstellen des Setups');
+        console.error('Error creating setup:', errorData);
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Error creating setup:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Function to navigate to plant detail page
   const navigateToPlantDetail = (plantId) => {
     router.push(`/plants/${plantId}`);
@@ -258,18 +310,78 @@ export default function PlantsPage() {
       setShowNewPlantModal(true);
     };
 
-    // Add event listener
+    const handleNewSetupClick = () => {
+      setShowSetupModal(true);
+    };
+
+    // Add event listeners
     window.addEventListener('newPlantClick', handleNewPlantClick);
+    window.addEventListener('newSetupClick', handleNewSetupClick);
 
     // Initial fetch
     fetchData();
 
-    // Clean up event listener
+    // Clean up event listeners
     return () => {
       window.removeEventListener('newPlantClick', handleNewPlantClick);
+      window.removeEventListener('newSetupClick', handleNewSetupClick);
     };
   }, []);
-  
+
+  // Handle creating a new setup
+  const handleCreateSetup = async (setupData) => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/plant-setups', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(setupData),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create setup');
+      }
+      
+      // Refresh data to show the new setup
+      fetchData();
+      setShowSetupModal(false);
+    } catch (err) {
+      console.error('Error creating setup:', err);
+      setError(`Fehler beim Erstellen des Setups: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle editing a setup
+  const handleEditSetup = async (setupData) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/plant-setups/${editingSetup.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(setupData),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update setup');
+      }
+      
+      // Refresh data to show the updated setup
+      fetchData();
+      setEditingSetup(null);
+    } catch (err) {
+      console.error('Error updating setup:', err);
+      setError(`Fehler beim Aktualisieren des Setups: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Toggle setup expansion
   const toggleSetupExpansion = (setupId) => {
     setExpandedSetups(prev => ({
@@ -369,6 +481,13 @@ export default function PlantsPage() {
                             <FaCalendarAlt className="text-xs" /> <span>Tageseintrag</span>
                           </button>
                           <button 
+                            onClick={() => setEditingSetup(setup)}
+                            className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-all"
+                            aria-label="Setup bearbeiten"
+                          >
+                            <FaEdit />
+                          </button>
+                          <button 
                             onClick={() => toggleSetupExpansion(setup.id)}
                             className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-all"
                           >
@@ -377,7 +496,7 @@ export default function PlantsPage() {
                         </div>
                       </div>
                     </div>
-
+                    
                     {/* Setup Plants */}
                     {expandedSetups[setup.id] && (
                       <div className="divide-y divide-gray-100">
@@ -841,7 +960,7 @@ export default function PlantsPage() {
                       onClick={() => setCurrentStep(currentStep - 1)}
                       className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 flex items-center gap-1"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
                       </svg>
                       Zurück
@@ -866,7 +985,7 @@ export default function PlantsPage() {
                     {currentStep < totalSteps ? (
                       <>
                         Weiter
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                         </svg>
                       </>
@@ -877,6 +996,26 @@ export default function PlantsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Setup Modal */}
+      {showSetupModal && (
+        <SetupModal
+          onClose={() => setShowSetupModal(false)}
+          onSave={handleCreateSetup}
+          availablePlants={plants}
+          isNew={true}
+        />
+      )}
+      
+      {editingSetup && (
+        <SetupModal
+          onClose={() => setEditingSetup(null)}
+          onSave={handleEditSetup}
+          availablePlants={plants}
+          setup={editingSetup}
+          isNew={false}
+        />
       )}
 
       <ContextMenu />
