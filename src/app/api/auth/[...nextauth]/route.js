@@ -73,16 +73,26 @@ export const authOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // Force redirect to /growguide after sign in
-      if (url.startsWith(baseUrl)) {
-        // If this is an internal URL, decide where to redirect
-        if (url.includes('/api/auth/signin') || url.includes('/api/auth/callback') || url.includes('/login')) {
-          console.log('Auth callback - redirecting to /growguide');
-          return `${baseUrl}/growguide`;
-        }
+      console.log('Redirect callback called with:', { url, baseUrl });
+      
+      // Get the actual base URL from config to ensure consistency
+      const configBaseUrl = authOptions.baseUrl;
+      console.log('Using config baseUrl:', configBaseUrl);
+      
+      // Handle sign-in redirects
+      if (url.includes('/api/auth/signin') || url.includes('/api/auth/callback') || url.includes('/login')) {
+        console.log('Auth callback - redirecting to /growguide');
+        return `${configBaseUrl}/growguide`;
       }
-      // Default redirect behavior
-      return url.startsWith(baseUrl) ? url : baseUrl;
+      
+      // Handle sign-out redirects
+      if (url.includes('/api/auth/signout') || url.includes('/logout')) {
+        console.log('Logout detected - redirecting to /login');
+        return `${configBaseUrl}/login`;
+      }
+      
+      // Default redirect behavior using the configured base URL
+      return url.startsWith(configBaseUrl) ? url : configBaseUrl;
     }
   },
   pages: {
@@ -98,12 +108,13 @@ export const authOptions = {
         // If NEXTAUTH_URL is set in environment, use it
         url: process.env.NEXTAUTH_URL,
       }
-    : {
-        // In development, default to localhost
-        url: process.env.NODE_ENV === "production"
-          ? process.env.VERCEL_URL || "https://drc420.team"
-          : "http://localhost:3000",
-      }),
+    : {}),
+      
+  // Define base URL for redirects and other operations
+  baseUrl: process.env.NEXTAUTH_URL || 
+    (process.env.NODE_ENV === "production" 
+      ? process.env.VERCEL_URL || "https://drc420.team" 
+      : "http://localhost:3000"),
       
   // Configure cookies with more permissive settings for cross-domain issues
   cookies: {
