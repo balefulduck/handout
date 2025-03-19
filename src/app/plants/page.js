@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import ContextMenu from '@/components/ContextMenu';
-import { FaSeedling, FaLeaf, FaCalendarAlt, FaPlus, FaEdit, FaWater, FaChevronDown, FaChevronUp, FaUsers, FaTint, FaCopy, FaEllipsisV, FaTrash, FaExchangeAlt } from 'react-icons/fa';
+import { FaSeedling, FaLeaf, FaCalendarAlt, FaPlus, FaEdit, FaWater, FaCog, FaChevronDown, FaChevronUp, FaUsers, FaTint, FaCopy, FaEllipsisV, FaTrash, FaExchangeAlt } from 'react-icons/fa';
 import { GiFlowerPot, GiGreenhouse } from 'react-icons/gi';
 import Link from 'next/link';
 import { Bebas_Neue } from 'next/font/google';
@@ -36,6 +36,10 @@ export default function PlantsPage() {
     substrate: 'soil', // Default to soil
     copies: 1 // Number of plant copies to create
   });
+
+  // State for showing/hiding copies and date options
+  const [showCopiesOptions, setShowCopiesOptions] = useState(false);
+  const [showDateOptions, setShowDateOptions] = useState(false);
 
   // Function to handle new plant form input changes
   const handleInputChange = (e) => {
@@ -579,7 +583,7 @@ export default function PlantsPage() {
                       <div className="border-2 border-brand-primary/40 rounded-lg bg-brand-primary/10 relative p-4">
                         <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-semibold flex items-center gap-2">
                           <FaSeedling className="text-brand-primary" />
-                          <span>{newPlant.copies > 1 ? "Name der Pflanzen" : "Name der Pflanze"}</span>
+                          <span>Name der Pflanze</span>
                         </div>
                         
                         <div className="mt-1">
@@ -589,129 +593,160 @@ export default function PlantsPage() {
                               type="text"
                               id="name"
                               name="name"
-                              placeholder={newPlant.copies > 1 ? "Basis-Name für alle Pflanzen" : "Name der Pflanze"}
+                              placeholder="Name der Pflanze"
                               value={newPlant.name}
                               onChange={handleInputChange}
                               required
                               className={`w-full text-lg font-medium py-2 px-2 border ${!newPlant.name && currentStep === 1 ? 'border-red-300 bg-red-50' : 'border-gray-300'} rounded-md bg-white shadow-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary`}
                             />
-                            {!newPlant.name && currentStep === 1 && (
-                              <div className="text-xs text-red-500 mt-1 ml-1">* Pflichtfeld</div>
-                            )}
+                           
                           </div>
                           
-                          {newPlant.copies > 1 && (
-                            <div className="text-xs text-gray-600 mt-1 ml-1">
-                              Namen werden durchnummeriert: {newPlant.name || "Pflanze"} 1, {newPlant.name || "Pflanze"} 2, ...
-                            </div>
-                          )}
-                          
                           {/* Breeder input (L2) - nested under name */}
-                          <div className="relative pl-6 border-l-2 border-gray-200 ml-1 mt-3">
-                            <div className="text-sm font-medium text-gray-600 mb-1">Züchter</div>
+                          <div className="relative text-sm pl-6 border-l-2 border-gray-200 ml-1 mt-3">
                             <input
                               type="text"
                               id="breeder"
                               name="breeder"
-                              placeholder="Optional"
+                              placeholder="Züchter"
                               value={newPlant.breeder}
                               onChange={handleInputChange}
-                              className="w-full py-2 px-2 text-sm border border-dashed border-gray-200 rounded bg-transparent text-gray-600"
+                              className="w-full py-2 px-2 text-sm rounded bg-transparent text-gray-600"
                             />
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* L2: Copies Selection with Tappable Cards */}
+                    {/* Simplified Copies & Date Display */}
                     <div className="mb-6 relative">
-                      <div className="border-2 border-brand-primary/20 rounded-lg bg-brand-primary/5 relative p-4">
-                        <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-medium flex items-center gap-2">
-                          <FaCopy className="text-brand-primary" />
-                          <span>Kopien</span>
-                        </div>
-                        
-                        <div className="mt-2">
-                          <div className="text-sm text-gray-600 mb-3">
-                            {newPlant.copies > 1 
-                              ? `${newPlant.copies} identische Pflanzen erstellen` 
-                              : "Eine Pflanze erstellen"}
-                          </div>
-                          
-                          {/* Tappable number cards */}
-                          <div className="grid grid-cols-5 gap-2">
-                            {[1, 2, 3, 4, 5].map(num => (
-                              <button
-                                key={`copy-${num}`}
-                                type="button"
-                                onClick={() => setNewPlant({...newPlant, copies: num})}
-                                className={`py-2 px-0 rounded-md border ${newPlant.copies === num 
-                                  ? 'bg-brand-primary text-white border-brand-primary' 
-                                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'} 
-                                  transition-colors duration-200 text-center font-medium`}
-                              >
-                                {num}
-                              </button>
-                            ))}
-                          </div>
-                          
-                          <div className="grid grid-cols-5 gap-2 mt-2">
-                            {[6, 7, 8, 9, 10].map(num => (
-                              <button
-                                key={`copy-${num}`}
-                                type="button"
-                                onClick={() => setNewPlant({...newPlant, copies: num})}
-                                className={`py-2 px-0 rounded-md border ${newPlant.copies === num 
-                                  ? 'bg-brand-primary text-white border-brand-primary' 
-                                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'} 
-                                  transition-colors duration-200 text-center font-medium`}
-                              >
-                                {num}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* L3: Start Date - Least emphasis */}
-                    <div className="mb-6">
-                      <div className="border-2 border-gray-200 rounded-lg bg-gray-50 relative">
+                      <div className="border-2 border-gray-200 rounded-lg bg-gray-50 relative p-4">
                         <div className="absolute -top-3 left-4 bg-white px-2 text-gray-600 font-medium flex items-center gap-2 z-10">
-                          <FaCalendarAlt className="text-gray-500" />
-                          <span>Startdatum</span>
+                          <FaCog className="text-gray-500" />
+                          <span>Weitere Einstellungen</span>
                         </div>
                         
-                        <div className="p-4">
-                          {/* Current Date Display */}
-                          <div className="flex justify-between items-center cursor-pointer">
-                            <div className="flex flex-col">
-                              <div className="flex items-baseline gap-2">
-                                <span className="text-sm font-medium text-gray-700">
-                                  {new Date(newPlant.start_date).toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                  {new Date(newPlant.start_date).toLocaleDateString('de-DE', { year: 'numeric' })}
-                                </span>
+                        <div className="flex justify-between items-center">
+                          {/* Copies Display */}
+                          <button
+                            type="button"
+                            onClick={() => setShowCopiesOptions(!showCopiesOptions)}
+                            className="flex items-center gap-2 py-2 px-3 rounded-md hover:bg-gray-100 transition-colors"
+                          >
+                            <FaCopy className="text-gray-500" />
+                            <div className="flex flex-col items-start">
+                              <span className="text-sm font-medium text-gray-700">Kopien</span>
+                              <span className="text-xs text-gray-500">{newPlant.copies}</span>
+                            </div>
+                            <svg className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${showCopiesOptions ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                          </button>
+                          
+                          {/* Date Display */}
+                          <button
+                            type="button"
+                            onClick={() => setShowDateOptions(!showDateOptions)}
+                            className="flex items-center gap-2 py-2 px-3 rounded-md hover:bg-gray-100 transition-colors"
+                          >
+                            <FaCalendarAlt className="text-gray-500" />
+                            <div className="flex flex-col items-start">
+                              <span className="text-sm font-medium text-gray-700">Startdatum</span>
+                              <span className="text-xs text-gray-500">
+                                {new Date(newPlant.start_date).toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' })}
+                              </span>
+                            </div>
+                            <svg className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${showDateOptions ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                          </button>
+                        </div>
+                        
+                        {/* Expandable Copies Options */}
+                        {showCopiesOptions && (
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <div className="text-sm text-gray-600 mb-3">
+                              {newPlant.copies > 1 
+                                ? `${newPlant.copies} identische Pflanzen erstellen` 
+                                : "Eine Pflanze erstellen"}
+                            </div>
+                            
+                            {/* Tappable number cards */}
+                            <div className="grid grid-cols-5 gap-2">
+                              {[1, 2, 3, 4, 5].map(num => (
+                                <button
+                                  key={`copy-${num}`}
+                                  type="button"
+                                  onClick={() => setNewPlant({...newPlant, copies: num})}
+                                  className={`py-2 px-0 rounded-md border ${newPlant.copies === num 
+                                    ? 'bg-brand-primary text-white border-brand-primary' 
+                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'} 
+                                    transition-colors duration-200 text-center font-medium`}
+                                >
+                                  {num}
+                                </button>
+                              ))}
+                            </div>
+                            
+                            <div className="grid grid-cols-5 gap-2 mt-2">
+                              {[6, 7, 8, 9, 10].map(num => (
+                                <button
+                                  key={`copy-${num}`}
+                                  type="button"
+                                  onClick={() => setNewPlant({...newPlant, copies: num})}
+                                  className={`py-2 px-0 rounded-md border ${newPlant.copies === num 
+                                    ? 'bg-brand-primary text-white border-brand-primary' 
+                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'} 
+                                    transition-colors duration-200 text-center font-medium`}
+                                >
+                                  {num}
+                                </button>
+                              ))}
+                            </div>
+                            
+                            {newPlant.copies > 1 && (
+                              <div className="text-xs text-gray-600 mt-3 ml-1">
+                                Namen werden durchnummeriert: {newPlant.name || "Pflanze"} 1, {newPlant.name || "Pflanze"} 2, ...
                               </div>
-                              <div className="text-xs text-gray-500">
-                                {new Date(newPlant.start_date).toLocaleDateString('de-DE', { weekday: 'long' })}
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Expandable Date Options */}
+                        {showDateOptions && (
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <div className="flex justify-between items-center">
+                              <div className="flex flex-col">
+                                <div className="flex items-baseline gap-2">
+                                  <span className="text-sm font-medium text-gray-700">
+                                    {new Date(newPlant.start_date).toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}
+                                  </span>
+                                  <span className="text-xs text-gray-500">
+                                    {new Date(newPlant.start_date).toLocaleDateString('de-DE', { year: 'numeric' })}
+                                  </span>
+                                </div>
                               </div>
+                              <button
+                                type="button"
+                                onClick={() => setNewPlant({...newPlant, start_date: new Date().toISOString().split('T')[0]})}
+                                className="text-xs text-brand-primary hover:text-brand-primary/80"
+                              >
+                                Heute
+                              </button>
+                            </div>
+                            
+                            <div className="mt-3">
+                              <input
+                                type="date"
+                                id="start_date"
+                                name="start_date"
+                                value={newPlant.start_date}
+                                onChange={handleInputChange}
+                                className="w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary"
+                              />
                             </div>
                           </div>
-                          
-                          <div className="mt-3 bg-white rounded-lg border border-gray-200 p-1">
-                            <input
-                              type="date"
-                              id="start_date"
-                              name="start_date"
-                              value={newPlant.start_date}
-                              onChange={handleInputChange}
-                              max={new Date().toISOString().split('T')[0]}
-                              className="w-full text-xs px-3 py-2 bg-transparent rounded focus:outline-none"
-                            />
-                          </div>
-                        </div>
+                        )}
                       </div>
                     </div>
                   </div>
