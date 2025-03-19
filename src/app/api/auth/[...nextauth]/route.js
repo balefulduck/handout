@@ -100,7 +100,7 @@ export const authOptions = {
     : {
         // In development, default to localhost
         url: process.env.NODE_ENV === "production"
-          ? "https://" + process.env.DOMAIN || "https://www.drc420.team"
+          ? "https://" + process.env.DOMAIN || "https://drc420.team"
           : "http://localhost:3000",
       }),
   cookies: {
