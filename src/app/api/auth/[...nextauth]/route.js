@@ -91,7 +91,8 @@ export const authOptions = {
   // Properly configure URLs for different environments
   // This prevents incorrect redirects after logout
   useSecureCookies: process.env.NODE_ENV === "production",
-  // Add URL configuration based on environment
+  
+  // Set the base URL for NextAuth
   ...(process.env.NEXTAUTH_URL
     ? {
         // If NEXTAUTH_URL is set in environment, use it
@@ -100,9 +101,11 @@ export const authOptions = {
     : {
         // In development, default to localhost
         url: process.env.NODE_ENV === "production"
-          ? "https://" + process.env.DOMAIN || "https://drc420.team"
+          ? process.env.VERCEL_URL || "https://drc420.team"
           : "http://localhost:3000",
       }),
+      
+  // Configure cookies with more permissive settings for cross-domain issues
   cookies: {
     sessionToken: {
       name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.session-token`,
@@ -111,7 +114,8 @@ export const authOptions = {
         sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",
-        domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined,
+        // Don't set domain in production to use the default top-level domain
+        domain: undefined,
       },
     },
     callbackUrl: {
@@ -120,7 +124,7 @@ export const authOptions = {
         sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",
-        domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined,
+        domain: undefined,
       },
     },
     csrfToken: {
@@ -130,7 +134,7 @@ export const authOptions = {
         sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",
-        domain: process.env.NODE_ENV === "production" ? process.env.COOKIE_DOMAIN : undefined,
+        domain: undefined,
       },
     },
   },

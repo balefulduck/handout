@@ -3,14 +3,20 @@ import { NextResponse } from 'next/server';
 
 export async function middleware(request) {
   console.log('Middleware executing for path:', request.nextUrl.pathname);
+  console.log('Request URL:', request.url);
   
   try {
+    // Enhanced token retrieval with more debugging
     const token = await getToken({ 
       req: request,
-      secret: process.env.NEXTAUTH_SECRET
+      secret: process.env.NEXTAUTH_SECRET,
+      secureCookie: process.env.NODE_ENV === "production"
     });
     
     console.log('Auth token present:', !!token);
+    if (!token) {
+      console.log('Cookie headers:', request.headers.get('cookie'));
+    }
     
     const isAuthPage = request.nextUrl.pathname.startsWith('/login');
     const isHomePage = request.nextUrl.pathname === '/';
