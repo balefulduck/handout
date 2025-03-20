@@ -171,8 +171,8 @@ export default function UserHelpRequestDetailPage() {
               </div>
             </div>
           </div>
-          <Link href="/plants" className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-olive-green">
-            Zurück zu Meine Pflanzen
+          <Link href="/help-requests" className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-olive-green">
+            Zurück zu Meinen Hilfe-Anfragen
           </Link>
         </div>
       </div>
@@ -182,11 +182,11 @@ export default function UserHelpRequestDetailPage() {
   return (
     <div className="min-h-screen mt-10 bg-gray-100 p-6">
       <ContextMenu />
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto pb-16">
         <div className="mb-6 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-900">Hilfe-Anfrage Details</h1>
-          <Link href="/plants" className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-olive-green">
-            Zurück zu Meine Pflanzen
+          <Link href="/help-requests" className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-olive-green">
+            Zurück zu Meinen Hilfe-Anfragen
           </Link>
         </div>
 
