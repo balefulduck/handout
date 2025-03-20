@@ -6,10 +6,12 @@ import DrcInfoTag from '@/components/DrcInfoTag';
 import { FaLeaf, FaSeedling, FaSearch } from 'react-icons/fa';
 import { GiGrowth } from 'react-icons/gi';
 import HelpRequestModal from '@/components/HelpRequestModal';
+import PlantDiagnosticWizard from '@/components/PlantDiagnosticWizard';
 
 export default function HelpPage() {
   const [expandedCards, setExpandedCards] = useState({});
   const [showHelpRequestModal, setShowHelpRequestModal] = useState(false);
+  const [showDiagnosticWizard, setShowDiagnosticWizard] = useState(false);
   
   // Function to toggle card expansion
   const toggleCard = (id) => {
@@ -80,14 +82,14 @@ export default function HelpPage() {
             <div className="flex-1">
               <h3 className="text-lg font-medium mb-2 text-gray-800">Was stimmt nicht mit deiner Pflanze?</h3>
               <p className="text-gray-600 mb-4">
-                Unser Hilfe-Assistent ermöglicht es dir, eine detaillierte Anfrage an unser Team zu senden.
-                Du kannst Fotos hinzufügen und betroffene Pflanzen auswählen.
+                Unser Diagnose-Assistent hilft dir, Probleme bei deinen Pflanzen zu identifizieren
+                und gibt dir konkrete Lösungsvorschläge.
               </p>
               <button 
-                onClick={() => setShowHelpRequestModal(true)}
+                onClick={() => setShowDiagnosticWizard(true)}
                 className="px-5 py-2.5 bg-olive-green text-white rounded-md hover:bg-yellow-green transition-all duration-300 flex items-center"
               >
-                <FaSearch className="mr-2" /> Hilfe anfordern
+                <FaSearch className="mr-2" /> Probleme diagnostizieren
               </button>
             </div>
             
@@ -114,6 +116,13 @@ export default function HelpPage() {
     {showHelpRequestModal && (
       <HelpRequestModal 
         onClose={() => setShowHelpRequestModal(false)} 
+      />
+    )}
+
+    {/* Plant Diagnostic Wizard */}
+    {showDiagnosticWizard && (
+      <PlantDiagnosticWizard 
+        onClose={() => setShowDiagnosticWizard(false)}
       />
     )}
     </>

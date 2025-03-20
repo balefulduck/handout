@@ -427,7 +427,7 @@ Ich benötige weitere Unterstützung bei diesem Problem.
                 window.location.href = '/growguide';
                 return false;
               }}
-              className={`flex-1 flex items-center justify-center py-1.5 transition-colors relative ${pathname === '/growguide' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
+              className={`flex-1 flex items-center justify-center ml-1 py-1.5 transition-colors relative ${pathname === '/growguide' ? 'bg-white/20 font-semibold' : 'hover:bg-white/10 font-semibold'}`}
             >
               <PiPlantBold className="md:hidden text-yellow-green text-lg" />
               <span className="hidden md:block text-xs lg:text-sm font-semibold text-yellow-green px-1 lg:px-2 interactive-link">Grow Guide</span>
