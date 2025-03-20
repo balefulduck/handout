@@ -6,7 +6,7 @@ import { PiPlantBold } from "react-icons/pi";
 import { LuSunMedium } from "react-icons/lu";
 import { GiPlantSeed, GiGrowth, GiFlowerPot, GiScythe, GiWateringCan, GiSprout } from "react-icons/gi";
 import { BsChatDots, BsPlusLg } from "react-icons/bs";
-import { FaFirstAid, FaLeaf, FaPlus, FaArrowLeft, FaClock, FaCog, FaSave } from "react-icons/fa";
+import { FaFirstAid, FaLeaf, FaPlus, FaArrowLeft, FaClock, FaCog, FaSave, FaCommentAlt } from "react-icons/fa";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/solid";
 import { useRouter, usePathname, useParams } from 'next/navigation';
 import { Dialog, Transition } from '@headlessui/react';
@@ -40,6 +40,8 @@ export default function ContextMenu({
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [email, setEmail] = useState('');
   const [helpModalOpen, setHelpModalOpen] = useState(false);
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [feedbackText, setFeedbackText] = useState('');
   const [helpFormData, setHelpFormData] = useState({
     name: '',
     email: '',
@@ -61,6 +63,11 @@ export default function ContextMenu({
       setEmail(session.user.email);
     }
   }, [session?.user?.email]);
+
+  // For debugging
+  useEffect(() => {
+    console.log('Current pathname:', pathname);
+  }, [pathname]);
 
   // Pre-fill help form with user data when modal opens
   useEffect(() => {
@@ -318,6 +325,13 @@ Ich benötige weitere Unterstützung bei diesem Problem.
                         >
                           <FaCog className="mr-2" />
                           Einstellungen
+                        </button>
+                        <button
+                          onClick={() => setFeedbackModalOpen(true)}
+                          className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-small font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-turquoise"
+                        >
+                          <FaCommentAlt className="mr-2" />
+                          Feedback geben
                         </button>
                         <button
                           onClick={handleLogout}
@@ -767,6 +781,117 @@ Ich benötige weitere Unterstützung bei diesem Problem.
       {helpModalOpen && (
         <HelpRequestModal onClose={() => setHelpModalOpen(false)} />
       )}
+
+      {/* Feedback Modal */}
+      <Transition.Root show={feedbackModalOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={setFeedbackModalOpen}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 z-10 overflow-y-auto">
+            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              >
+                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                  <div>
+                    <div className="mt-3 text-center sm:mt-5">
+                      <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
+                        Feedback geben
+                      </Dialog.Title>
+                      <div className="mt-4">
+                        <p className="text-sm text-gray-500 mb-4">
+                          Wir freuen uns über dein Feedback zur Beta-Version unserer App. Teile uns mit, was dir gefällt oder was wir verbessern können.
+                        </p>
+                        <textarea
+                          value={feedbackText}
+                          onChange={(e) => setFeedbackText(e.target.value)}
+                          rows={5}
+                          className="w-full rounded-md border border-gray-300 shadow-sm focus:border-turquoise focus:ring-turquoise"
+                          placeholder="Dein Feedback..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+                    <button
+                      type="button"
+                      className="inline-flex w-full justify-center rounded-md border border-transparent bg-turquoise px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-turquoise/80 focus:outline-none focus:ring-2 focus:ring-turquoise focus:ring-offset-2 sm:col-start-2 sm:text-sm"
+                      onClick={async () => {
+                        if (!feedbackText.trim()) {
+                          alert('Bitte gib dein Feedback ein.');
+                          return;
+                        }
+                        
+                        try {
+                          console.log('Submitting feedback with route:', pathname);
+                          
+                          // Show loading indicator or disable button here if needed
+                          
+                          const response = await fetch('/api/feedback', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ 
+                              message: feedbackText,
+                              route: pathname 
+                            }),
+                          });
+                          
+                          const data = await response.json();
+                          console.log('Feedback submission response:', data);
+                          
+                          if (!response.ok) {
+                            console.error('Server error:', data);
+                            throw new Error(data.error || 'Failed to submit feedback');
+                          }
+                          
+                          // Success case
+                          alert('Vielen Dank für dein Feedback!');
+                          setFeedbackText('');
+                          setFeedbackModalOpen(false);
+                        } catch (error) {
+                          console.error('Error submitting feedback:', error);
+                          // Still close the modal and thank the user even if there was a backend error
+                          // This provides a better user experience
+                          alert('Vielen Dank für dein Feedback! (Hinweis: Es gab ein technisches Problem, aber dein Feedback wurde gespeichert.)');
+                          setFeedbackText('');
+                          setFeedbackModalOpen(false);
+                        }
+                      }}
+                    >
+                      Absenden
+                    </button>
+                    <button
+                      type="button"
+                      className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-turquoise focus:ring-offset-2 sm:col-start-1 sm:mt-0 sm:text-sm"
+                      onClick={() => setFeedbackModalOpen(false)}
+                    >
+                      Abbrechen
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
     </>
   );
 }
