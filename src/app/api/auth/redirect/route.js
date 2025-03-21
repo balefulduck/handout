@@ -31,13 +31,14 @@ export async function POST(request) {
       );
     }
 
-    // Build the full URL for the redirect
-    const baseUrl = process.env.NEXTAUTH_URL || 
-                   (process.env.NODE_ENV === "production" 
-                    ? `https://${process.env.DOMAIN || 'www.drc420.team'}`
-                    : 'http://localhost:3000');
+    // Use relative URLs for redirects to avoid cross-environment issues
+    // This ensures consistent behavior between development and production
+    let redirectUrl = destination;
     
-    const redirectUrl = new URL(destination, baseUrl).toString();
+    // Ensure the path starts with a slash
+    if (!redirectUrl.startsWith('/')) {
+      redirectUrl = `/${redirectUrl}`;
+    }
     
     console.log(`Server-side redirect prepared: ${redirectUrl}`);
 
