@@ -13,96 +13,35 @@ export default function LoginPage() {
     const formData = new FormData(e.currentTarget);
     
     try {
-      // Log pre-login state
-      await fetch('/api/debug/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event: 'pre_login',
-          username: formData.get('username')
-        })
-      });
-
-      const res = await signIn('credentials', {
+      // Simple logging for debugging
+      console.log('Login attempt with username:', formData.get('username'));
+      
+      // Attempt sign in with direct redirect to growguide page
+      // This lets NextAuth handle the redirect which should be more reliable
+      const result = await signIn('credentials', {
         username: formData.get('username'),
         password: formData.get('password'),
-        redirect: false,
+        callbackUrl: '/growguide',  // Set explicit callback URL
+        redirect: true,  // Let NextAuth handle the redirect
       });
-
-      // Log post-login state
-      await fetch('/api/debug/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event: 'post_login',
-          response: res
-        })
-      });
-
-      if (res.error) {
-        setError(res.error);
-        return;
-      }
-
-      if (res.ok) {
-        // Store successful authentication in sessionStorage
-        sessionStorage.setItem('auth_success', 'true');
-        
-        // Add visual feedback that login was successful
-        try {
-          const loginForm = document.querySelector('form');
-          if (loginForm) {
-            loginForm.innerHTML = '<div class="p-4 bg-green-100 text-green-800 rounded">Anmeldung erfolgreich! Leite weiter...</div>';
-          }
-        } catch (error) {
-          console.error('UI update error:', error);
-        }
-        
-        // Simplified approach: first try the redirect API for consistency
-        console.log('Attempting redirect after successful login');
-        
-        // Use a short timeout to ensure the session is properly established
-        setTimeout(() => {
-          try {
-            // Try server-side redirect first
-            fetch('/api/auth/redirect', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ destination: '/growguide' }),
-            })
-            .then(response => {
-              if (!response.ok) throw new Error('Redirect API failed');
-              return response.json();
-            })
-            .then(data => {
-              console.log('Redirect response:', data);
-              // Use the redirectUrl from the API response
-              window.location.href = data.redirectUrl || '/growguide';
-            })
-            .catch(error => {
-              console.error('Server redirect failed, using direct navigation:', error);
-              // Direct navigation as fallback
-              window.location.href = '/growguide';
-            });
-          } catch (error) {
-            console.error('Redirect error, using fallback:', error);
-            window.location.href = '/growguide';
-          }
-        }, 500); // Short delay to ensure session is established
+      
+      // Note: The code below shouldn't execute due to the redirect
+      // It's only a fallback in case the redirect doesn't happen
+      console.log('Login result:', result);
+      
+      // If we get here, something went wrong with the redirect
+      if (result?.error) {
+        setError(result.error);
+      } else if (result?.url) {
+        // Manual redirect as fallback
+        window.location.href = result.url;
+      } else {
+        // Last resort fallback
+        window.location.href = '/growguide';
       }
     } catch (error) {
-      // Log any errors
-      await fetch('/api/debug/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event: 'error',
-          error: error.message
-        })
-      });
-      setError('Ein Fehler ist aufgetreten');
+      console.error('Login error:', error);
+      setError('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
     }
   };
 

@@ -21,7 +21,7 @@ export const authOptions = {
           throw new Error('Cannot authenticate on client side');
         }
 
-        console.log('Auth attempt:', { username: credentials?.username });
+        console.log('Auth attempt for:', credentials?.username);
 
         if (!credentials?.username || !credentials?.password) {
           console.log('Missing credentials');
@@ -33,29 +33,30 @@ export const authOptions = {
             "SELECT * FROM users WHERE username = ?"
           ).get(credentials.username);
 
-          console.log('Found user:', user ? 'yes' : 'no');
-
           if (!user) {
+            console.log('User not found:', credentials.username);
             throw new Error("Benutzer nicht gefunden");
           }
 
-          console.log('Comparing passwords...');
           const isValid = await bcrypt.compare(
             credentials.password,
             user.password_hash
           );
-          console.log('Password valid:', isValid);
-
+          
           if (!isValid) {
+            console.log('Invalid password for user:', credentials.username);
             throw new Error("Falsches Passwort");
           }
 
+          console.log('Authentication successful for:', credentials.username);
+          
+          // Return a simplified user object
           return {
             id: user.id,
             name: user.username
           };
         } catch (error) {
-          console.error('Auth error:', error);
+          console.error('Auth error:', error.message);
           throw error;
         }
       },
@@ -73,93 +74,72 @@ export const authOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      console.log('Redirect callback called with:', { url, baseUrl });
+      console.log('NextAuth redirect called for:', url);
       
-      // Always use relative URLs for redirects
-      // This ensures consistent behavior across environments
+      // Extremely simplified redirect logic for DigitalOcean compatibility
+      // The simpler this function, the more reliable it will be across environments
       
-      // Extract the path from URL if it's absolute
-      let path = url;
-      try {
-        // If the URL is absolute, extract just the pathname
-        if (url.startsWith('http')) {
-          const urlObj = new URL(url);
-          path = urlObj.pathname;
-          console.log('Extracted path from absolute URL:', path);
-        }
-      } catch (error) {
-        console.error('Error parsing URL:', error);
-      }
-      
-      // Handle sign-in redirects
-      if (path.includes('/api/auth/signin') || path.includes('/api/auth/callback') || path.includes('/login')) {
-        console.log('Auth callback - redirecting to /growguide');
+      // For login-related paths, always send to growguide
+      if (url.includes('/login') || url.includes('/api/auth/signin') || 
+          url.includes('/api/auth/callback') || url.includes('callback')) {
+        console.log('Auth flow detected - redirecting to /growguide');
         return '/growguide';
       }
       
-      // Handle sign-out redirects
-      if (path.includes('/api/auth/signout') || path.includes('/api/auth/logout')) {
-        console.log('Logout callback - redirecting to /login');
+      // For logout-related paths, always go to login
+      if (url.includes('/signout') || url.includes('/logout')) {
+        console.log('Logout flow detected - redirecting to /login');
         return '/login';
       }
       
-      // Handle sign-out redirects
-      if (path.includes('/api/auth/signout') || path.includes('/logout')) {
-        console.log('Logout detected in NextAuth redirect callback');
-        return '/login';
+      // For all other URLs, extract just the path for consistency
+      // This avoids any localhost references in the URL
+      try {
+        // If it's an absolute URL, extract just the path
+        if (url.startsWith('http')) {
+          const urlObj = new URL(url);
+          return urlObj.pathname || '/growguide';
+        }
+      } catch (error) {
+        console.error('Error parsing redirect URL:', error);
       }
       
-      // For any other paths, use them directly as relative URLs
-      return path.startsWith('/') ? path : `/${path}`;
+      // For any other cases, use the URL as is if it starts with /
+      // Otherwise make it relative by adding a leading /
+      return url.startsWith('/') ? url : `/${url}`;
     }
   },
   pages: {
     signIn: '/login'
   },
-  // Session configuration
+  // Session configuration - simplified
   session: {
-    // Use JWT strategy for sessions
     strategy: "jwt",
-    // Session will last for 30 days
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-    // Update session every time it's used
-    updateAge: 24 * 60 * 60, // 24 hours
-  },
-  
-  // JWT configuration
-  jwt: {
-    // How long until the JWT expires
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   
-  // Cookie security settings
-  useSecureCookies: process.env.NODE_ENV === "production",
+  // Pages configuration
+  pages: {
+    signIn: '/login',
+    signOut: '/login',
+    error: '/login', // Error messages will be displayed on the login page
+  },
   
-  // Explicitly disable absolute URLs for redirects
-  // This ensures we always use relative URLs which work across environments
-  forceAbsoluteUrls: false,
+  // Debug mode in development only
+  debug: process.env.NODE_ENV !== "production",
   
-  // Cookie configuration
+  // Security settings
+  secret: process.env.NEXTAUTH_SECRET,
+  
+  // URLs - only set in production if NEXTAUTH_URL is available
+  ...(process.env.NEXTAUTH_URL && process.env.NODE_ENV === "production" ? {
+    url: process.env.NEXTAUTH_URL,
+  } : {}),
+  
+  // Simplified cookie settings to work with DigitalOcean's deployment
   cookies: {
     sessionToken: {
       name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-      },
-    },
-    callbackUrl: {
-      name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.callback-url`,
-      options: {
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-      },
-    },
-    csrfToken: {
-      name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.csrf-token`,
       options: {
         httpOnly: true,
         sameSite: "lax",
