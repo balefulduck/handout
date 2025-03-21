@@ -75,26 +75,33 @@ export const authOptions = {
     async redirect({ url, baseUrl }) {
       console.log('Redirect callback called with:', { url, baseUrl });
       
+      // Extract the path from URL if it's absolute
+      let path = url;
+      try {
+        // If the URL is absolute, extract just the pathname
+        if (url.startsWith('http')) {
+          const urlObj = new URL(url);
+          path = urlObj.pathname;
+          console.log('Extracted path from absolute URL:', path);
+        }
+      } catch (error) {
+        console.error('Error parsing URL:', error);
+      }
+      
       // Handle sign-in redirects
-      if (url.includes('/api/auth/signin') || url.includes('/api/auth/callback') || url.includes('/login')) {
+      if (path.includes('/api/auth/signin') || path.includes('/api/auth/callback') || path.includes('/login')) {
         console.log('Auth callback - redirecting to /growguide');
         return '/growguide';
       }
       
-      // Handle sign-out redirects - Note that we're now handling redirects client-side in ContextMenu.js
-      // This is just a fallback if the client-side redirect doesn't work
-      if (url.includes('/api/auth/signout') || url.includes('/logout')) {
+      // Handle sign-out redirects
+      if (path.includes('/api/auth/signout') || path.includes('/logout')) {
         console.log('Logout detected in NextAuth redirect callback');
         return '/login';
       }
       
-      // If the URL is already absolute, use it
-      if (url.startsWith('http')) {
-        return url;
-      }
-      
-      // Otherwise, make it relative to the base URL
-      return url.startsWith('/') ? url : `/${url}`;
+      // For any other paths, use them directly as relative URLs
+      return path.startsWith('/') ? path : `/${path}`;
     }
   },
   pages: {
@@ -105,21 +112,17 @@ export const authOptions = {
   useSecureCookies: process.env.NODE_ENV === "production",
   
   // Set the base URL for NextAuth
+  // Only using the URL setting when explicitly provided
   ...(process.env.NEXTAUTH_URL
     ? {
-        // If NEXTAUTH_URL is set in environment, use it
         url: process.env.NEXTAUTH_URL,
       }
     : {}),
       
-  // Define base URL for redirects and other operations
-  baseUrl: process.env.NEXTAUTH_URL || 
-    (process.env.NODE_ENV === "production" 
-      ? process.env.VERCEL_URL || "https://drc420.team" 
-      : "https://drc420.team"),
-      
-  // Force absolute URLs to be disabled for redirects
-  // This ensures relative URLs are used instead
+  // Don't use baseUrl at all - we're using only relative URLs for redirects
+  // This avoids any issues with domain mismatches
+  
+  // Explicitly disable absolute URLs for redirects
   forceAbsoluteUrls: false,
       
   // Configure cookies with more permissive settings for cross-domain issues
