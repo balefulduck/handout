@@ -9,8 +9,12 @@ const jura = Jura({
 });
 
 export const metadata = {
-  title: "Cannabis Anbau Workshop",
-  description: "Digitaler Handout für Cannabis Anbau Workshop",
+  title: "Dr. Cannabis GrowGuide",
+  description: "Digitales Pflanzenmonitoring",
+  icons: {
+    icon: '/drca.svg',
+    apple: '/drca.svg',
+  },
 };
 
 export default function RootLayout({ children }) {

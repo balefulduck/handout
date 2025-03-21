@@ -45,26 +45,55 @@ export default function LoginPage() {
       }
 
       if (res.ok) {
-        // Log pre-redirect state
-        await fetch('/api/debug/auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            event: 'pre_redirect'
+        // Store successful authentication in sessionStorage
+        sessionStorage.setItem('auth_success', 'true');
+        
+        // Add visual feedback that login was successful
+        try {
+          const loginForm = document.querySelector('form');
+          if (loginForm) {
+            loginForm.innerHTML = '<div class="p-4 bg-green-100 text-green-800 rounded">Anmeldung erfolgreich! Leite weiter...</div>';
+          }
+        } catch (error) {
+          console.error('UI update error:', error);
+        }
+        
+        // Use a POST request to a custom API endpoint to trigger server-side redirect
+        try {
+          console.log('Attempting server-side redirect via API');
+          
+          fetch('/api/auth/redirect', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ destination: '/growguide' }),
           })
-        });
-
-        // Let the middleware handle the redirect
-        router.refresh();
-
-        // Log post-refresh state
-        await fetch('/api/debug/auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            event: 'post_refresh'
+          .then(response => response.json())
+          .then(data => {
+            console.log('Redirect response:', data);
+            
+            // If server-side redirect doesn't work, try client-side as fallback
+            if (data.redirectUrl) {
+              console.log('Using server-provided redirect URL:', data.redirectUrl);
+              window.location.href = data.redirectUrl;
+            } else {
+              // Local fallback if the server doesn't provide a URL
+              console.log('Server did not provide redirect URL, using fallback');
+              window.location.href = '/growguide';
+            }
           })
-        });
+          .catch(error => {
+            console.error('Server redirect error:', error);
+            // Fallback to client-side redirect
+            window.location.href = '/growguide';
+          });
+          
+        } catch (error) {
+          console.error('Redirect API error:', error);
+          // Final fallback
+          window.location.href = '/growguide';
+        }
       }
     } catch (error) {
       // Log any errors
