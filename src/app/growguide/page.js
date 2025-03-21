@@ -7,22 +7,10 @@ import dynamic from 'next/dynamic';
 
 import ContextMenu from '@/components/ContextMenu';
 
-// Use dynamic imports with SSR disabled for components that might cause hydration issues
-const SeedlingPhase = dynamic(() => import('@/components/phases/SeedlingPhase'), {
+// Use dynamic import with SSR disabled for the PhaseContent component to prevent hydration issues
+const PhaseContent = dynamic(() => import('@/components/phases/PhaseContent'), {
   ssr: false,
-  loading: () => <div className="animate-pulse p-4 bg-gray-100 rounded">Loading seedling phase...</div>
-});
-const VegetationPhase = dynamic(() => import('@/components/phases/VegetationPhase'), {
-  ssr: false,
-  loading: () => <div className="animate-pulse p-4 bg-gray-100 rounded">Loading vegetation phase...</div>
-});
-const FlowerPhase = dynamic(() => import('@/components/phases/FlowerPhase'), {
-  ssr: false,
-  loading: () => <div className="animate-pulse p-4 bg-gray-100 rounded">Loading flower phase...</div>
-});
-const HarvestPhase = dynamic(() => import('@/components/phases/HarvestPhase'), {
-  ssr: false,
-  loading: () => <div className="animate-pulse p-4 bg-gray-100 rounded">Loading harvest phase...</div>
+  loading: () => <div className="animate-pulse p-4 bg-gray-100 rounded">Loading phase content...</div>
 });
 
 // Create an error boundary fallback component
@@ -144,34 +132,15 @@ export default function GrowGuidePage() {
       return <div className="animate-pulse p-4 bg-gray-100 rounded">Loading phase content...</div>;
     }
     
-    switch (activePhase) {
-      case 'seedling':
-        return (
-          <Suspense fallback={<div className="animate-pulse p-4 bg-gray-100 rounded">Loading seedling phase...</div>}>
-            <SeedlingPhase />
-          </Suspense>
-        );
-      case 'vegetation':
-        return (
-          <Suspense fallback={<div className="animate-pulse p-4 bg-gray-100 rounded">Loading vegetation phase...</div>}>
-            <VegetationPhase />
-          </Suspense>
-        );
-      case 'flower':
-        return (
-          <Suspense fallback={<div className="animate-pulse p-4 bg-gray-100 rounded">Loading flower phase...</div>}>
-            <FlowerPhase />
-          </Suspense>
-        );
-      case 'harvest':
-        return (
-          <Suspense fallback={<div className="animate-pulse p-4 bg-gray-100 rounded">Loading harvest phase...</div>}>
-            <HarvestPhase />
-          </Suspense>
-        );
-      default:
-        return null;
+    if (!activePhase) {
+      return null;
     }
+    
+    return (
+      <Suspense fallback={<div className="animate-pulse p-4 bg-gray-100 rounded">Loading phase content...</div>}>
+        <PhaseContent phaseName={activePhase} />
+      </Suspense>
+    );
   };
 
   return (
