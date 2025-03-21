@@ -58,19 +58,42 @@ export default function LoginPage() {
           console.error('UI update error:', error);
         }
         
-        console.log('Login successful, redirecting to /growguide');
-        
-        // Simple direct approach - use setTimeout to ensure the success message is seen
-        setTimeout(() => {
-          // Use router for app directory navigation when possible
-          try {
-            router.push('/growguide');
-          } catch (e) {
-            console.error('Router navigation failed, using fallback:', e);
-            // Fallback to direct navigation if router fails
+        // Use a POST request to a custom API endpoint to trigger server-side redirect
+        try {
+          console.log('Attempting server-side redirect via API');
+          
+          fetch('/api/auth/redirect', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ destination: '/growguide' }),
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log('Redirect response:', data);
+            
+            // If server-side redirect doesn't work, try client-side as fallback
+            if (data.redirectUrl) {
+              console.log('Using server-provided redirect URL:', data.redirectUrl);
+              window.location.href = data.redirectUrl;
+            } else {
+              // Local fallback if the server doesn't provide a URL
+              console.log('Server did not provide redirect URL, using fallback');
+              window.location.href = '/growguide';
+            }
+          })
+          .catch(error => {
+            console.error('Server redirect error:', error);
+            // Fallback to client-side redirect
             window.location.href = '/growguide';
-          }
-        }, 500);
+          });
+          
+        } catch (error) {
+          console.error('Redirect API error:', error);
+          // Final fallback
+          window.location.href = '/growguide';
+        }
       }
     } catch (error) {
       // Log any errors
