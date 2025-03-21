@@ -31,14 +31,13 @@ export async function POST(request) {
       );
     }
 
-    // We're going to use relative URLs to avoid domain mismatches
-    // This ensures consistent behavior across environments
-    let redirectUrl = destination;
+    // Build the full URL for the redirect
+    const baseUrl = process.env.NEXTAUTH_URL || 
+                   (process.env.NODE_ENV === "production" 
+                    ? `https://${process.env.DOMAIN || 'www.drc420.team'}`
+                    : 'http://localhost:3000');
     
-    // Ensure the destination starts with a slash for a relative URL
-    if (!destination.startsWith('/')) {
-      redirectUrl = `/${destination}`;
-    }
+    const redirectUrl = new URL(destination, baseUrl).toString();
     
     console.log(`Server-side redirect prepared: ${redirectUrl}`);
 
