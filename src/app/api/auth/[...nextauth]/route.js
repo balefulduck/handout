@@ -75,6 +75,9 @@ export const authOptions = {
     async redirect({ url, baseUrl }) {
       console.log('Redirect callback called with:', { url, baseUrl });
       
+      // Always use relative URLs for redirects
+      // This ensures consistent behavior across environments
+      
       // Extract the path from URL if it's absolute
       let path = url;
       try {
@@ -95,6 +98,12 @@ export const authOptions = {
       }
       
       // Handle sign-out redirects
+      if (path.includes('/api/auth/signout') || path.includes('/api/auth/logout')) {
+        console.log('Logout callback - redirecting to /login');
+        return '/login';
+      }
+      
+      // Handle sign-out redirects
       if (path.includes('/api/auth/signout') || path.includes('/logout')) {
         console.log('Logout detected in NextAuth redirect callback');
         return '/login';
@@ -107,25 +116,30 @@ export const authOptions = {
   pages: {
     signIn: '/login'
   },
-  // Properly configure URLs for different environments
-  // This prevents incorrect redirects after logout
+  // Session configuration
+  session: {
+    // Use JWT strategy for sessions
+    strategy: "jwt",
+    // Session will last for 30 days
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    // Update session every time it's used
+    updateAge: 24 * 60 * 60, // 24 hours
+  },
+  
+  // JWT configuration
+  jwt: {
+    // How long until the JWT expires
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  
+  // Cookie security settings
   useSecureCookies: process.env.NODE_ENV === "production",
   
-  // Set the base URL for NextAuth
-  // Only using the URL setting when explicitly provided
-  ...(process.env.NEXTAUTH_URL
-    ? {
-        url: process.env.NEXTAUTH_URL,
-      }
-    : {}),
-      
-  // Don't use baseUrl at all - we're using only relative URLs for redirects
-  // This avoids any issues with domain mismatches
-  
   // Explicitly disable absolute URLs for redirects
+  // This ensures we always use relative URLs which work across environments
   forceAbsoluteUrls: false,
-      
-  // Configure cookies with more permissive settings for cross-domain issues
+  
+  // Cookie configuration
   cookies: {
     sessionToken: {
       name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.session-token`,
@@ -134,8 +148,6 @@ export const authOptions = {
         sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",
-        // Don't set domain in production to use the default top-level domain
-        domain: undefined,
       },
     },
     callbackUrl: {
@@ -144,7 +156,6 @@ export const authOptions = {
         sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",
-        domain: undefined,
       },
     },
     csrfToken: {
@@ -154,7 +165,6 @@ export const authOptions = {
         sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",
-        domain: undefined,
       },
     },
   },

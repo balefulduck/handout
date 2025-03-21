@@ -154,18 +154,43 @@ export default function ContextMenu({
 
   const handleLogout = async () => {
     try {
-      // First, terminate the session on the server but prevent automatic redirect
-      await signOut({ redirect: false });
+      console.log('Starting logout process...');
       
-      console.log('Session terminated, redirecting to login page...');
+      // First clear any client-side session data
+      localStorage.removeItem('recentlyViewedPlants');
+      sessionStorage.removeItem('auth_success');
       
-      // Then manually navigate to the login page
-      // This gives us full control over the redirect
-      window.location.href = '/login';
+      // Create a form to post to the signout endpoint directly
+      // This bypasses any client-side routing issues
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/api/auth/signout';
+      
+      // Add CSRF token if available
+      const csrfToken = await fetch('/api/auth/csrf').then(res => res.json()).then(data => data.csrfToken).catch(() => '');
+      if (csrfToken) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfToken';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+      }
+      
+      // Add callbackUrl parameter
+      const callbackInput = document.createElement('input');
+      callbackInput.type = 'hidden';
+      callbackInput.name = 'callbackUrl';
+      callbackInput.value = '/login';
+      form.appendChild(callbackInput);
+      
+      // Add the form to the document and submit it
+      document.body.appendChild(form);
+      console.log('Submitting logout form...');
+      form.submit();
     } catch (error) {
       console.error('Error during logout:', error);
-      // Fallback redirect in case of error
-      window.location.href = '/login';
+      // Fallback to direct signout with redirect
+      await signOut({ callbackUrl: '/login' });
     }
   };
 
