@@ -114,7 +114,7 @@ export const authOptions = {
   baseUrl: process.env.NEXTAUTH_URL || 
     (process.env.NODE_ENV === "production" 
       ? process.env.VERCEL_URL || "https://drc420.team" 
-      : "http://localhost:3000"),
+      : "https://drc420.team"),
       
   // Configure cookies with more permissive settings for cross-domain issues
   cookies: {
