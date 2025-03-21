@@ -71,17 +71,23 @@ export default function GrowGuidePage() {
   const [activePhase, setActivePhase] = useState('seedling');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Handle client-side mounting to prevent hydration issues
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Safely fetch data with proper error handling
   useEffect(() => {
-    let isMounted = true;
+    let isComponentMounted = true;
     
     const fetchStrains = async () => {
       try {
         setIsLoading(true);
         const response = await fetch('/api/strains/selected');
         
-        if (!isMounted) return;
+        if (!isComponentMounted) return;
         
         if (response.ok) {
           const data = await response.json();
@@ -91,12 +97,12 @@ export default function GrowGuidePage() {
           // Fail gracefully - don't set error state as this isn't critical
         }
       } catch (err) {
-        if (isMounted) {
+        if (isComponentMounted) {
           console.error('Error fetching strains:', err);
           // Again, fail gracefully for this non-critical data
         }
       } finally {
-        if (isMounted) {
+        if (isComponentMounted) {
           setIsLoading(false);
         }
       }
@@ -105,7 +111,7 @@ export default function GrowGuidePage() {
     fetchStrains();
     
     return () => {
-      isMounted = false;
+      isComponentMounted = false;
     };
   }, []);
 
@@ -131,6 +137,11 @@ export default function GrowGuidePage() {
   const renderPhaseContent = () => {
     if (error) {
       return <ErrorFallback error={error} />;
+    }
+    
+    // Only render phase content on the client side
+    if (!isMounted) {
+      return <div className="animate-pulse p-4 bg-gray-100 rounded">Loading phase content...</div>;
     }
     
     switch (activePhase) {
@@ -165,9 +176,11 @@ export default function GrowGuidePage() {
 
   return (
     <div className="min-h-screen mt-10 pt-7 bg-gray-50" suppressHydrationWarning={true}>
-      <ContextMenu activePhase={activePhase} onPhaseSelect={handlePhaseSelect} />
+      {isMounted && (
+        <>
+          <ContextMenu activePhase={activePhase} onPhaseSelect={handlePhaseSelect} />
 
-      <main className="max-w-7xl mx-auto px-6 py-10 pb-24">
+          <main className="max-w-7xl mx-auto px-6 py-10 pb-24" suppressHydrationWarning={true}>
         {/* Page Header */}
         <div className="mb-8 text-center">
           <h2 className="text-medium-blue mb-2">Grow Guide</h2>
@@ -198,7 +211,18 @@ export default function GrowGuidePage() {
             </div>
           </Transition>
         </div>
-      </main>
+          </main>
+        </>
+      )}
+      {!isMounted && (
+        <div className="max-w-7xl mx-auto px-6 py-10 pb-24 flex justify-center items-center min-h-screen">
+          <div className="animate-pulse p-8 bg-gray-100 rounded-xl w-full max-w-md text-center">
+            <div className="h-8 bg-gray-200 rounded w-3/4 mx-auto mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-5/6 mx-auto"></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
