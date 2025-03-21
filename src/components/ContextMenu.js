@@ -153,7 +153,6 @@ export default function ContextMenu({
   }, [sidebarOpen]);
 
   const handleLogout = async () => {
-    // Use a simple relative URL to avoid any baseUrl issues
     await signOut({ callbackUrl: '/login' });
   };
 

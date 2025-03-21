@@ -75,25 +75,24 @@ export const authOptions = {
     async redirect({ url, baseUrl }) {
       console.log('Redirect callback called with:', { url, baseUrl });
       
+      // Get the actual base URL from config to ensure consistency
+      const configBaseUrl = authOptions.baseUrl;
+      console.log('Using config baseUrl:', configBaseUrl);
+      
       // Handle sign-in redirects
       if (url.includes('/api/auth/signin') || url.includes('/api/auth/callback') || url.includes('/login')) {
         console.log('Auth callback - redirecting to /growguide');
-        return '/growguide';
+        return `${configBaseUrl}/growguide`;
       }
       
       // Handle sign-out redirects
       if (url.includes('/api/auth/signout') || url.includes('/logout')) {
         console.log('Logout detected - redirecting to /login');
-        return '/login';
+        return `${configBaseUrl}/login`;
       }
       
-      // If the URL is already absolute, use it
-      if (url.startsWith('http')) {
-        return url;
-      }
-      
-      // Otherwise, make it relative to the base URL
-      return url.startsWith('/') ? url : `/${url}`;
+      // Default redirect behavior using the configured base URL
+      return url.startsWith(configBaseUrl) ? url : configBaseUrl;
     }
   },
   pages: {
@@ -116,10 +115,6 @@ export const authOptions = {
     (process.env.NODE_ENV === "production" 
       ? process.env.VERCEL_URL || "https://drc420.team" 
       : "https://drc420.team"),
-      
-  // Force absolute URLs to be disabled for redirects
-  // This ensures relative URLs are used instead
-  forceAbsoluteUrls: false,
       
   // Configure cookies with more permissive settings for cross-domain issues
   cookies: {
