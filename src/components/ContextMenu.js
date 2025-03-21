@@ -153,7 +153,20 @@ export default function ContextMenu({
   }, [sidebarOpen]);
 
   const handleLogout = async () => {
-    await signOut({ callbackUrl: '/login' });
+    try {
+      // First, terminate the session on the server but prevent automatic redirect
+      await signOut({ redirect: false });
+      
+      console.log('Session terminated, redirecting to login page...');
+      
+      // Then manually navigate to the login page
+      // This gives us full control over the redirect
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Fallback redirect in case of error
+      window.location.href = '/login';
+    }
   };
 
   const handleEmailUpdate = async () => {
