@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, usePathname, useParams } from 'next/navigation';
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState('strains'); // 'strains' or 'users'
+  const [activeTab, setActiveTab] = useState('strains'); // 'strains' or 'users' or 'feedback'
 
   const router = useRouter();
   
@@ -29,11 +29,16 @@ export default function AdminPage() {
     password: ''
   });
 
+  // Feedback management state
+  const [feedback, setFeedback] = useState([]);
+
   useEffect(() => {
     if (activeTab === 'strains') {
       loadStrains();
     } else if (activeTab === 'users') {
       loadUsers();
+    } else if (activeTab === 'feedback') {
+      loadFeedback();
     }
   }, [activeTab]);
 
@@ -166,6 +171,39 @@ export default function AdminPage() {
     }
   };
 
+  // Feedback management functions
+  const loadFeedback = async () => {
+    try {
+      const response = await fetch('/api/feedback');
+      const data = await response.json();
+      if (data && data.feedback) {
+        setFeedback(data.feedback);
+      } else {
+        console.error('Invalid feedback data format:', data);
+        setFeedback([]);
+      }
+    } catch (error) {
+      console.error('Error loading feedback:', error);
+      setFeedback([]);
+    }
+  };
+
+  const handleDeleteFeedback = async (id) => {
+    if (!confirm('Bist du sicher, dass du dieses Feedback löschen möchtest?')) return;
+    
+    try {
+      const response = await fetch(`/api/feedback?id=${id}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        loadFeedback();
+      }
+    } catch (error) {
+      console.error('Error deleting feedback:', error);
+    }
+  };
+
   // Form components
   const StrainForm = ({ strain, onSave, onCancel }) => (
     <div className="space-y-4">
@@ -282,6 +320,16 @@ export default function AdminPage() {
         </button>
         <button
           className={`px-6 py-3 font-medium ${
+            activeTab === 'feedback'
+              ? 'text-custom-orange border-b-2 border-custom-orange'
+              : 'text-gray-500 hover:text-custom-orange'
+          }`}
+          onClick={() => setActiveTab('feedback')}
+        >
+          Feedback
+        </button>
+        <button
+          className={`px-6 py-3 font-medium ${
             activeTab === 'help-requests'
               ? 'text-custom-orange border-b-2 border-custom-orange'
               : 'text-gray-500 hover:text-custom-orange'
@@ -290,7 +338,6 @@ export default function AdminPage() {
         >
           Hilfe-Anfragen
         </button>
-
       </div>
       
       {/* Strain Management Section */}
@@ -442,6 +489,48 @@ export default function AdminPage() {
             {(!users || users.length === 0) && (
               <div className="col-span-3 text-center py-8 text-white/70">
                 No users found. Add a new user above.
+              </div>
+            )}
+          </div>
+        </>
+      )}
+      
+      {/* Feedback Management Section */}
+      {activeTab === 'feedback' && (
+        <>
+          <h2 className="text-2xl font-bold font-aptos mb-6">Beta-Feedback</h2>
+          <div className="grid grid-cols-1 gap-6">
+            {feedback && feedback.length > 0 && feedback.map(feedbackItem => (
+              <div key={feedbackItem.id} className="bg-white border border-gray-200 rounded-lg shadow-md p-6">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {feedbackItem.username}
+                    </h3>
+                    <p className="text-sm text-gray-500 mb-4">
+                      {new Date(feedbackItem.created_at).toLocaleString('de-DE')}
+                    </p>
+                    {feedbackItem.route && (
+                      <p className="text-xs text-gray-500 mb-2">
+                        <span className="font-medium">Seite:</span> {feedbackItem.route}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    className="px-3 py-1 text-white bg-red-600 rounded hover:bg-red-700 text-sm"
+                    onClick={() => handleDeleteFeedback(feedbackItem.id)}
+                  >
+                    Löschen
+                  </button>
+                </div>
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                  <p className="text-gray-800 whitespace-pre-wrap">{feedbackItem.message}</p>
+                </div>
+              </div>
+            ))}
+            {(!feedback || feedback.length === 0) && (
+              <div className="text-center py-12 bg-gray-50 rounded-lg">
+                <p className="text-gray-500">Noch kein Feedback vorhanden.</p>
               </div>
             )}
           </div>
