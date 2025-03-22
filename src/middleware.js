@@ -2,12 +2,19 @@ import { getToken } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
 
 /**
- * Simple middleware to handle authentication across the application
+ * Enhanced middleware to handle authentication across the application
  * This implementation focuses on reliability and consistency
  */
 export async function middleware(request) {
   const pathname = request.nextUrl.pathname;
-  console.log('Middleware executing for path:', pathname);
+  const url = request.nextUrl.clone();
+  
+  // Check for logout-related cookies to ensure proper logout handling
+  const cookies = request.cookies;
+  const isLoggingOut = cookies.get('next-auth.session-token') === undefined && 
+                      cookies.get('__Secure-next-auth.session-token') === undefined;
+  
+  console.log('Middleware executing for path:', pathname, 'Logging out:', isLoggingOut);
   
   // 1. Always allow access to static assets and API routes
   if (
@@ -26,8 +33,14 @@ export async function middleware(request) {
     return NextResponse.next();
   }
   
+  // 3. Special handling for logout - always redirect to login
+  if (pathname.includes('/signout') || pathname.includes('/logout')) {
+    console.log('Detected logout request, will redirect to login');
+    return NextResponse.next();
+  }
+  
   try {
-    // 3. Get the authentication token
+    // 4. Get the authentication token with strict validation
     const token = await getToken({ 
       req: request,
       secret: process.env.NEXTAUTH_SECRET,
@@ -36,25 +49,32 @@ export async function middleware(request) {
     
     console.log('Auth token present:', !!token, 'for path:', pathname);
     
-    // 4. Handle authenticated users on login page
+    // 5. Handle authenticated users on login page
     if (token && pathname === '/login') {
       console.log('Redirecting authenticated user from login to growguide');
       return NextResponse.redirect(new URL('/growguide', request.url));
     }
     
-    // 5. Handle unauthenticated users on protected routes
-    if (!token) {
+    // 6. Strict check for protected routes - ensure token is valid
+    // Special handling for critical routes
+    const criticalRoutes = ['/growguide', '/plants', '/help'];
+    const isCriticalRoute = criticalRoutes.some(route => 
+      pathname === route || pathname.startsWith(`${route}/`)
+    );
+    
+    if (!token || (isCriticalRoute && !token)) {
       console.log('Unauthenticated user attempting to access:', pathname);
-      const redirectUrl = new URL('/login', request.url);
-      redirectUrl.searchParams.set('callbackUrl', pathname);
-      return NextResponse.redirect(redirectUrl);
+      url.pathname = '/login';
+      url.searchParams.set('callbackUrl', pathname);
+      return NextResponse.redirect(url);
     }
     
-    // 6. Allow authenticated users to access protected routes
+    // 7. Allow authenticated users to access protected routes
     return NextResponse.next();
   } catch (error) {
     console.error('Authentication error:', error);
-    return NextResponse.redirect(new URL('/login', request.url));
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
   }
 }
 

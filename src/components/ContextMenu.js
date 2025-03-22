@@ -160,37 +160,24 @@ export default function ContextMenu({
       localStorage.removeItem('recentlyViewedPlants');
       sessionStorage.removeItem('auth_success');
       
-      // Create a form to post to the signout endpoint directly
-      // This bypasses any client-side routing issues
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = '/api/auth/signout';
+      // Clear any auth-related cookies to ensure complete logout
+      document.cookie = 'next-auth.session-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
+      document.cookie = '__Secure-next-auth.session-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; secure';
+      document.cookie = 'next-auth.csrf-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
+      document.cookie = '__Secure-next-auth.csrf-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; secure';
       
-      // Add CSRF token if available
-      const csrfToken = await fetch('/api/auth/csrf').then(res => res.json()).then(data => data.csrfToken).catch(() => '');
-      if (csrfToken) {
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = 'csrfToken';
-        csrfInput.value = csrfToken;
-        form.appendChild(csrfInput);
-      }
+      // Use NextAuth's signOut function directly with explicit redirect
+      await signOut({ 
+        callbackUrl: '/login',
+        redirect: true
+      });
       
-      // Add callbackUrl parameter
-      const callbackInput = document.createElement('input');
-      callbackInput.type = 'hidden';
-      callbackInput.name = 'callbackUrl';
-      callbackInput.value = '/login';
-      form.appendChild(callbackInput);
-      
-      // Add the form to the document and submit it
-      document.body.appendChild(form);
-      console.log('Submitting logout form...');
-      form.submit();
+      // Force redirect to login as a fallback
+      window.location.href = '/login';
     } catch (error) {
       console.error('Error during logout:', error);
-      // Fallback to direct signout with redirect
-      await signOut({ callbackUrl: '/login' });
+      // Force redirect to login in case of error
+      window.location.href = '/login';
     }
   };
 
