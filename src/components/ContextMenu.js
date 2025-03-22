@@ -160,20 +160,26 @@ export default function ContextMenu({
       localStorage.removeItem('recentlyViewedPlants');
       sessionStorage.removeItem('auth_success');
       
+      // Clear NextAuth related local storage items
+      localStorage.removeItem('next-auth.session-token');
+      localStorage.removeItem('next-auth.callback-url');
+      localStorage.removeItem('next-auth.csrf-token');
+      
       // Clear any auth-related cookies to ensure complete logout
       document.cookie = 'next-auth.session-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
       document.cookie = '__Secure-next-auth.session-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; secure';
       document.cookie = 'next-auth.csrf-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
       document.cookie = '__Secure-next-auth.csrf-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; secure';
       
-      // Use NextAuth's signOut function directly with explicit redirect
+      // Use NextAuth's signOut function with modified options
       await signOut({ 
         callbackUrl: '/login',
         redirect: true
       });
       
-      // Force redirect to login as a fallback
-      window.location.href = '/login';
+      // Force a complete page reload to clear any cached session data
+      // Adding a timestamp query parameter to prevent caching
+      window.location.href = '/login?refresh=' + new Date().getTime();
     } catch (error) {
       console.error('Error during logout:', error);
       // Force redirect to login in case of error
