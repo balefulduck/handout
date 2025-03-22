@@ -2,27 +2,14 @@
 
 import { useSession } from 'next-auth/react';
 import React, { useEffect, useState, Suspense } from 'react';
-import { Transition } from '@headlessui/react';
 import dynamic from 'next/dynamic';
 
 import ContextMenu from '@/components/ContextMenu';
 
-// Use dynamic imports with SSR disabled for components that might cause hydration issues
-const SeedlingPhase = dynamic(() => import('@/components/phases/SeedlingPhase'), {
+// Use dynamic import with SSR disabled for the PhaseContent component to prevent hydration issues
+const PhaseContent = dynamic(() => import('@/components/phases/PhaseContent'), {
   ssr: false,
-  loading: () => <div className="animate-pulse p-4 bg-gray-100 rounded">Loading seedling phase...</div>
-});
-const VegetationPhase = dynamic(() => import('@/components/phases/VegetationPhase'), {
-  ssr: false,
-  loading: () => <div className="animate-pulse p-4 bg-gray-100 rounded">Loading vegetation phase...</div>
-});
-const FlowerPhase = dynamic(() => import('@/components/phases/FlowerPhase'), {
-  ssr: false,
-  loading: () => <div className="animate-pulse p-4 bg-gray-100 rounded">Loading flower phase...</div>
-});
-const HarvestPhase = dynamic(() => import('@/components/phases/HarvestPhase'), {
-  ssr: false,
-  loading: () => <div className="animate-pulse p-4 bg-gray-100 rounded">Loading harvest phase...</div>
+  loading: () => <div className="animate-pulse p-4 bg-gray-100 rounded">Loading phase content...</div>
 });
 
 // Create an error boundary fallback component
@@ -71,11 +58,12 @@ export default function GrowGuidePage() {
   const [activePhase, setActivePhase] = useState('seedling');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isMounted, setIsMounted] = useState(false);
+  const [clientReady, setClientReady] = useState(false);
 
   // Handle client-side mounting to prevent hydration issues
   useEffect(() => {
-    setIsMounted(true);
+    // Set client ready after hydration is complete
+    setClientReady(true);
   }, []);
 
   // Safely fetch data with proper error handling
@@ -139,48 +127,24 @@ export default function GrowGuidePage() {
       return <ErrorFallback error={error} />;
     }
     
-    // Only render phase content on the client side
-    if (!isMounted) {
-      return <div className="animate-pulse p-4 bg-gray-100 rounded">Loading phase content...</div>;
+    if (!activePhase) {
+      return null;
     }
     
-    switch (activePhase) {
-      case 'seedling':
-        return (
-          <Suspense fallback={<div className="animate-pulse p-4 bg-gray-100 rounded">Loading seedling phase...</div>}>
-            <SeedlingPhase />
-          </Suspense>
-        );
-      case 'vegetation':
-        return (
-          <Suspense fallback={<div className="animate-pulse p-4 bg-gray-100 rounded">Loading vegetation phase...</div>}>
-            <VegetationPhase />
-          </Suspense>
-        );
-      case 'flower':
-        return (
-          <Suspense fallback={<div className="animate-pulse p-4 bg-gray-100 rounded">Loading flower phase...</div>}>
-            <FlowerPhase />
-          </Suspense>
-        );
-      case 'harvest':
-        return (
-          <Suspense fallback={<div className="animate-pulse p-4 bg-gray-100 rounded">Loading harvest phase...</div>}>
-            <HarvestPhase />
-          </Suspense>
-        );
-      default:
-        return null;
-    }
+    return (
+      <Suspense fallback={<div className="animate-pulse p-4 bg-gray-100 rounded">Loading phase content...</div>}>
+        {/* Only render PhaseContent component when on client */}
+        {clientReady && <PhaseContent phaseName={activePhase} />}
+      </Suspense>
+    );
   };
 
   return (
-    <div className="min-h-screen mt-10 pt-7 bg-gray-50" suppressHydrationWarning={true}>
-      {isMounted && (
-        <>
-          <ContextMenu activePhase={activePhase} onPhaseSelect={handlePhaseSelect} />
+    <div className="min-h-screen mt-10 pt-7 bg-gray-50">
+      {/* Render ContextMenu always - it's client-side only via 'use client' directive */}
+      <ContextMenu activePhase={activePhase} onPhaseSelect={handlePhaseSelect} />
 
-          <main className="max-w-7xl mx-auto px-6 py-10 pb-24" suppressHydrationWarning={true}>
+      <main className="max-w-7xl mx-auto px-6 py-10 pb-24">
         {/* Page Header */}
         <div className="mb-8 text-center">
           <h2 className="text-medium-blue mb-2">Grow Guide</h2>
@@ -197,32 +161,12 @@ export default function GrowGuidePage() {
               <div className="h-1 w-24 bg-gradient-to-r from-purple to-medium-blue rounded transition-all duration-500 hover:w-32"></div>
             </div>
           )}
-          <Transition
-            show={activePhase !== null}
-            enter="transition-opacity duration-200"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="transition-opacity duration-200"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="transition-all duration-300 text-focus-animation">
-              {renderPhaseContent()}
-            </div>
-          </Transition>
-        </div>
-          </main>
-        </>
-      )}
-      {!isMounted && (
-        <div className="max-w-7xl mx-auto px-6 py-10 pb-24 flex justify-center items-center min-h-screen">
-          <div className="animate-pulse p-8 bg-gray-100 rounded-xl w-full max-w-md text-center">
-            <div className="h-8 bg-gray-200 rounded w-3/4 mx-auto mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded w-5/6 mx-auto"></div>
+          {/* Simpler fade animation implemented with CSS for better hydration */}
+          <div className={`transition-opacity duration-300 ${activePhase !== null ? 'opacity-100' : 'opacity-0'}`}>
+            {renderPhaseContent()}
           </div>
         </div>
-      )}
+      </main>
     </div>
   );
 }

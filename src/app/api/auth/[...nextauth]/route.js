@@ -21,7 +21,7 @@ export const authOptions = {
           throw new Error('Cannot authenticate on client side');
         }
 
-        console.log('Auth attempt:', { username: credentials?.username });
+        console.log('Auth attempt for:', credentials?.username);
 
         if (!credentials?.username || !credentials?.password) {
           console.log('Missing credentials');
@@ -33,29 +33,31 @@ export const authOptions = {
             "SELECT * FROM users WHERE username = ?"
           ).get(credentials.username);
 
-          console.log('Found user:', user ? 'yes' : 'no');
-
           if (!user) {
+            console.log('User not found:', credentials.username);
             throw new Error("Benutzer nicht gefunden");
           }
 
-          console.log('Comparing passwords...');
           const isValid = await bcrypt.compare(
             credentials.password,
             user.password_hash
           );
-          console.log('Password valid:', isValid);
-
+          
           if (!isValid) {
+            console.log('Invalid password for user:', credentials.username);
             throw new Error("Falsches Passwort");
           }
 
+          console.log('Authentication successful for:', credentials.username);
+          
+          // Return a simplified user object with admin status
           return {
             id: user.id,
-            name: user.username
+            name: user.username,
+            isAdmin: user.is_admin === 1
           };
         } catch (error) {
-          console.error('Auth error:', error);
+          console.error('Auth error:', error.message);
           throw error;
         }
       },
@@ -65,67 +67,79 @@ export const authOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.isAdmin = user.isAdmin;
       }
       return token;
     },
     async session({ session, token }) {
       session.user.id = token.id;
+      session.user.isAdmin = token.isAdmin;
       return session;
     },
     async redirect({ url, baseUrl }) {
-      console.log('Redirect callback called with:', { url, baseUrl });
+      console.log('NextAuth redirect called for:', url);
       
-      // Extract the path from URL if it's absolute
-      let path = url;
-      try {
-        // If the URL is absolute, extract just the pathname
-        if (url.startsWith('http')) {
-          const urlObj = new URL(url);
-          path = urlObj.pathname;
-          console.log('Extracted path from absolute URL:', path);
-        }
-      } catch (error) {
-        console.error('Error parsing URL:', error);
-      }
+      // Extremely simplified redirect logic for DigitalOcean compatibility
+      // The simpler this function, the more reliable it will be across environments
       
-      // Handle sign-in redirects
-      if (path.includes('/api/auth/signin') || path.includes('/api/auth/callback') || path.includes('/login')) {
-        console.log('Auth callback - redirecting to /growguide');
+      // For login-related paths, always send to growguide
+      if (url.includes('/login') || url.includes('/api/auth/signin') || 
+          url.includes('/api/auth/callback') || url.includes('callback')) {
+        console.log('Auth flow detected - redirecting to /growguide');
         return '/growguide';
       }
       
-      // Handle sign-out redirects
-      if (path.includes('/api/auth/signout') || path.includes('/logout')) {
-        console.log('Logout detected in NextAuth redirect callback');
+      // For logout-related paths, always go to login
+      if (url.includes('/signout') || url.includes('/logout')) {
+        console.log('Logout flow detected - redirecting to /login');
         return '/login';
       }
       
-      // For any other paths, use them directly as relative URLs
-      return path.startsWith('/') ? path : `/${path}`;
+      // For all other URLs, extract just the path for consistency
+      // This avoids any localhost references in the URL
+      try {
+        // If it's an absolute URL, extract just the path
+        if (url.startsWith('http')) {
+          const urlObj = new URL(url);
+          return urlObj.pathname || '/growguide';
+        }
+      } catch (error) {
+        console.error('Error parsing redirect URL:', error);
+      }
+      
+      // For any other cases, use the URL as is if it starts with /
+      // Otherwise make it relative by adding a leading /
+      return url.startsWith('/') ? url : `/${url}`;
     }
   },
   pages: {
     signIn: '/login'
   },
-  // Properly configure URLs for different environments
-  // This prevents incorrect redirects after logout
-  useSecureCookies: process.env.NODE_ENV === "production",
+  // Session configuration - simplified
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
   
-  // Set the base URL for NextAuth
-  // Only using the URL setting when explicitly provided
-  ...(process.env.NEXTAUTH_URL
-    ? {
-        url: process.env.NEXTAUTH_URL,
-      }
-    : {}),
-      
-  // Don't use baseUrl at all - we're using only relative URLs for redirects
-  // This avoids any issues with domain mismatches
+  // Pages configuration
+  pages: {
+    signIn: '/login',
+    signOut: '/login',
+    error: '/login', // Error messages will be displayed on the login page
+  },
   
-  // Explicitly disable absolute URLs for redirects
-  forceAbsoluteUrls: false,
-      
-  // Configure cookies with more permissive settings for cross-domain issues
+  // Debug mode in development only
+  debug: process.env.NODE_ENV !== "production",
+  
+  // Security settings
+  secret: process.env.NEXTAUTH_SECRET,
+  
+  // URLs - only set in production if NEXTAUTH_URL is available
+  ...(process.env.NEXTAUTH_URL && process.env.NODE_ENV === "production" ? {
+    url: process.env.NEXTAUTH_URL,
+  } : {}),
+  
+  // Simplified cookie settings to work with DigitalOcean's deployment
   cookies: {
     sessionToken: {
       name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.session-token`,
@@ -134,27 +148,6 @@ export const authOptions = {
         sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",
-        // Don't set domain in production to use the default top-level domain
-        domain: undefined,
-      },
-    },
-    callbackUrl: {
-      name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.callback-url`,
-      options: {
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-        domain: undefined,
-      },
-    },
-    csrfToken: {
-      name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.csrf-token`,
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-        domain: undefined,
       },
     },
   },

@@ -154,17 +154,35 @@ export default function ContextMenu({
 
   const handleLogout = async () => {
     try {
-      // First, terminate the session on the server but prevent automatic redirect
-      await signOut({ redirect: false });
+      console.log('Starting logout process...');
       
-      console.log('Session terminated, redirecting to login page...');
+      // First clear any client-side session data
+      localStorage.removeItem('recentlyViewedPlants');
+      sessionStorage.removeItem('auth_success');
       
-      // Then manually navigate to the login page
-      // This gives us full control over the redirect
-      window.location.href = '/login';
+      // Clear NextAuth related local storage items
+      localStorage.removeItem('next-auth.session-token');
+      localStorage.removeItem('next-auth.callback-url');
+      localStorage.removeItem('next-auth.csrf-token');
+      
+      // Clear any auth-related cookies to ensure complete logout
+      document.cookie = 'next-auth.session-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
+      document.cookie = '__Secure-next-auth.session-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; secure';
+      document.cookie = 'next-auth.csrf-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
+      document.cookie = '__Secure-next-auth.csrf-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; secure';
+      
+      // Use NextAuth's signOut function with modified options
+      await signOut({ 
+        callbackUrl: '/login',
+        redirect: true
+      });
+      
+      // Force a complete page reload to clear any cached session data
+      // Adding a timestamp query parameter to prevent caching
+      window.location.href = '/login?refresh=' + new Date().getTime();
     } catch (error) {
       console.error('Error during logout:', error);
-      // Fallback redirect in case of error
+      // Force redirect to login in case of error
       window.location.href = '/login';
     }
   };

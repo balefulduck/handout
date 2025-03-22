@@ -13,99 +13,35 @@ export default function LoginPage() {
     const formData = new FormData(e.currentTarget);
     
     try {
-      // Log pre-login state
-      await fetch('/api/debug/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event: 'pre_login',
-          username: formData.get('username')
-        })
-      });
-
-      const res = await signIn('credentials', {
+      // Simple logging for debugging
+      console.log('Login attempt with username:', formData.get('username'));
+      
+      // Attempt sign in with direct redirect to growguide page
+      // This lets NextAuth handle the redirect which should be more reliable
+      const result = await signIn('credentials', {
         username: formData.get('username'),
         password: formData.get('password'),
-        redirect: false,
+        callbackUrl: '/growguide',  // Set explicit callback URL
+        redirect: true,  // Let NextAuth handle the redirect
       });
-
-      // Log post-login state
-      await fetch('/api/debug/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event: 'post_login',
-          response: res
-        })
-      });
-
-      if (res.error) {
-        setError(res.error);
-        return;
-      }
-
-      if (res.ok) {
-        // Store successful authentication in sessionStorage
-        sessionStorage.setItem('auth_success', 'true');
-        
-        // Add visual feedback that login was successful
-        try {
-          const loginForm = document.querySelector('form');
-          if (loginForm) {
-            loginForm.innerHTML = '<div class="p-4 bg-green-100 text-green-800 rounded">Anmeldung erfolgreich! Leite weiter...</div>';
-          }
-        } catch (error) {
-          console.error('UI update error:', error);
-        }
-        
-        // Use a POST request to a custom API endpoint to trigger server-side redirect
-        try {
-          console.log('Attempting server-side redirect via API');
-          
-          fetch('/api/auth/redirect', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ destination: '/growguide' }),
-          })
-          .then(response => response.json())
-          .then(data => {
-            console.log('Redirect response:', data);
-            
-            // If server-side redirect doesn't work, try client-side as fallback
-            if (data.redirectUrl) {
-              console.log('Using server-provided redirect URL:', data.redirectUrl);
-              window.location.href = data.redirectUrl;
-            } else {
-              // Local fallback if the server doesn't provide a URL
-              console.log('Server did not provide redirect URL, using fallback');
-              window.location.href = '/growguide';
-            }
-          })
-          .catch(error => {
-            console.error('Server redirect error:', error);
-            // Fallback to client-side redirect
-            window.location.href = '/growguide';
-          });
-          
-        } catch (error) {
-          console.error('Redirect API error:', error);
-          // Final fallback
-          window.location.href = '/growguide';
-        }
+      
+      // Note: The code below shouldn't execute due to the redirect
+      // It's only a fallback in case the redirect doesn't happen
+      console.log('Login result:', result);
+      
+      // If we get here, something went wrong with the redirect
+      if (result?.error) {
+        setError(result.error);
+      } else if (result?.url) {
+        // Manual redirect as fallback
+        window.location.href = result.url;
+      } else {
+        // Last resort fallback
+        window.location.href = '/growguide';
       }
     } catch (error) {
-      // Log any errors
-      await fetch('/api/debug/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event: 'error',
-          error: error.message
-        })
-      });
-      setError('Ein Fehler ist aufgetreten');
+      console.error('Login error:', error);
+      setError('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
     }
   };
 
@@ -117,7 +53,7 @@ export default function LoginPage() {
             Anmelden
           </h2>
           <p className="mt-2 text-center text-sm text-custom-orange/80">
-            Willkommen beim Cannabis Anbau Workshop
+            Willkommen beim Dr. Cannabis GrowGuide
           </p>
         </div>
 
@@ -140,7 +76,6 @@ export default function LoginPage() {
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-custom-orange focus:border-custom-orange focus:z-10 sm:text-sm"
                 placeholder="Benutzername"
-                defaultValue="workshop"
               />
             </div>
             <div>
@@ -154,7 +89,6 @@ export default function LoginPage() {
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-custom-orange focus:border-custom-orange focus:z-10 sm:text-sm"
                 placeholder="Passwort"
-                defaultValue="drc"
               />
             </div>
           </div>
