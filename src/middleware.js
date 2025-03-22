@@ -1,87 +1,64 @@
 import { getToken } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
 
-// Define public routes that don't require authentication
-const PUBLIC_ROUTES = [
-  '/',
-  '/login',
-];
-
-// Define explicitly protected routes that should always check for authentication
-// This helps ensure critical routes are always protected even if there are edge cases
-const PROTECTED_ROUTES = [
-  '/growguide',
-  '/plants',
-  '/help',
-];
-
-// Define public file patterns that should bypass middleware
-const PUBLIC_FILE_PATTERNS = [
-  /\.(svg|png|jpg|jpeg|gif|ico|pdf|woff|woff2|ttf|eot)$/,
-  /^\/_next\//,
-  /^\/api\//,
-  /^\/favicon\.ico$/,
-  /^\/images\//,
-  /^\/fonts\//,
-];
-
+/**
+ * Simple middleware to handle authentication across the application
+ * This implementation focuses on reliability and consistency
+ */
 export async function middleware(request) {
   const pathname = request.nextUrl.pathname;
   console.log('Middleware executing for path:', pathname);
   
+  // 1. Always allow access to static assets and API routes
+  if (
+    pathname.startsWith('/_next/') || 
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/images/') ||
+    pathname.startsWith('/fonts/') ||
+    pathname === '/favicon.ico' ||
+    /\.(svg|png|jpg|jpeg|gif|ico|pdf|woff|woff2|ttf|eot)$/.test(pathname)
+  ) {
+    return NextResponse.next();
+  }
+  
+  // 2. Always allow access to the login page and home page
+  if (pathname === '/login' || pathname === '/') {
+    return NextResponse.next();
+  }
+  
   try {
-    // Check if the request is for a public file or API
-    if (PUBLIC_FILE_PATTERNS.some(pattern => 
-      typeof pattern === 'string' ? pathname.startsWith(pattern) : pattern.test(pathname)
-    )) {
-      return NextResponse.next();
-    }
-    
-    // Check if the route is public
-    if (PUBLIC_ROUTES.some(route => pathname === route)) {
-      return NextResponse.next();
-    }
-    
-    // Special handling for explicitly protected routes
-    // This ensures critical routes like /growguide always check authentication
-    const isProtectedRoute = PROTECTED_ROUTES.some(route => 
-      pathname === route || pathname.startsWith(`${route}/`)
-    );
-    
-    // Get the token with explicit configuration
+    // 3. Get the authentication token
     const token = await getToken({ 
       req: request,
       secret: process.env.NEXTAUTH_SECRET,
       secureCookie: process.env.NODE_ENV === "production"
     });
     
-    console.log('Auth token present:', !!token);
+    console.log('Auth token present:', !!token, 'for path:', pathname);
     
-    // If user is on login page and already authenticated, redirect to growguide
+    // 4. Handle authenticated users on login page
     if (token && pathname === '/login') {
-      console.log('User is authenticated and on login page - redirecting to growguide');
+      console.log('Redirecting authenticated user from login to growguide');
       return NextResponse.redirect(new URL('/growguide', request.url));
     }
     
-    // If no token and not on a public route, redirect to login
-    // For explicitly protected routes, we enforce this check more aggressively
-    if (!token || (isProtectedRoute && !token)) {
-      console.log('No auth token - redirecting to login');
-      // Cache the attempted URL to redirect back after login
+    // 5. Handle unauthenticated users on protected routes
+    if (!token) {
+      console.log('Unauthenticated user attempting to access:', pathname);
       const redirectUrl = new URL('/login', request.url);
       redirectUrl.searchParams.set('callbackUrl', pathname);
       return NextResponse.redirect(redirectUrl);
     }
     
-    // User is authenticated and accessing a protected route - allow access
+    // 6. Allow authenticated users to access protected routes
     return NextResponse.next();
   } catch (error) {
-    console.error('Middleware error:', error);
-    // For security, redirect to login on errors rather than allowing access
+    console.error('Authentication error:', error);
     return NextResponse.redirect(new URL('/login', request.url));
   }
 }
 
+// Configure which routes the middleware applies to
 export const config = {
   matcher: [
     /*
@@ -90,7 +67,6 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public file extensions (.svg, .png, etc)
      */
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
