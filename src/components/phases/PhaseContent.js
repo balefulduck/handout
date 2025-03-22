@@ -92,9 +92,9 @@ export default function PhaseContent({ phaseName }) {
   return (
     <div className="py-6 px-4">
       
-      <div className="max-w-3xl mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-          {phaseData.map((item) => {
+      <div className="max-w-3xl mx-auto mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 auto-rows-fr">
+          {phaseData.map((item, itemIndex) => {
             const Icon = contentTypeIcons[item.content_type] || contentTypeIcons.default;
             
             // Determine if this should be full-width
@@ -103,10 +103,23 @@ export default function PhaseContent({ phaseName }) {
             return (
               <div 
                 key={`${item.phase}-${item.content_type}`} 
-                className={`rounded-xl shadow overflow-hidden ${isFullWidth ? 'col-span-1 sm:col-span-2 md:col-span-3' : ''}`}
+                className={`rounded-xl shadow-lg overflow-hidden relative flex flex-col h-full ${isFullWidth ? 'col-span-1 sm:col-span-2 md:col-span-3' : ''}`}
               >
-                <div className={`bg-${item.color_theme} p-3`}>
-                  <div className="flex items-center gap-2">
+                {/* Single background image for the entire card */}
+                <div 
+                  className="absolute inset-0 z-0" 
+                  style={{
+                    backgroundImage: `url('/cb.jpg')`,
+                    backgroundPosition: `${(itemIndex % 5) * 25}% ${(itemIndex % 3) * 33}%`,
+                    backgroundSize: 'cover',
+                    filter: 'blur(1px) brightness(0.5)',
+                    opacity: 0.85
+                  }}
+                ></div>
+                <div className="absolute inset-0 bg-black opacity-50 z-1"></div>
+                
+                <div className="bg-olive-green/80 p-3 relative overflow-hidden z-10">
+                  <div className="flex items-center gap-2 relative z-20">
                     <Icon className="text-base text-white" />
                     {item.tooltip ? (
                       <DrcInfoTag 
@@ -122,10 +135,12 @@ export default function PhaseContent({ phaseName }) {
                     )}
                   </div>
                 </div>
-                <div className={`p-4 border-x border-b border-${item.color_theme}/20 rounded-b-xl bg-white`}>
-                  {item.values.map((value, index) => (
-                    <div key={index} className={index > 0 ? 'mt-2' : ''}>
-                      <span className="text-sm text-gray-700">{value}</span>
+                <div className="p-4 rounded-b-xl relative overflow-hidden font-dosis z-10 flex-grow" style={{ color: 'white' }}>
+                  {/* Additional dark overlay for better text readability - fill entire card */}
+                  <div className="absolute inset-0 bg-black opacity-30 z-1"></div>
+                  {item.values.map((value, valueIndex) => (
+                    <div key={valueIndex} className={`${valueIndex > 0 ? 'mt-2' : ''} relative z-20`}>
+                      <span className="text-base text-white font-dosis tracking-wide">{value}</span>
                     </div>
                   ))}
                 </div>

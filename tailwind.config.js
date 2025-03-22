@@ -9,7 +9,7 @@ module.exports = {
     extend: {
       fontFamily: {
         encode: ['Encode Sans', 'sans-serif'],
-        aptos: ['Aptos', 'sans-serif'],
+        dosis: ['Dosis', 'sans-serif'],
       },
       colors: {
         // New color system
