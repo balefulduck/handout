@@ -81,10 +81,9 @@ export const authOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      console.log('NextAuth redirect called for:', url);
+      console.log('NextAuth redirect called for:', url, 'baseUrl:', baseUrl);
       
-      // Extremely simplified redirect logic for DigitalOcean compatibility
-      // The simpler this function, the more reliable it will be across environments
+      // Simplified redirect logic with improved error handling
       
       // For login-related paths, always send to growguide
       if (url.includes('/login') || url.includes('/api/auth/signin') || 
@@ -99,21 +98,26 @@ export const authOptions = {
         return '/login';
       }
       
-      // For all other URLs, extract just the path for consistency
-      // This avoids any localhost references in the URL
+      // For all other cases, ensure we return a valid path
+      // Avoid URL constructor errors by using simple string operations
       try {
-        // If it's an absolute URL, extract just the path
+        // If it's an absolute URL (with http/https), extract just the path
         if (url.startsWith('http')) {
-          const urlObj = new URL(url);
-          return urlObj.pathname || '/growguide';
+          // Extract path portion without using URL constructor
+          const pathStart = url.indexOf('/', 8); // Skip past http(s)://
+          if (pathStart !== -1) {
+            return url.substring(pathStart) || '/growguide';
+          }
+          return '/growguide'; // Fallback if path extraction fails
         }
+        
+        // For relative URLs, ensure they start with /
+        return url.startsWith('/') ? url : `/${url}`;
       } catch (error) {
-        console.error('Error parsing redirect URL:', error);
+        console.error('Error in redirect handler:', error);
+        // Safe fallback
+        return '/growguide';
       }
-      
-      // For any other cases, use the URL as is if it starts with /
-      // Otherwise make it relative by adding a leading /
-      return url.startsWith('/') ? url : `/${url}`;
     }
   },
   pages: {

@@ -41,13 +41,14 @@ export default function LoginPage() {
       if (result?.error) {
         // Handle specific NextAuth errors
         setError(result.error);
-      } else if (result?.ok && result?.url) {
+      } else if (result?.ok) {
         // If login was successful, clear any cached data and redirect
         localStorage.removeItem('recentlyViewedPlants');
         sessionStorage.clear();
         
         // Force page reload to ensure clean session state
-        window.location.href = result.url;
+        // Use the callbackUrl directly instead of trying to use result.url
+        window.location.href = '/growguide';
       } else {
         // Unexpected error case
         setError('Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
