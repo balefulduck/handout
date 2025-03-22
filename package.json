@@ -7,8 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "reset-users": "node scripts/reset-users.js",
-    "postbuild": "node scripts/reset-users.js"
+    "reset-users": "node scripts/reset-users.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
