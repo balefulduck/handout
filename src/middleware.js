@@ -62,11 +62,20 @@ export async function middleware(request) {
       pathname === route || pathname.startsWith(`${route}/`)
     );
     
+    // Check for admin routes
+    const isAdminRoute = pathname === '/admin' || pathname.startsWith('/admin/');
+    
     if (!token || (isCriticalRoute && !token)) {
       console.log('Unauthenticated user attempting to access:', pathname);
       url.pathname = '/login';
       url.searchParams.set('callbackUrl', pathname);
       return NextResponse.redirect(url);
+    }
+    
+    // Restrict admin routes to users with admin role
+    if (isAdminRoute && !token.isAdmin) {
+      console.log('Non-admin user attempting to access admin route:', pathname);
+      return NextResponse.redirect(new URL('/growguide', request.url));
     }
     
     // 7. Allow authenticated users to access protected routes

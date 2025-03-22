@@ -50,10 +50,11 @@ export const authOptions = {
 
           console.log('Authentication successful for:', credentials.username);
           
-          // Return a simplified user object
+          // Return a simplified user object with admin status
           return {
             id: user.id,
-            name: user.username
+            name: user.username,
+            isAdmin: user.is_admin === 1
           };
         } catch (error) {
           console.error('Auth error:', error.message);
@@ -66,11 +67,13 @@ export const authOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.isAdmin = user.isAdmin;
       }
       return token;
     },
     async session({ session, token }) {
       session.user.id = token.id;
+      session.user.isAdmin = token.isAdmin;
       return session;
     },
     async redirect({ url, baseUrl }) {
