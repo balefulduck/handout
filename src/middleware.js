@@ -7,6 +7,14 @@ const PUBLIC_ROUTES = [
   '/login',
 ];
 
+// Define explicitly protected routes that should always check for authentication
+// This helps ensure critical routes are always protected even if there are edge cases
+const PROTECTED_ROUTES = [
+  '/growguide',
+  '/plants',
+  '/help',
+];
+
 // Define public file patterns that should bypass middleware
 const PUBLIC_FILE_PATTERNS = [
   /\.(svg|png|jpg|jpeg|gif|ico|pdf|woff|woff2|ttf|eot)$/,
@@ -34,6 +42,12 @@ export async function middleware(request) {
       return NextResponse.next();
     }
     
+    // Special handling for explicitly protected routes
+    // This ensures critical routes like /growguide always check authentication
+    const isProtectedRoute = PROTECTED_ROUTES.some(route => 
+      pathname === route || pathname.startsWith(`${route}/`)
+    );
+    
     // Get the token with explicit configuration
     const token = await getToken({ 
       req: request,
@@ -50,7 +64,8 @@ export async function middleware(request) {
     }
     
     // If no token and not on a public route, redirect to login
-    if (!token) {
+    // For explicitly protected routes, we enforce this check more aggressively
+    if (!token || (isProtectedRoute && !token)) {
       console.log('No auth token - redirecting to login');
       // Cache the attempted URL to redirect back after login
       const redirectUrl = new URL('/login', request.url);
