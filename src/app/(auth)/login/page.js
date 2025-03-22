@@ -7,55 +7,66 @@ import { useRouter } from 'next/navigation';
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
     
     try {
+      // Prevent multiple submissions
+      if (isSubmitting) return;
+      setIsSubmitting(true);
+      
       // Clear any previous errors
       setError('');
       
-      // Validate input fields first
+      // Get form data
+      const formData = new FormData(e.currentTarget);
       const username = formData.get('username');
       const password = formData.get('password');
       
+      // Basic validation
       if (!username || !password) {
         setError('Bitte Benutzername und Passwort eingeben');
+        setIsSubmitting(false);
         return;
       }
       
-      console.log('Login attempt with username:', username);
+      console.log('Attempting login with username:', username);
       
-      // Attempt sign in but don't redirect automatically
-      // This allows us to properly handle errors
+      // Simplified login approach - don't use callbackUrl to avoid URL constructor issues
       const result = await signIn('credentials', {
-        username: username,
-        password: password,
-        callbackUrl: '/growguide',
-        redirect: false, // Don't redirect automatically so we can handle errors
+        username,
+        password,
+        redirect: false
       });
       
       console.log('Login result:', result);
       
       if (result?.error) {
-        // Handle specific NextAuth errors
-        setError(result.error);
+        // Display the error from NextAuth
+        setError(result.error || 'Anmeldung fehlgeschlagen');
+        setIsSubmitting(false);
       } else if (result?.ok) {
-        // If login was successful, clear any cached data and redirect
-        localStorage.removeItem('recentlyViewedPlants');
-        sessionStorage.clear();
+        // Clear client-side data
+        try {
+          localStorage.clear();
+          sessionStorage.clear();
+        } catch (e) {
+          console.error('Error clearing storage:', e);
+        }
         
-        // Force page reload to ensure clean session state
-        // Use the callbackUrl directly instead of trying to use result.url
-        window.location.href = '/growguide';
+        // Use Next.js router for navigation instead of window.location
+        // This avoids URL constructor issues
+        router.push('/growguide');
       } else {
-        // Unexpected error case
-        setError('Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
+        setError('Ein unbekannter Fehler ist aufgetreten');
+        setIsSubmitting(false);
       }
     } catch (error) {
       console.error('Login error:', error);
       setError('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
+      setIsSubmitting(false);
     }
   };
 

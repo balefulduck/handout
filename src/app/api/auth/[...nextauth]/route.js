@@ -8,6 +8,14 @@ if (typeof window === 'undefined') {
   console.log('Initializing auth route on server side');
 }
 
+// Define default error messages for authentication
+const AUTH_ERRORS = {
+  DEFAULT: 'Ein Fehler ist aufgetreten',
+  USER_NOT_FOUND: 'Benutzer nicht gefunden',
+  INVALID_PASSWORD: 'Falsches Passwort',
+  MISSING_CREDENTIALS: 'Bitte Benutzername und Passwort eingeben'
+};
+
 export const authOptions = {
   providers: [
     CredentialsProvider({
@@ -25,7 +33,7 @@ export const authOptions = {
 
         if (!credentials?.username || !credentials?.password) {
           console.log('Missing credentials');
-          return null; // Return null instead of throwing to trigger proper NextAuth error handling
+          return Promise.reject(new Error(AUTH_ERRORS.MISSING_CREDENTIALS));
         }
 
         try {
@@ -36,8 +44,7 @@ export const authOptions = {
 
           if (!user) {
             console.log('User not found:', credentials.username);
-            // Return null instead of throwing to trigger proper NextAuth error handling
-            return null;
+            return Promise.reject(new Error(AUTH_ERRORS.USER_NOT_FOUND));
           }
 
           const isValid = await bcrypt.compare(
@@ -47,8 +54,7 @@ export const authOptions = {
           
           if (!isValid) {
             console.log('Invalid password for user:', credentials.username);
-            // Return null instead of throwing to trigger proper NextAuth error handling
-            return null;
+            return Promise.reject(new Error(AUTH_ERRORS.INVALID_PASSWORD));
           }
 
           console.log('Authentication successful for:', credentials.username);
@@ -62,7 +68,7 @@ export const authOptions = {
           };
         } catch (error) {
           console.error('Auth error:', error.message);
-          return null; // Return null to trigger NextAuth error handling
+          return Promise.reject(new Error(AUTH_ERRORS.DEFAULT));
         }
       },
     }),
@@ -81,43 +87,22 @@ export const authOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      console.log('NextAuth redirect called for:', url, 'baseUrl:', baseUrl);
+      // Extremely simplified redirect logic to avoid URL constructor issues
+      console.log('NextAuth redirect called for:', url);
       
-      // Simplified redirect logic with improved error handling
-      
-      // For login-related paths, always send to growguide
-      if (url.includes('/login') || url.includes('/api/auth/signin') || 
-          url.includes('/api/auth/callback') || url.includes('callback')) {
-        console.log('Auth flow detected - redirecting to /growguide');
+      // Default destinations for common auth flows
+      if (url.includes('/login') || url.includes('/signin') || url.includes('/callback')) {
         return '/growguide';
       }
       
-      // For logout-related paths, always go to login
       if (url.includes('/signout') || url.includes('/logout')) {
-        console.log('Logout flow detected - redirecting to /login');
         return '/login';
       }
       
-      // For all other cases, ensure we return a valid path
-      // Avoid URL constructor errors by using simple string operations
-      try {
-        // If it's an absolute URL (with http/https), extract just the path
-        if (url.startsWith('http')) {
-          // Extract path portion without using URL constructor
-          const pathStart = url.indexOf('/', 8); // Skip past http(s)://
-          if (pathStart !== -1) {
-            return url.substring(pathStart) || '/growguide';
-          }
-          return '/growguide'; // Fallback if path extraction fails
-        }
-        
-        // For relative URLs, ensure they start with /
-        return url.startsWith('/') ? url : `/${url}`;
-      } catch (error) {
-        console.error('Error in redirect handler:', error);
-        // Safe fallback
-        return '/growguide';
-      }
+      // For all other cases, use a simple approach
+      // If it starts with a slash, use it as is; otherwise add a slash
+      // Avoid any URL parsing that might cause errors
+      return url.startsWith('/') ? url : `/${url}`;
     }
   },
   pages: {
