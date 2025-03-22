@@ -13,31 +13,44 @@ export default function LoginPage() {
     const formData = new FormData(e.currentTarget);
     
     try {
-      // Simple logging for debugging
-      console.log('Login attempt with username:', formData.get('username'));
+      // Clear any previous errors
+      setError('');
       
-      // Attempt sign in with direct redirect to growguide page
-      // This lets NextAuth handle the redirect which should be more reliable
+      // Validate input fields first
+      const username = formData.get('username');
+      const password = formData.get('password');
+      
+      if (!username || !password) {
+        setError('Bitte Benutzername und Passwort eingeben');
+        return;
+      }
+      
+      console.log('Login attempt with username:', username);
+      
+      // Attempt sign in but don't redirect automatically
+      // This allows us to properly handle errors
       const result = await signIn('credentials', {
-        username: formData.get('username'),
-        password: formData.get('password'),
-        callbackUrl: '/growguide',  // Set explicit callback URL
-        redirect: true,  // Let NextAuth handle the redirect
+        username: username,
+        password: password,
+        callbackUrl: '/growguide',
+        redirect: false, // Don't redirect automatically so we can handle errors
       });
       
-      // Note: The code below shouldn't execute due to the redirect
-      // It's only a fallback in case the redirect doesn't happen
       console.log('Login result:', result);
       
-      // If we get here, something went wrong with the redirect
       if (result?.error) {
+        // Handle specific NextAuth errors
         setError(result.error);
-      } else if (result?.url) {
-        // Manual redirect as fallback
+      } else if (result?.ok && result?.url) {
+        // If login was successful, clear any cached data and redirect
+        localStorage.removeItem('recentlyViewedPlants');
+        sessionStorage.clear();
+        
+        // Force page reload to ensure clean session state
         window.location.href = result.url;
       } else {
-        // Last resort fallback
-        window.location.href = '/growguide';
+        // Unexpected error case
+        setError('Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
       }
     } catch (error) {
       console.error('Login error:', error);

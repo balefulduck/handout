@@ -25,17 +25,19 @@ export const authOptions = {
 
         if (!credentials?.username || !credentials?.password) {
           console.log('Missing credentials');
-          throw new Error("Bitte Benutzername und Passwort eingeben");
+          return null; // Return null instead of throwing to trigger proper NextAuth error handling
         }
 
         try {
+          // Find user with exact username match
           const user = db.prepare(
-            "SELECT * FROM users WHERE username = ?"
+            "SELECT * FROM users WHERE username = ? COLLATE NOCASE"
           ).get(credentials.username);
 
           if (!user) {
             console.log('User not found:', credentials.username);
-            throw new Error("Benutzer nicht gefunden");
+            // Return null instead of throwing to trigger proper NextAuth error handling
+            return null;
           }
 
           const isValid = await bcrypt.compare(
@@ -45,20 +47,22 @@ export const authOptions = {
           
           if (!isValid) {
             console.log('Invalid password for user:', credentials.username);
-            throw new Error("Falsches Passwort");
+            // Return null instead of throwing to trigger proper NextAuth error handling
+            return null;
           }
 
           console.log('Authentication successful for:', credentials.username);
           
-          // Return a simplified user object with admin status
+          // Return a user object with explicit id, name and admin status
           return {
             id: user.id,
             name: user.username,
-            isAdmin: user.is_admin === 1
+            email: user.email || null,
+            isAdmin: user.is_admin === 1 || false // Ensure boolean value with fallback
           };
         } catch (error) {
           console.error('Auth error:', error.message);
-          throw error;
+          return null; // Return null to trigger NextAuth error handling
         }
       },
     }),
