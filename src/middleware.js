@@ -28,8 +28,8 @@ export async function middleware(request) {
     return NextResponse.next();
   }
   
-  // 2. Always allow access to public pages
-  if (pathname === '/login' || pathname === '/' || pathname === '/register') {
+  // 2. Always allow access to the login page and home page
+  if (pathname === '/login' || pathname === '/') {
     return NextResponse.next();
   }
   

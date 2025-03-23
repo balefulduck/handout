@@ -7,19 +7,11 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Get the current origin to ensure we use the correct URL in all environments
-  const getOrigin = () => {
-    return typeof window !== 'undefined' ? window.location.origin : '';
-  };
-
   // Direct API call to authenticate without NextAuth redirect handling
   const handleDirectLogin = async (username, password) => {
     try {
-      const origin = getOrigin();
-      console.log('Using origin for API calls:', origin);
-      
-      // Call the credentials API directly with the correct origin
-      const res = await fetch(`${origin}/api/auth/callback/credentials`, {
+      // Call the credentials API directly
+      const res = await fetch('/api/auth/callback/credentials', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
