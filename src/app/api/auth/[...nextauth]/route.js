@@ -8,6 +8,28 @@ if (typeof window === 'undefined') {
   console.log('Initializing auth route on server side');
 }
 
+// Determine the base URL for the application
+// This is critical for avoiding localhost references in production
+const getBaseUrl = () => {
+  // Check for explicitly set NEXTAUTH_URL
+  if (process.env.NEXTAUTH_URL) {
+    return process.env.NEXTAUTH_URL;
+  }
+  
+  // In production, try to determine the URL from request headers
+  if (process.env.NODE_ENV === 'production') {
+    // Default to https and the VERCEL_URL if available
+    if (process.env.VERCEL_URL) {
+      return `https://${process.env.VERCEL_URL}`;
+    }
+    // For other hosting platforms, we'll need to set NEXTAUTH_URL in env
+    return 'https://your-production-domain.com';
+  }
+  
+  // In development, default to localhost
+  return 'http://localhost:3000';
+};
+
 // Define default error messages for authentication
 const AUTH_ERRORS = {
   DEFAULT: 'Ein Fehler ist aufgetreten',
@@ -17,6 +39,8 @@ const AUTH_ERRORS = {
 };
 
 export const authOptions = {
+  // Set the correct base URL for all environments
+  baseUrl: getBaseUrl(),
   providers: [
     CredentialsProvider({
       name: "Credentials",
