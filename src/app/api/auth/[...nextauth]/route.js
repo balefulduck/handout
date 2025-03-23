@@ -10,7 +10,7 @@ if (typeof window === 'undefined') {
 
 // Define default error messages for authentication
 const AUTH_ERRORS = {
-  DEFAULT: 'Ein Fehler ist aufgetreten',
+  DEFAULT: 'Ein Fehler ist aufgetreten!',
   USER_NOT_FOUND: 'Benutzer nicht gefunden',
   INVALID_PASSWORD: 'Falsches Passwort',
   MISSING_CREDENTIALS: 'Bitte Benutzername und Passwort eingeben'
