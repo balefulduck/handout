@@ -86,23 +86,11 @@ export const authOptions = {
       session.user.isAdmin = token.isAdmin;
       return session;
     },
-    async redirect({ url, baseUrl }) {
-      // Extremely simplified redirect logic to avoid URL constructor issues
-      console.log('NextAuth redirect called for:', url);
-      
-      // Default destinations for common auth flows
-      if (url.includes('/login') || url.includes('/signin') || url.includes('/callback')) {
-        return '/growguide';
-      }
-      
-      if (url.includes('/signout') || url.includes('/logout')) {
-        return '/login';
-      }
-      
-      // For all other cases, use a simple approach
-      // If it starts with a slash, use it as is; otherwise add a slash
-      // Avoid any URL parsing that might cause errors
-      return url.startsWith('/') ? url : `/${url}`;
+    async redirect() {
+      // Extremely simplified redirect handler
+      // Let the client-side code handle all redirects
+      // This effectively disables NextAuth's redirect handling
+      return '/growguide';
     }
   },
   pages: {

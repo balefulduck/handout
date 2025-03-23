@@ -323,7 +323,7 @@ Ich benötige weitere Unterstützung bei diesem Problem.
                           </div>
                         </div>
                         <div className="ml-3">
-                          <div className="text-normal font-medium text-gray-800">{session?.user?.name || 'Workshop'}</div>
+                          <div className="text-normal font-medium text-gray-800">{session?.user?.name}</div>
                           {isEditingEmail ? (
                             <div className="flex items-center gap-2 mt-1">
                               <input
