@@ -367,6 +367,16 @@ Ich benötige weitere Unterstützung bei diesem Problem.
                           <FaCog className="mr-2" />
                           Einstellungen
                         </button>
+                        {session?.user?.role === 'admin' && (
+                          <button
+                            onClick={() => router.push('/admin')}
+                            className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-small font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-olive-green"
+                          >
+                            <FaUserShield className="mr-2" />
+                            Admin
+                          </button>
+                        )}
+
                         <button
                           onClick={() => setFeedbackModalOpen(true)}
                           className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-small font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-turquoise"
