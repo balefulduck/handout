@@ -146,11 +146,18 @@ export default function GrowGuidePage() {
 
       <main className="max-w-7xl mx-auto px-6 py-10 pb-24">
         {/* Page Header */}
-        <div className="mb-8 text-center">
-          <h2 className="text-medium-blue mb-2">Grow Guide</h2>
-          <p className="max-w-2xl mx-auto text-gray-600 text-base">
-            Wähle eine Wachstumsphase im Kontextmenü am unteren Bildschirmrand um detaillierte Informationen zu den wichtigsten Parametern deines Grows zu erhalten.
-          </p>
+        <div className="mb-8 md:flex md:justify-between">
+          <div className="md:w-1/2">
+            <h2 className="text-medium-blue mb-2 text-left">Grow Guide</h2>
+          </div>
+          <div className="md:w-1/2 mt-4 md:mt-0 text-left">
+            <p className="text-gray-600 text-base font-dosis">
+              Wähle eine Wachstumsphase im Kontextmenü am unteren Bildschirmrand um detaillierte Informationen zu den wichtigsten Parametern deines Grows zu erhalten.
+            </p>
+            <p className="text-gray-600 text-base mt-2 font-dosis">
+              Wische über <span className="drc-info-tag-style rounded-md px-2 py-0.5 font-bold shadow-md bg-olive-green/15 text-olive-green border border-olive-green/30">markierte</span> Begriffe um weitere Informationen und Tipps zu erhalten. <br />Schau Dir auch unser Dr. Cannabis Lexikon an!
+            </p>
+          </div>
         </div>
         
         {/* Phase Content */}

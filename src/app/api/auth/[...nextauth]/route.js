@@ -8,6 +8,14 @@ if (typeof window === 'undefined') {
   console.log('Initializing auth route on server side');
 }
 
+// Define default error messages for authentication
+const AUTH_ERRORS = {
+  DEFAULT: 'Ein Fehler ist aufgetreten!',
+  USER_NOT_FOUND: 'Benutzer nicht gefunden',
+  INVALID_PASSWORD: 'Falsches Passwort',
+  MISSING_CREDENTIALS: 'Bitte Benutzername und Passwort eingeben'
+};
+
 export const authOptions = {
   providers: [
     CredentialsProvider({
@@ -25,17 +33,18 @@ export const authOptions = {
 
         if (!credentials?.username || !credentials?.password) {
           console.log('Missing credentials');
-          throw new Error("Bitte Benutzername und Passwort eingeben");
+          return Promise.reject(new Error(AUTH_ERRORS.MISSING_CREDENTIALS));
         }
 
         try {
+          // Find user with exact username match
           const user = db.prepare(
-            "SELECT * FROM users WHERE username = ?"
+            "SELECT * FROM users WHERE username = ? COLLATE NOCASE"
           ).get(credentials.username);
 
           if (!user) {
             console.log('User not found:', credentials.username);
-            throw new Error("Benutzer nicht gefunden");
+            return Promise.reject(new Error(AUTH_ERRORS.USER_NOT_FOUND));
           }
 
           const isValid = await bcrypt.compare(
@@ -45,20 +54,21 @@ export const authOptions = {
           
           if (!isValid) {
             console.log('Invalid password for user:', credentials.username);
-            throw new Error("Falsches Passwort");
+            return Promise.reject(new Error(AUTH_ERRORS.INVALID_PASSWORD));
           }
 
           console.log('Authentication successful for:', credentials.username);
           
-          // Return a simplified user object with admin status
+          // Return a user object with explicit id, name and admin status
           return {
             id: user.id,
             name: user.username,
-            isAdmin: user.is_admin === 1
+            email: user.email || null,
+            isAdmin: user.is_admin === 1 || false // Ensure boolean value with fallback
           };
         } catch (error) {
           console.error('Auth error:', error.message);
-          throw error;
+          return Promise.reject(new Error(AUTH_ERRORS.DEFAULT));
         }
       },
     }),
@@ -76,40 +86,11 @@ export const authOptions = {
       session.user.isAdmin = token.isAdmin;
       return session;
     },
-    async redirect({ url, baseUrl }) {
-      console.log('NextAuth redirect called for:', url);
-      
-      // Extremely simplified redirect logic for DigitalOcean compatibility
-      // The simpler this function, the more reliable it will be across environments
-      
-      // For login-related paths, always send to growguide
-      if (url.includes('/login') || url.includes('/api/auth/signin') || 
-          url.includes('/api/auth/callback') || url.includes('callback')) {
-        console.log('Auth flow detected - redirecting to /growguide');
-        return '/growguide';
-      }
-      
-      // For logout-related paths, always go to login
-      if (url.includes('/signout') || url.includes('/logout')) {
-        console.log('Logout flow detected - redirecting to /login');
-        return '/login';
-      }
-      
-      // For all other URLs, extract just the path for consistency
-      // This avoids any localhost references in the URL
-      try {
-        // If it's an absolute URL, extract just the path
-        if (url.startsWith('http')) {
-          const urlObj = new URL(url);
-          return urlObj.pathname || '/growguide';
-        }
-      } catch (error) {
-        console.error('Error parsing redirect URL:', error);
-      }
-      
-      // For any other cases, use the URL as is if it starts with /
-      // Otherwise make it relative by adding a leading /
-      return url.startsWith('/') ? url : `/${url}`;
+    async redirect() {
+      // Extremely simplified redirect handler
+      // Let the client-side code handle all redirects
+      // This effectively disables NextAuth's redirect handling
+      return '/growguide';
     }
   },
   pages: {

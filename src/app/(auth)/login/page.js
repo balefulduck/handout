@@ -2,46 +2,98 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Direct API call to authenticate without NextAuth redirect handling
+  const handleDirectLogin = async (username, password) => {
+    try {
+      // Call the credentials API directly
+      const res = await fetch('/api/auth/callback/credentials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      
+      if (res.ok) {
+        // Clear client storage
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Direct navigation without URL constructor
+        document.location.href = '/growguide';
+        return true;
+      } else {
+        const data = await res.json();
+        return { error: data.error || 'Anmeldung fehlgeschlagen' };
+      }
+    } catch (err) {
+      console.error('Direct login error:', err);
+      return { error: 'Ein Fehler ist aufgetreten' };
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
     
     try {
-      // Simple logging for debugging
-      console.log('Login attempt with username:', formData.get('username'));
+      // Prevent multiple submissions
+      if (isSubmitting) return;
+      setIsSubmitting(true);
+      setError('');
       
-      // Attempt sign in with direct redirect to growguide page
-      // This lets NextAuth handle the redirect which should be more reliable
-      const result = await signIn('credentials', {
-        username: formData.get('username'),
-        password: formData.get('password'),
-        callbackUrl: '/growguide',  // Set explicit callback URL
-        redirect: true,  // Let NextAuth handle the redirect
-      });
+      // Get form data
+      const formData = new FormData(e.currentTarget);
+      const username = formData.get('username');
+      const password = formData.get('password');
       
-      // Note: The code below shouldn't execute due to the redirect
-      // It's only a fallback in case the redirect doesn't happen
-      console.log('Login result:', result);
+      // Basic validation
+      if (!username || !password) {
+        setError('Bitte Benutzername und Passwort eingeben');
+        setIsSubmitting(false);
+        return;
+      }
       
-      // If we get here, something went wrong with the redirect
-      if (result?.error) {
-        setError(result.error);
-      } else if (result?.url) {
-        // Manual redirect as fallback
-        window.location.href = result.url;
-      } else {
-        // Last resort fallback
-        window.location.href = '/growguide';
+      console.log('Attempting login with username:', username);
+      
+      // First try the standard NextAuth approach
+      try {
+        const result = await signIn('credentials', {
+          username,
+          password,
+          redirect: false
+        });
+        
+        console.log('NextAuth login result:', result);
+        
+        if (result?.error) {
+          setError(result.error);
+          setIsSubmitting(false);
+        } else if (result?.ok) {
+          // Success - clear storage and redirect
+          localStorage.clear();
+          sessionStorage.clear();
+          
+          // Simple direct navigation
+          window.location.href = '/growguide';
+        }
+      } catch (authError) {
+        console.error('NextAuth error:', authError);
+        
+        // Fall back to direct login if NextAuth fails
+        const directResult = await handleDirectLogin(username, password);
+        
+        if (directResult.error) {
+          setError(directResult.error);
+          setIsSubmitting(false);
+        }
       }
     } catch (error) {
       console.error('Login error:', error);
       setError('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
+      setIsSubmitting(false);
     }
   };
 

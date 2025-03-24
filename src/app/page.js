@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FaSeedling, FaLeaf, FaQuestion, FaQrCode, FaArrowRight } from 'react-icons/fa';
 import { GiGrowth, GiPlantWatering } from 'react-icons/gi';
+import TutorialVideo from '@/components/TutorialVideo';
 
 export default function Home() {
   return (
@@ -45,7 +46,29 @@ export default function Home() {
           </div>
         </div>
       </div>
-      
+         {/* Beta Announcement */}
+      <div className="bg-gray-50 rounded-lg p-6 shadow-sm border border-gray-200 max-w-4xl w-full mb-6">
+        <h2 className="text-xl font-bold text-gray-800 text-center mb-3">Beta Phase</h2>
+        <p className="text-gray-700 text-center mb-4">
+          Wir freuen uns, dass du an unserer Beta teilnimmst! Dein Feedback hilft uns, Dr. Cannabis GrowGuide zu verbessern.
+          Klicke auf einen der Buttons oben, um loszulegen.
+        </p>
+        
+        {/* Tutorial Video Section */}
+        <div className="mt-4">
+          <details className="group">
+            <summary className="flex justify-center items-center cursor-pointer text-olive-green font-medium hover:text-olive-green/80 transition-colors">
+              <span>Tutorial Video ansehen</span>
+              <svg className="ml-2 h-5 w-5 transform group-open:rotate-180 transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </summary>
+            <div className="mt-4">
+              <TutorialVideo />
+            </div>
+          </details>
+        </div>
+      </div>
       {/* Features Section */}
       <div className="w-full max-w-4xl mb-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -109,14 +132,7 @@ export default function Home() {
         </div>
       </div>
       
-      {/* Beta Announcement */}
-      <div className="bg-gray-50 rounded-lg p-6 shadow-sm border border-gray-200 max-w-4xl w-full">
-        <h2 className="text-xl font-bold text-gray-800 text-center mb-3">Offene Beta Phase</h2>
-        <p className="text-gray-700 text-center">
-          Wir freuen uns, dass du an unserer offenen Beta teilnimmst! Dein Feedback hilft uns, Dr. Cannabis GrowGuide zu verbessern.
-          Klicke auf einen der Buttons oben, um loszulegen.
-        </p>
-      </div>
+   
     </main>
   );
 }

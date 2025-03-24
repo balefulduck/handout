@@ -156,34 +156,44 @@ export default function ContextMenu({
     try {
       console.log('Starting logout process...');
       
-      // First clear any client-side session data
-      localStorage.removeItem('recentlyViewedPlants');
-      sessionStorage.removeItem('auth_success');
+      // First clear all client-side storage
+      localStorage.clear();
+      sessionStorage.clear();
       
-      // Clear NextAuth related local storage items
-      localStorage.removeItem('next-auth.session-token');
-      localStorage.removeItem('next-auth.callback-url');
-      localStorage.removeItem('next-auth.csrf-token');
+      // Clear all cookies by setting their expiry date to the past
+      // This gets all cookies regardless of their name
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i];
+        const eqPos = cookie.indexOf('=');
+        const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim();
+        document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax`;
+        document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax; Secure`;
+        document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=None; Secure`;
+      }
       
-      // Clear any auth-related cookies to ensure complete logout
-      document.cookie = 'next-auth.session-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
-      document.cookie = '__Secure-next-auth.session-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; secure';
-      document.cookie = 'next-auth.csrf-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
-      document.cookie = '__Secure-next-auth.csrf-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; secure';
+      // Explicitly clear NextAuth related cookies
+      document.cookie = 'next-auth.session-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax';
+      document.cookie = '__Secure-next-auth.session-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax; Secure';
+      document.cookie = 'next-auth.csrf-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax';
+      document.cookie = '__Secure-next-auth.csrf-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax; Secure';
       
-      // Use NextAuth's signOut function with modified options
-      await signOut({ 
+      // Call NextAuth's signOut with explicit options
+      await signOut({
         callbackUrl: '/login',
-        redirect: true
+        redirect: false  // Handle the redirect ourselves for more control
       });
       
-      // Force a complete page reload to clear any cached session data
-      // Adding a timestamp query parameter to prevent caching
+      // Wait a moment to ensure the signOut API request completes
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Force a hard reload to clear any in-memory state
+      // The timestamp prevents browser caching
       window.location.href = '/login?refresh=' + new Date().getTime();
     } catch (error) {
       console.error('Error during logout:', error);
       // Force redirect to login in case of error
-      window.location.href = '/login';
+      window.location.href = '/login?error=logout_failed';
     }
   };
 
@@ -313,7 +323,7 @@ Ich benötige weitere Unterstützung bei diesem Problem.
                           </div>
                         </div>
                         <div className="ml-3">
-                          <div className="text-normal font-medium text-gray-800">{session?.user?.name || 'Workshop'}</div>
+                          <div className="text-normal font-medium text-gray-800">{session?.user?.name}</div>
                           {isEditingEmail ? (
                             <div className="flex items-center gap-2 mt-1">
                               <input
