@@ -6,7 +6,7 @@ import { PiPlantBold } from "react-icons/pi";
 import { LuSunMedium } from "react-icons/lu";
 import { GiPlantSeed, GiGrowth, GiFlowerPot, GiScythe, GiWateringCan, GiSprout } from "react-icons/gi";
 import { BsChatDots, BsPlusLg } from "react-icons/bs";
-import { FaFirstAid, FaLeaf, FaPlus, FaArrowLeft, FaClock, FaCog, FaSave, FaCommentAlt } from "react-icons/fa";
+import { FaFirstAid, FaLeaf, FaPlus, FaArrowLeft, FaClock, FaUserShield, FaCog, FaSave, FaCommentAlt } from "react-icons/fa";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/solid";
 import { useRouter, usePathname, useParams } from 'next/navigation';
 import { Dialog, Transition } from '@headlessui/react';
@@ -367,7 +367,7 @@ Ich benötige weitere Unterstützung bei diesem Problem.
                           <FaCog className="mr-2" />
                           Einstellungen
                         </button>
-                        {session?.user?.role === 'admin' && (
+                        {session?.user?.isAdmin && (
                           <button
                             onClick={() => router.push('/admin')}
                             className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-small font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-olive-green"
@@ -689,13 +689,12 @@ Ich benötige weitere Unterstützung bei diesem Problem.
           {pathname === '/help' && (
             <div className="grid grid-cols-3 gap-3 py-2 px-2">
               <button
-                onClick={() => {/* TODO: Implement Discord integration */}}
-                className="flex flex-col items-center gap-2 transition-colors"
+                className="flex flex-col items-center gap-2 transition-colors opacity-50 cursor-not-allowed"
               >
-                <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-icon-lime">
+                <div className="p-2 rounded-lg bg-gray-50/95 text-gray-400">
                   <BsChatDots className="text-lg" />
                 </div>
-                <span className="text-xs text-white font-semibold">Discord</span>
+                <span className="text-xs text-white font-semibold">Discord (Bald verfügbar!)</span>
               </button>
 
               <button

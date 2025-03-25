@@ -26,6 +26,7 @@ export default function DrcInfoTag({ term, children, tooltipContent, color = "ol
   const tooltipRef = useRef(null);
   const triggerRef = useRef(null);
   const autoCloseTimerRef = useRef(null);
+  const hoverTimerRef = useRef(null);
   
   // Handle client-side rendering for portals
   useEffect(() => {
@@ -64,6 +65,30 @@ export default function DrcInfoTag({ term, children, tooltipContent, color = "ol
       autoCloseTimerRef.current = null;
     }
     setIsTooltipVisible(false);
+  };
+
+  // Handle mouse enter with delay
+  const handleMouseEnter = () => {
+    // Clear any existing hover timer
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+    
+    // Set a new hover timer
+    hoverTimerRef.current = setTimeout(() => {
+      showTooltip();
+      hoverTimerRef.current = null;
+    }, 150); // 150ms delay
+  };
+  
+  // Handle mouse leave - only clear the hover timer without hiding the tooltip
+  const handleMouseLeave = () => {
+    // Clear hover timer if it exists to prevent showing tooltip after leaving
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
   };
   
   // Mobile long press handlers
@@ -140,6 +165,9 @@ export default function DrcInfoTag({ term, children, tooltipContent, color = "ol
       if (autoCloseTimerRef.current) {
         clearTimeout(autoCloseTimerRef.current);
       }
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current);
+      }
     };
   }, [longPressTimer, updateTooltipPosition]);
 
@@ -150,7 +178,8 @@ export default function DrcInfoTag({ term, children, tooltipContent, color = "ol
         className={`drc-info-tag rounded-md px-2 py-0.5 font-bold transition-all cursor-pointer shadow-md hover:shadow-lg ${bgMode === "light" || (bgMode === "auto" && color === "olive-green") 
           ? `bg-${color}/15 text-${color} hover:bg-${color}/25 border border-${color}/30` 
           : "bg-white/20 text-white hover:bg-white/30"}`}
-        onMouseEnter={showTooltip}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         onClick={() => {
           // Toggle tooltip and reset auto-close timer if showing
           setIsTooltipVisible(!isTooltipVisible);
@@ -182,44 +211,44 @@ export default function DrcInfoTag({ term, children, tooltipContent, color = "ol
               transform: 'translateX(-50%)',
               transformOrigin: 'top center'
             }}
-        >
-          <div className="max-w-xs rounded-lg overflow-hidden shadow-xl relative">
-            {/* Cannabis background image with blur effect */}
-            <div 
-              className="absolute inset-0 z-0" 
-              style={{
-                backgroundImage: `url('/cb.jpg')`,
-                backgroundPosition: '25% 33%',
-                backgroundSize: 'cover',
-                filter: 'blur(1px) brightness(0.5)',
-                opacity: 0.85
-              }}
-            ></div>
-            <div className="absolute inset-0 bg-black opacity-50 z-1"></div>
-            
-            <div className="bg-olive-green/80 p-3 flex items-center gap-2 relative z-10">
-              <Image src="/1.webp" width={45} height={45} alt="Icon" priority className="rounded-full border-2 border-white/70" />
-              <span className="text-white font-bold">Dr. Cannabis informiert:</span>
-            </div>
-            <div className="p-3 relative z-10">
-              <div className="text-base text-white font-dosis tracking-wide mb-3">
-                {tooltipContent}
-              </div>
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigateToDetailPage();
+          >
+            <div className="max-w-xs rounded-lg overflow-hidden shadow-xl relative">
+              {/* Cannabis background image with blur effect */}
+              <div 
+                className="absolute inset-0 z-0" 
+                style={{
+                  backgroundImage: `url('/cb.jpg')`,
+                  backgroundPosition: '25% 33%',
+                  backgroundSize: 'cover',
+                  filter: 'blur(1px) brightness(0.5)',
+                  opacity: 0.85
                 }}
-                className="flex items-center gap-2 px-3 py-1.5 text-base text-white bg-olive-green hover:bg-olive-green/90 transition-colors rounded-md w-full justify-center mt-2 font-dosis"
-              >
-                <span>Mehr erfahren</span>
-                <FaArrowRight size={12} />
-              </button>
+              ></div>
+              <div className="absolute inset-0 bg-black opacity-50 z-1"></div>
+              
+              <div className="bg-olive-green/80 p-3 flex items-center gap-2 relative z-10">
+                <Image src="/1.webp" width={45} height={45} alt="Icon" priority className="rounded-full border-2 border-white/70" />
+                <span className="text-white font-bold">Dr. Cannabis informiert:</span>
+              </div>
+              <div className="p-3 relative z-10">
+                <div className="text-base text-white font-dosis tracking-wide mb-3">
+                  {tooltipContent}
+                </div>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigateToDetailPage();
+                  }}
+                  className="flex items-center gap-2 px-3 py-1.5 text-base text-white bg-olive-green hover:bg-olive-green/90 transition-colors rounded-md w-full justify-center mt-2 font-dosis"
+                >
+                  <span>Mehr erfahren</span>
+                  <FaArrowRight size={12} />
+                </button>
+              </div>
             </div>
-          </div>
-          <div 
-            className={`absolute left-1/2 -top-2 transform -translate-x-1/2 w-0 h-0 border-l-[8px] border-r-[8px] border-b-[8px] border-l-transparent border-r-transparent border-b-${color} filter drop-shadow-sm`}
-          ></div>
+            <div 
+              className={`absolute left-1/2 -top-2 transform -translate-x-1/2 w-0 h-0 border-l-[8px] border-r-[8px] border-b-[8px] border-l-transparent border-r-transparent border-b-${color} filter drop-shadow-sm`}
+            ></div>
           </div>,
           document.body
         );
