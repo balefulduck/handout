@@ -4,6 +4,7 @@ import path from 'path';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../auth/[...nextauth]/route';
 import { writeFile } from 'fs/promises';
+import { resetDb } from '@/lib/db';
 
 // Database backup/restore API endpoint
 // Only accessible to admin users
@@ -118,6 +119,10 @@ async function handleRestore() {
     // Copy backup to database location
     fs.copyFileSync(backupPath, dbPath);
     
+    // Reset the database connection to ensure the restored database is used
+    resetDb();
+    console.log('Database connection has been reset to use the restored database');
+    
     // Get file sizes to verify restore
     const backupSize = fs.statSync(backupPath).size;
     const restoredSize = fs.statSync(dbPath).size;
@@ -195,7 +200,11 @@ export async function POST(request) {
       // Write the uploaded file to the database location
       await writeFile(dbPath, buffer);
       
+      // Reset the database connection to ensure the new database is used
+      resetDb();
+      
       console.log('Database file uploaded and installed successfully');
+      console.log('Database connection has been reset to use the new database');
       
       return NextResponse.json({ 
         success: true, 

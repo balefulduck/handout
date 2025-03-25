@@ -2,19 +2,46 @@ const Database = require('better-sqlite3');
 const path = require('path');
 
 let db;
+let lastConnectionTime = 0;
+
+// Reset database connection
+const resetDb = () => {
+    if (db) {
+        try {
+            console.log('Closing existing database connection...');
+            db.close();
+        } catch (error) {
+            console.error('Error closing database connection:', error);
+        }
+        db = null;
+    }
+};
 
 // Initialize database connection
 const getDb = () => {
+    const currentTime = Date.now();
+    // Force reconnection if more than 5 seconds have passed since last connection check
+    // This helps ensure we pick up new database files after uploads
+    if (currentTime - lastConnectionTime > 5000) {
+        resetDb();
+    }
+    
     if (!db) {
         console.log('Initializing database connection...');
         console.log('Database path:', path.join(process.cwd(), 'cannabis-workshop.db'));
         
-        db = new Database(path.join(process.cwd(), 'cannabis-workshop.db'), {
-            verbose: console.log
-        });
+        try {
+            db = new Database(path.join(process.cwd(), 'cannabis-workshop.db'), {
+                verbose: console.log
+            });
 
-        // Enable foreign keys
-        db.pragma('foreign_keys = ON');
+            // Enable foreign keys
+            db.pragma('foreign_keys = ON');
+            lastConnectionTime = currentTime;
+        } catch (error) {
+            console.error('Error initializing database connection:', error);
+            throw error;
+        }
     }
     return db;
 };
@@ -253,4 +280,4 @@ const initDb = () => {
     console.log('Database schema updated successfully');
 };
 
-module.exports = { db: getDb(), initDb };
+module.exports = { db: getDb(), initDb, resetDb };
