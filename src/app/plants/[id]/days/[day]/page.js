@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { FaArrowLeft, FaTint, FaTemperatureHigh, FaLeaf } from 'react-icons/fa';
+import { FaArrowLeft, FaTint, FaTemperatureHigh, FaLeaf, FaFlask } from 'react-icons/fa';
 import { WiHumidity } from 'react-icons/wi';
 
 export default function DayDetailPage() {
@@ -80,6 +80,18 @@ export default function DayDetailPage() {
             </div>
           </div>
         </div>
+
+        {dayEntry.ph_value && (
+          <div className="mb-6">
+            <div className="flex items-center bg-purple-50 p-4 rounded-lg">
+              <FaFlask className="text-purple-500 text-xl mr-3" />
+              <div>
+                <p className="text-sm text-gray-600">pH-Wert</p>
+                <p className="font-semibold">{dayEntry.ph_value}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {dayEntry.fertilizers && dayEntry.fertilizers.length > 0 && (
           <div className="mb-6">

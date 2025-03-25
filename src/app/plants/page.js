@@ -1,11 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import ContextMenu from '@/components/ContextMenu';
-import { FaSeedling, FaLeaf, FaCalendarAlt, FaPlus, FaEdit, FaWater, FaChevronDown, FaChevronUp, FaUsers, FaTint } from 'react-icons/fa';
+import { FaSeedling, FaLeaf, FaCalendarAlt, FaPlus, FaEdit, FaWater, FaCog, FaChevronDown, FaChevronUp, FaUsers, FaTint, FaCopy, FaEllipsisV, FaTrash, FaExchangeAlt } from 'react-icons/fa';
 import { GiFlowerPot, GiGreenhouse } from 'react-icons/gi';
 import Link from 'next/link';
+import { Bebas_Neue } from 'next/font/google';
+import SetupModal from '@/components/SetupModal';
+
+const bebasNeue = Bebas_Neue({
+  weight: ['400'],
+  subsets: ['latin'],
+  display: 'swap',
+});
 
 export default function PlantsPage() {
   const router = useRouter();
@@ -15,7 +23,15 @@ export default function PlantsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showNewPlantModal, setShowNewPlantModal] = useState(false);
+  const [showSetupModal, setShowSetupModal] = useState(false);
+  const [editingSetup, setEditingSetup] = useState(null);
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 3;
   const [individualPlants, setIndividualPlants] = useState([]);
+  const [newSetup, setNewSetup] = useState({
+    name: '',
+    description: '',
+  });
 
   // Form state for new plant
   const [newPlant, setNewPlant] = useState({
@@ -24,13 +40,27 @@ export default function PlantsPage() {
     genetic_type: 'hybrid', // Default value
     expected_flowering_days: 60, // Default value
     start_date: new Date().toISOString().split('T')[0], // Today's date as default
-    substrate: '' // New substrate field
+    substrate: 'soil', // Default to soil
+    copies: 1 // Number of plant copies to create
   });
+
+  // State for showing/hiding copies and date options
+  const [showCopiesOptions, setShowCopiesOptions] = useState(false);
+  const [showDateOptions, setShowDateOptions] = useState(false);
 
   // Function to handle new plant form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewPlant(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Function to handle new setup form input changes
+  const handleSetupInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewSetup(prev => ({
       ...prev,
       [name]: value
     }));
@@ -87,45 +117,191 @@ export default function PlantsPage() {
     }
   };
 
-  // Function to create a new plant
+  // Function to create new plant(s)
   const createPlant = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     try {
-      const response = await fetch('/api/plants', {
+      setLoading(true);
+      const copies = Math.max(1, parseInt(newPlant.copies) || 1);
+      let successCount = 0;
+      
+      // Create multiple plants if copies > 1
+      for (let i = 0; i < copies; i++) {
+        // Create a copy of the plant data without the copies field
+        const plantData = {...newPlant};
+        delete plantData.copies; // Remove copies field before sending to API
+        
+        // Modify name for multiple copies
+        if (copies > 1) {
+          const baseName = plantData.name || 'Pflanze';
+          plantData.name = `${baseName} ${i+1}`;
+        }
+        
+        const response = await fetch('/api/plants', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(plantData),
+        });
+
+        if (response.ok) {
+          successCount++;
+        } else {
+          const errorData = await response.json();
+          setError(errorData.error || `Fehler beim Erstellen der Pflanze ${i+1}`);
+          console.error(`Error creating plant copy ${i+1}:`, errorData);
+        }
+      }
+
+      // Only close modal and reset form if at least one plant was created successfully
+      if (successCount > 0) {
+        // Reset form and close modal
+        setNewPlant({
+          name: '',
+          breeder: '',
+          genetic_type: 'hybrid',
+          expected_flowering_days: 60,
+          start_date: new Date().toISOString().split('T')[0],
+          substrate: '',
+          copies: 1
+        });
+        setShowNewPlantModal(false);
+        setCurrentStep(1);
+        
+        // Success message based on how many plants were created
+        if (successCount === 1) {
+          // No special message needed for one plant
+        } else {
+          // Maybe add a toast or alert here if you have a notification system
+          console.log(`Successfully created ${successCount} plants`);
+        }
+      }
+      
+      // Refresh plants list
+      fetchData();
+    } catch (err) {
+      setError(err.message);
+      console.error('Error creating plants:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to create new setup
+  const createSetup = async (e) => {
+    if (e) e.preventDefault();
+    try {
+      setLoading(true);
+      const response = await fetch('/api/plant-setups', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newPlant),
+        body: JSON.stringify(newSetup),
       });
 
-      if (!response.ok) {
+      if (response.ok) {
+        // Reset form and close modal
+        setNewSetup({
+          name: '',
+          description: '',
+        });
+        setShowSetupModal(false);
+        
+        // Refresh setups list
+        fetchData();
+      } else {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create plant');
+        setError(errorData.error || 'Fehler beim Erstellen des Setups');
+        console.error('Error creating setup:', errorData);
       }
-
-      // Reset form and close modal
-      setNewPlant({
-        name: '',
-        breeder: '',
-        genetic_type: 'hybrid',
-        expected_flowering_days: 60,
-        start_date: new Date().toISOString().split('T')[0],
-        substrate: ''
-      });
-      setShowNewPlantModal(false);
-      
-      // Refresh plants list
-      fetchPlants();
     } catch (err) {
       setError(err.message);
-      console.error('Error creating plant:', err);
+      console.error('Error creating setup:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
   // Function to navigate to plant detail page
   const navigateToPlantDetail = (plantId) => {
     router.push(`/plants/${plantId}`);
+  };
+  
+  // Handle plant deletion
+  const handleDeletePlant = async (e, plantId) => {
+    e.stopPropagation(); // Prevent navigation to plant detail
+    
+    if (!confirm('Möchtest du diese Pflanze wirklich löschen?')) {
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/plants/${plantId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete plant');
+      }
+      
+      // Refresh plants list after successful deletion
+      fetchData();
+    } catch (err) {
+      console.error('Error deleting plant:', err);
+      setError(`Fehler beim Löschen der Pflanze: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Plant Options Modal Component
+  const PlantOptionsMenu = ({ plant, onClose }) => {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={onClose}>
+        <div 
+          className="bg-white w-full max-w-xs mx-auto rounded-lg shadow-lg overflow-hidden" 
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="p-4 border-b border-gray-200">
+            <div className="flex justify-between items-center">
+              <h3 className="font-semibold text-lg text-gray-800">{plant.name}</h3>
+              <button 
+                onClick={onClose}
+                className="rounded-full p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <div className="divide-y divide-gray-100">
+            <button 
+              onClick={(e) => handleDeletePlant(e, plant.id)}
+              className="w-full text-left px-4 py-3 text-red-600 hover:bg-gray-50 flex items-center"
+            >
+              <FaTrash className="mr-3 text-sm" /> <span>Löschen</span>
+            </button>
+            <button 
+              disabled
+              className="w-full text-left px-4 py-3 text-gray-400 flex items-center cursor-not-allowed"
+            >
+              <FaPlus className="mr-3 text-sm" /> <span>Zu Setup hinzufügen</span>
+            </button>
+            <button 
+              disabled
+              className="w-full text-left px-4 py-3 text-gray-400 flex items-center cursor-not-allowed"
+            >
+              <FaExchangeAlt className="mr-3 text-sm" /> <span>Zu anderem Setup verschieben</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   // Listen for the "Neue Pflanze" button click from ContextMenu
@@ -134,18 +310,78 @@ export default function PlantsPage() {
       setShowNewPlantModal(true);
     };
 
-    // Add event listener
+    const handleNewSetupClick = () => {
+      setShowSetupModal(true);
+    };
+
+    // Add event listeners
     window.addEventListener('newPlantClick', handleNewPlantClick);
+    window.addEventListener('newSetupClick', handleNewSetupClick);
 
     // Initial fetch
     fetchData();
 
-    // Clean up event listener
+    // Clean up event listeners
     return () => {
       window.removeEventListener('newPlantClick', handleNewPlantClick);
+      window.removeEventListener('newSetupClick', handleNewSetupClick);
     };
   }, []);
-  
+
+  // Handle creating a new setup
+  const handleCreateSetup = async (setupData) => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/plant-setups', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(setupData),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create setup');
+      }
+      
+      // Refresh data to show the new setup
+      fetchData();
+      setShowSetupModal(false);
+    } catch (err) {
+      console.error('Error creating setup:', err);
+      setError(`Fehler beim Erstellen des Setups: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle editing a setup
+  const handleEditSetup = async (setupData) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/plant-setups/${editingSetup.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(setupData),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update setup');
+      }
+      
+      // Refresh data to show the updated setup
+      fetchData();
+      setEditingSetup(null);
+    } catch (err) {
+      console.error('Error updating setup:', err);
+      setError(`Fehler beim Aktualisieren des Setups: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Toggle setup expansion
   const toggleSetupExpansion = (setupId) => {
     setExpandedSetups(prev => ({
@@ -225,12 +461,12 @@ export default function PlantsPage() {
                 {setups.map((setup) => (
                   <div key={setup.id} className="bg-white border border-gray-200 rounded-lg shadow overflow-hidden">
                     {/* Setup Header */}
-                    <div className="bg-brand-primary/10 border-b border-brand-primary/20 p-4">
+                    <div className="bg-brand-primary/10 border-b border-brand-primary/20 p-4 bg-stone-100">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center space-x-3">
                           <GiGreenhouse className="text-2xl text-brand-primary" />
                           <div>
-                            <h3 className="font-bold text-gray-800 hover:text-brand-primary transition-colors cursor-pointer" 
+                            <h3 className={`${bebasNeue.className} font-bold text-gray-800 hover:text-brand-primary transition-colors cursor-pointer`} 
                                 onClick={() => navigateToSetupDetail(setup.id)}>
                               {setup.name}
                             </h3>
@@ -240,9 +476,16 @@ export default function PlantsPage() {
                         <div className="flex items-center space-x-2">
                           <button 
                             onClick={() => navigateToNewDayEntry(setup.id)}
-                            className="p-2 bg-brand-primary text-white rounded-md hover:bg-primary-hover transition-all text-sm flex items-center gap-1"
+                            className="p-2 bg-brand-primary text-white rounded-md hover:bg-primary-hover transition-all text-sm flex items-center gap-1 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/30 before:to-transparent before:opacity-50 before:pointer-events-none"
                           >
                             <FaCalendarAlt className="text-xs" /> <span>Tageseintrag</span>
+                          </button>
+                          <button 
+                            onClick={() => setEditingSetup(setup)}
+                            className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-all"
+                            aria-label="Setup bearbeiten"
+                          >
+                            <FaEdit />
                           </button>
                           <button 
                             onClick={() => toggleSetupExpansion(setup.id)}
@@ -253,7 +496,7 @@ export default function PlantsPage() {
                         </div>
                       </div>
                     </div>
-
+                    
                     {/* Setup Plants */}
                     {expandedSetups[setup.id] && (
                       <div className="divide-y divide-gray-100">
@@ -266,7 +509,7 @@ export default function PlantsPage() {
                             >
                               <div className="flex items-center space-x-3">
                                 <div>
-                                  <h4 className="font-medium text-gray-800">{plant.name}</h4>
+                                  <h4 className="font-semibold text-gray-800">{plant.name}</h4>
                                   <div className="flex items-center space-x-2 text-xs text-gray-500">
                                     {plant.breeder && (
                                       <span>{plant.breeder}</span>
@@ -278,24 +521,39 @@ export default function PlantsPage() {
                                 </div>
                               </div>
                               
-                              <div className="flex items-center space-x-4">
-                                {/* Age indicator */}
-                                <div className="text-xs text-gray-600">
-                                  <div className="flex items-center">
-                                    <FaLeaf className="mr-1 text-green-500" />
-                                    <span>{calculateAge(plant.start_date)} Tage alt</span>
-                                  </div>
+                              <div className="flex items-center">
+                                {/* Plant Options Menu Trigger */}
+                                <div className="relative">
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setExpandedSetups(prev => {
+                                        const newState = {...prev};
+                                        // Close all other menus first
+                                        Object.keys(newState).forEach(key => {
+                                          if (key.startsWith('plant-menu-')) {
+                                            newState[key] = false;
+                                          }
+                                        });
+                                        // Toggle this menu
+                                        newState[`plant-menu-${plant.id}`] = !prev[`plant-menu-${plant.id}`];
+                                        return newState;
+                                      });
+                                    }}
+                                    className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all"
+                                  >
+                                    <FaEllipsisV size={14} />
+                                  </button>
+                                  {expandedSetups[`plant-menu-${plant.id}`] && (
+                                    <PlantOptionsMenu 
+                                      plant={plant} 
+                                      onClose={() => setExpandedSetups(prev => ({
+                                        ...prev,
+                                        [`plant-menu-${plant.id}`]: false
+                                      }))} 
+                                    />
+                                  )}
                                 </div>
-                                
-                                {/* Flowering indicator */}
-                                {plant.flowering_start_date && (
-                                  <div className="text-xs text-gray-600">
-                                    <div className="flex items-center">
-                                      <FaLeaf className="mr-1 text-pink-500" />
-                                      <span>{calculateFloweringDays(plant.flowering_start_date)} Tage blüte</span>
-                                    </div>
-                                  </div>
-                                )}
                               </div>
                             </div>
                           ))
@@ -318,7 +576,7 @@ export default function PlantsPage() {
                   <div className="flex justify-between items-center">
                     <div className="flex items-center space-x-3">
                       <div>
-                        <h3 className="font-bold text-gray-800">Einzelne Pflanzen</h3>
+                        <h3 className={`${bebasNeue.className} font-bold text-gray-800`}>Einzelne Pflanzen</h3>
                         <p className="text-sm text-gray-600">{individualPlants.length} Pflanzen ohne Setup</p>
                       </div>
                     </div>
@@ -335,7 +593,7 @@ export default function PlantsPage() {
                     >
                       <div className="flex items-center space-x-3">
                         <div>
-                          <h4 className="font-medium text-gray-800">{plant.name}</h4>
+                          <h4 className="font-semibold text-gray-800">{plant.name}</h4>
                           <div className="flex items-center space-x-2 text-xs text-gray-500">
                             {plant.breeder && (
                               <span>{plant.breeder}</span>
@@ -347,24 +605,39 @@ export default function PlantsPage() {
                         </div>
                       </div>
                       
-                      <div className="flex items-center space-x-4">
-                        {/* Age indicator */}
-                        <div className="text-xs text-gray-600">
-                          <div className="flex items-center">
-                            <FaLeaf className="mr-1 text-green-500" />
-                            <span>{calculateAge(plant.start_date)} Tage alt</span>
-                          </div>
+                      <div className="flex items-center">
+                        {/* Plant Options Menu Trigger */}
+                        <div className="relative">
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setExpandedSetups(prev => {
+                                const newState = {...prev};
+                                // Close all other menus first
+                                Object.keys(newState).forEach(key => {
+                                  if (key.startsWith('plant-menu-')) {
+                                    newState[key] = false;
+                                  }
+                                });
+                                // Toggle this menu
+                                newState[`plant-menu-${plant.id}`] = !prev[`plant-menu-${plant.id}`];
+                                return newState;
+                              });
+                            }}
+                            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all"
+                          >
+                            <FaEllipsisV size={14} />
+                          </button>
+                          {expandedSetups[`plant-menu-${plant.id}`] && (
+                            <PlantOptionsMenu 
+                              plant={plant} 
+                              onClose={() => setExpandedSetups(prev => ({
+                                ...prev,
+                                [`plant-menu-${plant.id}`]: false
+                              }))} 
+                            />
+                          )}
                         </div>
-                        
-                        {/* Flowering indicator */}
-                        {plant.flowering_start_date && (
-                          <div className="text-xs text-gray-600">
-                            <div className="flex items-center">
-                              <FaLeaf className="mr-1 text-pink-500" />
-                              <span>{calculateFloweringDays(plant.flowering_start_date)} Tage blüte</span>
-                            </div>
-                          </div>
-                        )}
                       </div>
                     </div>
                   ))}
@@ -375,121 +648,374 @@ export default function PlantsPage() {
         )}
       </div>
 
-      {/* New Plant Modal */}
+      {/* New Plant Modal - Multi-step with Fullscreen Mobile */}
       {showNewPlantModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto relative">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-md h-full md:h-auto md:max-h-[90vh] md:rounded-lg shadow-lg overflow-y-auto relative">
             <div className="absolute inset-0 pattern-grid opacity-5 pointer-events-none"></div>
-            <div className="relative z-10 p-6">
-              <h3 className="mb-4 text-gray-800 interactive-heading">Neue Pflanze hinzufügen</h3>
+            <div className="relative z-10 p-4 md:p-6">
+              <div className="flex items-center justify-between mb-2">
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setShowNewPlantModal(false);
+                    setCurrentStep(1);
+                  }}
+                  className="rounded-full p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </div>
               
-              <form onSubmit={createPlant}>
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={newPlant.name}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="breeder" className="block text-sm font-medium text-gray-700 mb-1">Züchter</label>
-                    <input
-                      type="text"
-                      id="breeder"
-                      name="breeder"
-                      value={newPlant.breeder}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="genetic_type" className="block text-sm font-medium text-gray-700 mb-1">Genetischer Typ</label>
-                    <select
-                      id="genetic_type"
-                      name="genetic_type"
-                      value={newPlant.genetic_type}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                    >
-                      <option value="indica">Indica</option>
-                      <option value="sativa">Sativa</option>
-                      <option value="hybrid">Hybrid</option>
-                      <option value="ruderalis">Ruderalis</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="expected_flowering_days" className="block text-sm font-medium text-gray-700 mb-1">Erwartete Blütezeit (Tage)</label>
-                    <input
-                      type="number"
-                      id="expected_flowering_days"
-                      name="expected_flowering_days"
-                      value={newPlant.expected_flowering_days}
-                      onChange={handleInputChange}
-                      min="1"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="start_date" className="block text-sm font-medium text-gray-700 mb-1">Startdatum</label>
-                    <input
-                      type="date"
-                      id="start_date"
-                      name="start_date"
-                      value={newPlant.start_date}
-                      onChange={handleInputChange}
-                      max={new Date().toISOString().split('T')[0]}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="substrate" className="block text-sm font-medium text-gray-700 mb-1">Substrat</label>
-                    <select
-                      id="substrate"
-                      name="substrate"
-                      value={newPlant.substrate}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
-                    >
-                      <option value="">Bitte wählen</option>
-                      <option value="soil">Erde</option>
-                      <option value="coco">Kokos</option>
-                      <option value="hydro">Hydrokultur</option>
-                      <option value="rockwool">Steinwolle</option>
-                      <option value="other">Andere</option>
-                    </select>
-                  </div>
+              {/* Progress Indicator */}
+              <div className="w-full bg-gray-200 rounded-full h-1.5 mb-6">
+                <div 
+                  className="bg-brand-primary h-1.5 rounded-full transition-all duration-300 ease-in-out" 
+                  style={{ width: `${(currentStep / totalSteps) * 100}%` }}>
                 </div>
+              </div>
+              
+              <form onSubmit={(e) => {
+                e.preventDefault();
                 
-                <div className="mt-6 flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowNewPlantModal(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-custom-orange"
-                  >
-                    Abbrechen
-                  </button>
+                // Validate name field before proceeding
+                if (currentStep === 1 && !newPlant.name.trim()) {
+                  // Don't proceed if name is empty on step 1
+                  return;
+                }
+                
+                if (currentStep < totalSteps) {
+                  setCurrentStep(currentStep + 1);
+                } else {
+                  createPlant(e);
+                  setCurrentStep(1);
+                }
+              }}>
+                {/* Step 1: Name, Copies and Date with Hierarchical Levels */}
+                {currentStep === 1 && (
+                  <div className="space-y-5">
+                  
+                    {/* L1: Plant Name & Breeder - Primary importance */}
+                    <div className="mb-6 relative">
+                      <div className="border-2 border-brand-primary/40 rounded-lg bg-brand-primary/10 relative p-4">
+                        <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-semibold flex items-center gap-2">
+                          <FaSeedling className="text-brand-primary" />
+                          <span>Name der Pflanze</span>
+                        </div>
+                        
+                        <div className="mt-1">
+                          {/* Main name input (L1) - Mandatory */}
+                          <div className="relative">
+                            <input
+                              type="text"
+                              id="name"
+                              name="name"
+                              placeholder="Name der Pflanze"
+                              value={newPlant.name}
+                              onChange={handleInputChange}
+                              required
+                              className={`w-full text-lg font-medium py-2 px-2 border ${!newPlant.name && currentStep === 1 ? 'border-red-300 bg-red-50' : 'border-gray-300'} rounded-md bg-white shadow-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary`}
+                            />
+                           
+                          </div>
+                          
+                          {/* Breeder input (L2) - nested under name */}
+                          <div className="relative text-sm pl-6 border-l-2 border-gray-200 ml-1 mt-3">
+                            <input
+                              type="text"
+                              id="breeder"
+                              name="breeder"
+                              placeholder="Züchter"
+                              value={newPlant.breeder}
+                              onChange={handleInputChange}
+                              className="w-full py-2 px-2 text-sm rounded bg-transparent text-gray-600"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Simplified Copies & Date Display */}
+                    <div className="mb-6 relative">
+                      <div className="border-2 border-gray-200 rounded-lg bg-gray-50 relative p-4">
+                        <div className="absolute -top-3 left-4 bg-white px-2 text-gray-600 font-medium flex items-center gap-2 z-10">
+                          <FaCog className="text-gray-500" />
+                          <span>Weitere Einstellungen</span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center">
+                          {/* Copies Display */}
+                          <button
+                            type="button"
+                            onClick={() => setShowCopiesOptions(!showCopiesOptions)}
+                            className="flex items-center gap-2 py-2 px-3 rounded-md hover:bg-gray-100 transition-colors"
+                          >
+                            <FaCopy className="text-gray-500" />
+                            <div className="flex flex-col items-start">
+                              <span className="text-sm font-medium text-gray-700">Kopien</span>
+                              <span className="text-xs text-gray-500">{newPlant.copies}</span>
+                            </div>
+                            <svg className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${showCopiesOptions ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                          </button>
+                          
+                          {/* Date Display */}
+                          <button
+                            type="button"
+                            onClick={() => setShowDateOptions(!showDateOptions)}
+                            className="flex items-center gap-2 py-2 px-3 rounded-md hover:bg-gray-100 transition-colors"
+                          >
+                            <FaCalendarAlt className="text-gray-500" />
+                            <div className="flex flex-col items-start">
+                              <span className="text-sm font-medium text-gray-700">Startdatum</span>
+                              <span className="text-xs text-gray-500">
+                                {new Date(newPlant.start_date).toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' })}
+                              </span>
+                            </div>
+                            <svg className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${showDateOptions ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                          </button>
+                        </div>
+                        
+                        {/* Expandable Copies Options */}
+                        {showCopiesOptions && (
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <div className="text-sm text-gray-600 mb-3">
+                              {newPlant.copies > 1 
+                                ? `${newPlant.copies} identische Pflanzen erstellen` 
+                                : "Eine Pflanze erstellen"}
+                            </div>
+                            
+                            {/* Tappable number cards */}
+                            <div className="grid grid-cols-5 gap-2">
+                              {[1, 2, 3, 4, 5].map(num => (
+                                <button
+                                  key={`copy-${num}`}
+                                  type="button"
+                                  onClick={() => setNewPlant({...newPlant, copies: num})}
+                                  className={`py-2 px-0 rounded-md border ${newPlant.copies === num 
+                                    ? 'bg-brand-primary text-white border-brand-primary' 
+                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'} 
+                                    transition-colors duration-200 text-center font-medium`}
+                                >
+                                  {num}
+                                </button>
+                              ))}
+                            </div>
+                            
+                            <div className="grid grid-cols-5 gap-2 mt-2">
+                              {[6, 7, 8, 9, 10].map(num => (
+                                <button
+                                  key={`copy-${num}`}
+                                  type="button"
+                                  onClick={() => setNewPlant({...newPlant, copies: num})}
+                                  className={`py-2 px-0 rounded-md border ${newPlant.copies === num 
+                                    ? 'bg-brand-primary text-white border-brand-primary' 
+                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'} 
+                                    transition-colors duration-200 text-center font-medium`}
+                                >
+                                  {num}
+                                </button>
+                              ))}
+                            </div>
+                            
+                            {newPlant.copies > 1 && (
+                              <div className="text-xs text-gray-600 mt-3 ml-1">
+                                Namen werden durchnummeriert: {newPlant.name || "Pflanze"} 1, {newPlant.name || "Pflanze"} 2, ...
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Expandable Date Options */}
+                        {showDateOptions && (
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <div className="flex justify-between items-center">
+                              <div className="flex flex-col">
+                                <div className="flex items-baseline gap-2">
+                                  <span className="text-sm font-medium text-gray-700">
+                                    {new Date(newPlant.start_date).toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}
+                                  </span>
+                                  <span className="text-xs text-gray-500">
+                                    {new Date(newPlant.start_date).toLocaleDateString('de-DE', { year: 'numeric' })}
+                                  </span>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setNewPlant({...newPlant, start_date: new Date().toISOString().split('T')[0]})}
+                                className="text-xs text-brand-primary hover:text-brand-primary/80"
+                              >
+                                Heute
+                              </button>
+                            </div>
+                            
+                            <div className="mt-3">
+                              <input
+                                type="date"
+                                id="start_date"
+                                name="start_date"
+                                value={newPlant.start_date}
+                                onChange={handleInputChange}
+                                className="w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Step 2: Substrate */}
+                {currentStep === 2 && (
+                  <div>
+                    {/* Substrate */}
+                    <div className="border-2 border-brand-primary/20 rounded-lg bg-brand-primary/5 relative p-4">
+                      <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-medium flex items-center gap-2">
+                        <FaSeedling className="text-brand-primary" />
+                        <span>Substrat</span>
+                      </div>
+                      
+                      {/* Substrate Selection */}
+                      <div className="mt-3">
+                        <div className="flex flex-wrap gap-2">
+                          {[
+                            { value: 'soil', label: 'Erde', icon: '🌱' },
+                            { value: 'coco', label: 'Kokos', icon: '🥥' },
+                            { value: 'hydro', label: 'Hydrokultur', icon: '💧' },
+                            { value: 'rockwool', label: 'Steinwolle', icon: '🧱' },
+                            { value: 'other', label: 'Andere', icon: '🔄' }
+                          ].map((option) => (
+                            <button
+                              key={option.value}
+                              type="button"
+                              onClick={() => setNewPlant({...newPlant, substrate: option.value})}
+                              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${newPlant.substrate === option.value 
+                                ? 'bg-brand-primary text-white shadow-sm' 
+                                : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'}`}
+                            >
+                              <span>{option.icon}</span>
+                              <span>{option.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Step 3: Expected Flowering Time */}
+                {currentStep === 3 && (
+                  <div className="space-y-8">
+                    {/* Expected Flowering Time */}
+                    <div className="border-2 border-brand-primary/20 rounded-lg bg-brand-primary/5 relative p-4">
+                      <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-medium flex items-center gap-2">
+                        <GiFlowerPot className="text-brand-primary" />
+                        <span>Blütezeit</span>
+                      </div>
+                      
+                      <div className="mt-3">
+                        <div className="flex flex-col">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-brand-primary font-bold text-xl">{newPlant.expected_flowering_days} Tage</span>
+                            <div className="flex gap-2">
+                              <button 
+                                type="button" 
+                                onClick={() => setNewPlant({...newPlant, expected_flowering_days: Math.max(30, newPlant.expected_flowering_days - 5)})}  
+                                className="h-8 w-8 rounded-full flex items-center justify-center border border-gray-300 hover:bg-gray-100"
+                              >-</button>
+                              <button 
+                                type="button" 
+                                onClick={() => setNewPlant({...newPlant, expected_flowering_days: Math.min(120, newPlant.expected_flowering_days + 5)})} 
+                                className="h-8 w-8 rounded-full flex items-center justify-center border border-gray-300 hover:bg-gray-100"
+                              >+</button>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <input
+                          type="range"
+                          min="40"
+                          max="100"
+                          step="1"
+                          value={newPlant.expected_flowering_days}
+                          onChange={(e) => setNewPlant({...newPlant, expected_flowering_days: parseInt(e.target.value)})}
+                          className="w-full h-2 bg-gradient-to-r from-green-400 to-purple-500 rounded-md appearance-none cursor-pointer accent-brand-primary"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Navigation Buttons */}
+                <div className="mt-8 flex justify-between items-center">
+                  {currentStep > 1 ? (
+                    <button
+                      type="button"
+                      onClick={() => setCurrentStep(currentStep - 1)}
+                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 flex items-center gap-1"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+                      </svg>
+                      Zurück
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowNewPlantModal(false);
+                        setCurrentStep(1);
+                      }}
+                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50"
+                    >
+                      Abbrechen
+                    </button>
+                  )}
+                  
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-custom-orange text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-custom-orange"
+                    className="px-5 py-2.5 bg-brand-primary text-white rounded-md font-medium hover:bg-opacity-90 shadow-sm flex items-center gap-1"
                   >
-                    Pflanze hinzufügen
+                    {currentStep < totalSteps ? (
+                      <>
+                        Weiter
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                      </>
+                    ) : 'Pflanze hinzufügen'}
                   </button>
                 </div>
               </form>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Setup Modal */}
+      {showSetupModal && (
+        <SetupModal
+          onClose={() => setShowSetupModal(false)}
+          onSave={handleCreateSetup}
+          availablePlants={plants}
+          isNew={true}
+        />
+      )}
+      
+      {editingSetup && (
+        <SetupModal
+          onClose={() => setEditingSetup(null)}
+          onSave={handleEditSetup}
+          availablePlants={plants}
+          setup={editingSetup}
+          isNew={false}
+        />
       )}
 
       <ContextMenu />

@@ -7,7 +7,7 @@ import { FaArrowLeft } from 'react-icons/fa';
 
 export default function PageHeader({ title, icon }) {
   return (
-    <header className="bg-olive-green text-white p-4 shadow-md">
+    <header className="bg-olive-green text-white p-4 shadow-md relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/30 before:to-transparent before:opacity-50 before:pointer-events-none">
       <div className="container mx-auto max-w-5xl">
         <Link href="/growguide" className="flex items-center gap-2 w-fit text-white hover:text-yellow-50 transition-colors">
           <FaArrowLeft />

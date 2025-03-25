@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, usePathname, useParams } from 'next/navigation';
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState('strains'); // 'strains' or 'users'
+  const [activeTab, setActiveTab] = useState('strains'); // 'strains' or 'users' or 'feedback'
 
   const router = useRouter();
   
@@ -29,11 +29,16 @@ export default function AdminPage() {
     password: ''
   });
 
+  // Feedback management state
+  const [feedback, setFeedback] = useState([]);
+
   useEffect(() => {
     if (activeTab === 'strains') {
       loadStrains();
     } else if (activeTab === 'users') {
       loadUsers();
+    } else if (activeTab === 'feedback') {
+      loadFeedback();
     }
   }, [activeTab]);
 
@@ -166,6 +171,39 @@ export default function AdminPage() {
     }
   };
 
+  // Feedback management functions
+  const loadFeedback = async () => {
+    try {
+      const response = await fetch('/api/feedback');
+      const data = await response.json();
+      if (data && data.feedback) {
+        setFeedback(data.feedback);
+      } else {
+        console.error('Invalid feedback data format:', data);
+        setFeedback([]);
+      }
+    } catch (error) {
+      console.error('Error loading feedback:', error);
+      setFeedback([]);
+    }
+  };
+
+  const handleDeleteFeedback = async (id) => {
+    if (!confirm('Bist du sicher, dass du dieses Feedback löschen möchtest?')) return;
+    
+    try {
+      const response = await fetch(`/api/feedback?id=${id}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        loadFeedback();
+      }
+    } catch (error) {
+      console.error('Error deleting feedback:', error);
+    }
+  };
+
   // Form components
   const StrainForm = ({ strain, onSave, onCancel }) => (
     <div className="space-y-4">
@@ -252,48 +290,7 @@ export default function AdminPage() {
     </div>
   );
 
-  const UserForm = ({ user, onSave, onCancel }) => (
-    <div className="space-y-4">
-      <input
-        type="text"
-        placeholder="Username"
-        className="w-full p-2 border rounded focus:border-custom-orange focus:ring-1 focus:ring-custom-orange"
-        value={user.username}
-        onChange={(e) => user.id ? 
-          setEditingUser({ ...user, username: e.target.value }) :
-          setNewUser({ ...newUser, username: e.target.value })}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        className="w-full p-2 border rounded focus:border-custom-orange focus:ring-1 focus:ring-custom-orange"
-        value={user.password || ''}
-        onChange={(e) => user.id ? 
-          setEditingUser({ ...user, password: e.target.value }) :
-          setNewUser({ ...newUser, password: e.target.value })}
-      />
-      {user.id && (
-        <p className="text-sm text-white/70">Leave password blank to keep current password</p>
-      )}
-      {/* Onboarding checkbox removed */}
-      <div className="flex gap-2">
-        <button
-          className="px-4 py-2 text-white bg-custom-orange rounded hover:bg-custom-orange/90"
-          onClick={() => onSave(user)}
-        >
-          {user.id ? 'Save Changes' : 'Add User'}
-        </button>
-        {onCancel && (
-          <button
-            className="px-4 py-2 text-custom-orange bg-custom-orange/10 rounded hover:bg-custom-orange/20"
-            onClick={onCancel}
-          >
-            Cancel
-          </button>
-        )}
-      </div>
-    </div>
-  );
+  // User form has been directly implemented in the user management section
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
@@ -309,7 +306,7 @@ export default function AdminPage() {
           }`}
           onClick={() => setActiveTab('strains')}
         >
-          Strain Management
+          Workshop Samen
         </button>
         <button
           className={`px-6 py-3 font-medium ${
@@ -319,7 +316,17 @@ export default function AdminPage() {
           }`}
           onClick={() => setActiveTab('users')}
         >
-          User Management
+          Benutzerverwaltung
+        </button>
+        <button
+          className={`px-6 py-3 font-medium ${
+            activeTab === 'feedback'
+              ? 'text-custom-orange border-b-2 border-custom-orange'
+              : 'text-gray-500 hover:text-custom-orange'
+          }`}
+          onClick={() => setActiveTab('feedback')}
+        >
+          Feedback
         </button>
         <button
           className={`px-6 py-3 font-medium ${
@@ -329,9 +336,8 @@ export default function AdminPage() {
           }`}
           onClick={() => router.push('/admin/help-requests')}
         >
-          Help Requests
+          Hilfe-Anfragen
         </button>
-
       </div>
       
       {/* Strain Management Section */}
@@ -394,18 +400,67 @@ export default function AdminPage() {
         <>
           <div className="bg-custom-orange text-white rounded-lg shadow-md p-6 mb-8">
             <h2 className="text-xl font-bold font-aptos mb-4">Add New User</h2>
-            <UserForm user={newUser} onSave={handleSaveUser} />
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Username"
+                className="w-full p-2 border rounded text-black focus:border-custom-orange focus:ring-1 focus:ring-custom-orange"
+                value={newUser.username}
+                onChange={(e) => setNewUser(prev => ({ ...prev, username: e.target.value }))}
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                className="w-full p-2 border rounded text-black focus:border-custom-orange focus:ring-1 focus:ring-custom-orange"
+                value={newUser.password || ''}
+                onChange={(e) => setNewUser(prev => ({ ...prev, password: e.target.value }))}
+              />
+              <div className="flex gap-2">
+                <button
+                  className="px-4 py-2 text-white bg-custom-orange rounded hover:bg-custom-orange/90"
+                  onClick={() => handleSaveUser(newUser)}
+                >
+                  Add User
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {users && users.length > 0 && users.map(user => (
               <div key={user.id} className="bg-custom-orange text-white rounded-lg shadow-md p-6">
                 {editingUser?.id === user.id ? (
-                  <UserForm
-                    user={editingUser}
-                    onSave={handleSaveUser}
-                    onCancel={() => setEditingUser(null)}
-                  />
+                  <div className="space-y-4">
+                    <input
+                      type="text"
+                      placeholder="Username"
+                      className="w-full p-2 border rounded text-black focus:border-custom-orange focus:ring-1 focus:ring-custom-orange"
+                      value={editingUser.username}
+                      onChange={(e) => setEditingUser(prev => ({ ...prev, username: e.target.value }))}
+                    />
+                    <input
+                      type="password"
+                      placeholder="Password"
+                      className="w-full p-2 border rounded text-black focus:border-custom-orange focus:ring-1 focus:ring-custom-orange"
+                      value={editingUser.password || ''}
+                      onChange={(e) => setEditingUser(prev => ({ ...prev, password: e.target.value }))}
+                    />
+                    <p className="text-sm text-white/70">Leave password blank to keep current password</p>
+                    <div className="flex gap-2">
+                      <button
+                        className="px-4 py-2 text-white bg-custom-orange rounded hover:bg-custom-orange/90"
+                        onClick={() => handleSaveUser(editingUser)}
+                      >
+                        Save Changes
+                      </button>
+                      <button
+                        className="px-4 py-2 text-custom-orange bg-custom-orange/10 rounded hover:bg-custom-orange/20"
+                        onClick={() => setEditingUser(null)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
                 ) : (
                   <>
                     <h3 className="text-xl font-bold font-aptos mb-4">{user.username}</h3>
@@ -434,6 +489,48 @@ export default function AdminPage() {
             {(!users || users.length === 0) && (
               <div className="col-span-3 text-center py-8 text-white/70">
                 No users found. Add a new user above.
+              </div>
+            )}
+          </div>
+        </>
+      )}
+      
+      {/* Feedback Management Section */}
+      {activeTab === 'feedback' && (
+        <>
+          <h2 className="text-2xl font-bold font-aptos mb-6">Beta-Feedback</h2>
+          <div className="grid grid-cols-1 gap-6">
+            {feedback && feedback.length > 0 && feedback.map(feedbackItem => (
+              <div key={feedbackItem.id} className="bg-white border border-gray-200 rounded-lg shadow-md p-6">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {feedbackItem.username}
+                    </h3>
+                    <p className="text-sm text-gray-500 mb-4">
+                      {new Date(feedbackItem.created_at).toLocaleString('de-DE')}
+                    </p>
+                    {feedbackItem.route && (
+                      <p className="text-xs text-gray-500 mb-2">
+                        <span className="font-medium">Seite:</span> {feedbackItem.route}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    className="px-3 py-1 text-white bg-red-600 rounded hover:bg-red-700 text-sm"
+                    onClick={() => handleDeleteFeedback(feedbackItem.id)}
+                  >
+                    Löschen
+                  </button>
+                </div>
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                  <p className="text-gray-800 whitespace-pre-wrap">{feedbackItem.message}</p>
+                </div>
+              </div>
+            ))}
+            {(!feedback || feedback.length === 0) && (
+              <div className="text-center py-12 bg-gray-50 rounded-lg">
+                <p className="text-gray-500">Noch kein Feedback vorhanden.</p>
               </div>
             )}
           </div>

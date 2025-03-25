@@ -337,13 +337,8 @@ export default function NewSetupDayEntryPage() {
         <div className="max-w-3xl mx-auto">
           <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center">
-              <button
-                onClick={() => router.push(`/setups/${params.id}`)}
-                className="mr-4 text-gray-600 hover:text-gray-800"
-              >
-                <FaArrowLeft size={20} />
-              </button>
-              <h1 className="text-2xl font-bold text-gray-800">Neuer Tageseintrag</h1>
+            
+              <h3 className="text-2xl font-bold text-gray-800">Neuer Tageseintrag</h3>
             </div>
           </div>
         

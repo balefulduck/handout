@@ -41,8 +41,8 @@ export const authOptions = {
 
         return {
           id: user.id,
-          name: user.username,
-          onboarding_completed: user.onboarding_completed
+          name: user.username
+          // onboarding_completed removed as it's no longer used
         };
       },
     }),
@@ -51,13 +51,13 @@ export const authOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.onboarding_completed = user.onboarding_completed;
+        // onboarding_completed removed as it's no longer used
       }
       return token;
     },
     async session({ session, token }) {
       session.user.id = token.id;
-      session.user.onboarding_completed = token.onboarding_completed;
+      // onboarding_completed removed as it's no longer used
       return session;
     }
   },

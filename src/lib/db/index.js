@@ -236,6 +236,19 @@ const initDb = () => {
         db.exec('ALTER TABLE fertilizer_usage ADD COLUMN setup_day_id INTEGER REFERENCES setup_day_entries(id) ON DELETE CASCADE;');
     }
 
+    // Feedback table - for storing user feedback
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            username TEXT NOT NULL,
+            message TEXT NOT NULL,
+            route TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL
+        );
+    `);
+
     console.log('Schema creation complete');
     console.log('Database schema updated successfully');
 };

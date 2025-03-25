@@ -44,10 +44,10 @@ export async function POST(request) {
     // Hash the password
     const password_hash = await bcrypt.hash(password, 12);
     
-    // Insert the new user
+    // Insert the new user with is_admin set to 0 (false)
     const result = db.prepare(`
-      INSERT INTO users (username, password_hash)
-      VALUES (?, ?)
+      INSERT INTO users (username, password_hash, is_admin)
+      VALUES (?, ?, 0)
     `).run(username, password_hash);
     
     return NextResponse.json(

@@ -4,9 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/backup-database.js",
     "build": "next build",
+    "postbuild": "node scripts/restore-database.js",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "reset-users": "node scripts/reset-users.js",
+    "backup-db": "node scripts/backup-database.js",
+    "restore-db": "node scripts/restore-database.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",

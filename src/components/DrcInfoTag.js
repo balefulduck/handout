@@ -183,13 +183,26 @@ export default function DrcInfoTag({ term, children, tooltipContent, color = "ol
               transformOrigin: 'top center'
             }}
         >
-          <div className="max-w-xs rounded-lg overflow-hidden shadow-xl border border-gray-200">
-            <div className={`bg-${color} p-3 flex items-center gap-2`}>
+          <div className="max-w-xs rounded-lg overflow-hidden shadow-xl relative">
+            {/* Cannabis background image with blur effect */}
+            <div 
+              className="absolute inset-0 z-0" 
+              style={{
+                backgroundImage: `url('/cb.jpg')`,
+                backgroundPosition: '25% 33%',
+                backgroundSize: 'cover',
+                filter: 'blur(1px) brightness(0.5)',
+                opacity: 0.85
+              }}
+            ></div>
+            <div className="absolute inset-0 bg-black opacity-50 z-1"></div>
+            
+            <div className="bg-olive-green/80 p-3 flex items-center gap-2 relative z-10">
               <Image src="/1.webp" width={45} height={45} alt="Icon" priority className="rounded-full border-2 border-white/70" />
               <span className="text-white font-bold">Dr. Cannabis informiert:</span>
             </div>
-            <div className="p-3 bg-white">
-              <div className="text-sm text-gray-700 mb-3">
+            <div className="p-3 relative z-10">
+              <div className="text-base text-white font-dosis tracking-wide mb-3">
                 {tooltipContent}
               </div>
               <button 
@@ -197,7 +210,7 @@ export default function DrcInfoTag({ term, children, tooltipContent, color = "ol
                   e.stopPropagation();
                   navigateToDetailPage();
                 }}
-                className={`flex items-center gap-2 px-3 py-1.5 text-sm text-white bg-${color} hover:bg-${color}/90 transition-colors rounded-md w-full justify-center mt-2`}
+                className="flex items-center gap-2 px-3 py-1.5 text-base text-white bg-olive-green hover:bg-olive-green/90 transition-colors rounded-md w-full justify-center mt-2 font-dosis"
               >
                 <span>Mehr erfahren</span>
                 <FaArrowRight size={12} />

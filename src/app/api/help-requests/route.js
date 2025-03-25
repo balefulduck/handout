@@ -253,7 +253,7 @@ export async function GET() {
 
       // For testing purposes, consider specific usernames as admins if the column doesn't exist
       // In a production app, you'd want to properly add this column to the database
-      const isAdmin = user.is_admin || session.user.name === 'workshop' || session.user.name === 'admin';
+      const isAdmin = user.is_admin || session.user.name === 'admin';
       
       if (!isAdmin) {
         return new Response(JSON.stringify({ error: "Nicht autorisiert" }), {
@@ -264,7 +264,7 @@ export async function GET() {
     } catch (dbError) {
       console.error('Database error during admin check:', dbError);
       // Allow access for specific users even if there's a DB error
-      if (session.user.name !== 'workshop' && session.user.name !== 'admin') {
+      if (session.user.name !== 'admin') {
         return new Response(JSON.stringify({ error: "Datenbankfehler" }), {
           status: 500,
           headers: { 'Content-Type': 'application/json' },
