@@ -1,7 +1,9 @@
 const Database = require('better-sqlite3');
 const path = require('path');
 
-let db;
+// Use a singleton pattern with proper connection management
+let db = null;
+let isInitializing = false;
 let lastConnectionTime = 0;
 
 // Reset database connection
@@ -14,36 +16,66 @@ const resetDb = () => {
             console.error('Error closing database connection:', error);
         }
         db = null;
+        lastConnectionTime = 0; // Reset the timestamp to force a new connection
+        console.log('Database connection has been reset');
     }
 };
 
-// Initialize database connection
+// Initialize database connection with proper locking to prevent race conditions
 const getDb = () => {
-    const currentTime = Date.now();
-    // Force reconnection if more than 5 seconds have passed since last connection check
-    // This helps ensure we pick up new database files after uploads
-    if (currentTime - lastConnectionTime > 5000) {
-        resetDb();
+    // If we're already in the process of initializing, wait a bit and return the current db
+    if (isInitializing) {
+        console.log('Database initialization already in progress, waiting...');
+        // In a real app, we might use a proper mutex here
+        return db;
     }
     
-    if (!db) {
-        console.log('Initializing database connection...');
+    try {
+        const currentTime = Date.now();
+        
+        // If we have a database connection and it's recent enough, use it
+        if (db && currentTime - lastConnectionTime < 5000) {
+            return db;
+        }
+        
+        // If we need a new connection, set the initialization flag
+        isInitializing = true;
+        
+        // Close any existing connection
+        if (db) {
+            try {
+                console.log('Closing stale database connection...');
+                db.close();
+                db = null;
+            } catch (error) {
+                console.error('Error closing stale database connection:', error);
+                // Continue anyway to create a new connection
+            }
+        }
+        
+        // Create a new connection
+        console.log('Initializing new database connection...');
         console.log('Database path:', path.join(process.cwd(), 'cannabis-workshop.db'));
         
-        try {
-            db = new Database(path.join(process.cwd(), 'cannabis-workshop.db'), {
-                verbose: console.log
-            });
+        db = new Database(path.join(process.cwd(), 'cannabis-workshop.db'), {
+            verbose: console.log
+        });
 
-            // Enable foreign keys
-            db.pragma('foreign_keys = ON');
-            lastConnectionTime = currentTime;
-        } catch (error) {
-            console.error('Error initializing database connection:', error);
-            throw error;
-        }
+        // Enable foreign keys
+        db.pragma('foreign_keys = ON');
+        
+        // Update the connection timestamp
+        lastConnectionTime = currentTime;
+        console.log('Database connection successfully established');
+        
+        return db;
+    } catch (error) {
+        console.error('CRITICAL: Error initializing database connection:', error);
+        throw error;
+    } finally {
+        // Always reset the initialization flag
+        isInitializing = false;
     }
-    return db;
 };
 
 // Initialize database schema
@@ -280,4 +312,10 @@ const initDb = () => {
     console.log('Database schema updated successfully');
 };
 
-module.exports = { db: getDb(), initDb, resetDb };
+// Export a getter function instead of the actual connection
+// This ensures we always get a fresh connection when needed
+module.exports = { 
+    get db() { return getDb(); }, 
+    initDb, 
+    resetDb 
+};
