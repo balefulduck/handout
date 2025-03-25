@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { FaDatabase, FaDownload, FaUpload, FaExclamationTriangle } from 'react-icons/fa';
 import ContextMenu from '@/components/ContextMenu';
+import Link from 'next/link';
 
 export default function DatabaseManagementPage() {
   const router = useRouter();
@@ -13,9 +14,14 @@ export default function DatabaseManagementPage() {
   const [loading, setLoading] = useState(false);
   const [lastBackup, setLastBackup] = useState(null);
 
-  // Check if user is admin
+  // Debug session state
   useEffect(() => {
-    if (status === 'authenticated' && session?.user?.role !== 'admin') {
+    console.log('Session status:', status);
+    console.log('Session data:', session);
+    
+    // Only redirect if we're sure the user is not an admin
+    if (status === 'authenticated' && session?.user && session.user.isAdmin === false) {
+      console.log('User is authenticated but not admin, redirecting');
       router.push('/');
     }
   }, [session, status, router]);
@@ -121,11 +127,42 @@ export default function DatabaseManagementPage() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   };
 
-  // If loading or not authenticated yet
-  if (status === 'loading' || (status === 'authenticated' && session?.user?.role !== 'admin')) {
+  // Handle different session states
+  if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-olive-green"></div>
+      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-olive-green mb-4"></div>
+        <p className="text-gray-600">Lade Sitzungsdaten...</p>
+      </div>
+    );
+  }
+  
+  // If not authenticated
+  if (status === 'unauthenticated') {
+    return (
+      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
+        <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+          <h2 className="text-2xl font-bold mb-4 text-red-600">Nicht angemeldet</h2>
+          <p className="mb-4">Sie müssen angemeldet sein, um auf diese Seite zuzugreifen.</p>
+          <Link href="/login" className="w-full bg-olive-green text-white py-2 px-4 rounded hover:bg-olive-green-dark transition-colors block text-center">
+            Zum Login
+          </Link>
+        </div>
+      </div>
+    );
+  }
+  
+  // If authenticated but not admin
+  if (status === 'authenticated' && !session?.user?.isAdmin) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
+        <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+          <h2 className="text-2xl font-bold mb-4 text-red-600">Zugriff verweigert</h2>
+          <p className="mb-4">Sie benötigen Administratorrechte, um auf diese Seite zuzugreifen.</p>
+          <Link href="/growguide" className="w-full bg-olive-green text-white py-2 px-4 rounded hover:bg-olive-green-dark transition-colors block text-center">
+            Zurück zum Growguide
+          </Link>
+        </div>
       </div>
     );
   }

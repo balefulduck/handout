@@ -10,8 +10,20 @@ import { authOptions } from '../../auth/[...nextauth]/route';
 export async function GET(request) {
   // Verify admin access
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== 'admin') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  
+  // Debug session information
+  console.log('API: Session data:', JSON.stringify(session, null, 2));
+  
+  // Check if session exists
+  if (!session) {
+    console.log('API: No session found');
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+  
+  // Check if user is admin
+  if (!session.user?.isAdmin) {
+    console.log('API: User is not admin', session.user);
+    return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 403 });
   }
 
   const { searchParams } = new URL(request.url);
