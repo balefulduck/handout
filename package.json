@@ -4,9 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node scripts/backup-database.js",
     "build": "next build",
-    "postbuild": "node scripts/restore-database.js",
     "start": "next start",
     "lint": "next lint",
     "reset-users": "node scripts/reset-users.js",
