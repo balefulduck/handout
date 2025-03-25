@@ -73,49 +73,41 @@ async function handleBackup() {
     // First, make sure all changes are flushed to disk by forcing a checkpoint
     // This ensures we capture all data, including WAL changes
     console.log('Forcing SQLite checkpoint to flush all changes to disk...');
-    try {
-      // Force the database connection to close to ensure all data is flushed
-      resetDb();
-      
-      // Create a proper SQLite backup using better-sqlite3 library
-      // This is more reliable than a simple file copy for active databases
-      console.log('Creating backup using better-sqlite3...');
-      const sourceDb = new Database(dbPath, { readonly: true });
-      
-      // Make sure the source database is in a consistent state
-      sourceDb.pragma('wal_checkpoint(FULL)');
-      
-      // Create the backup directory if it doesn't exist
-      if (!fs.existsSync(path.dirname(backupPath))) {
-        fs.mkdirSync(path.dirname(backupPath), { recursive: true });
-      }
-      
-      // Remove any existing backup file
-      if (fs.existsSync(backupPath)) {
-        fs.unlinkSync(backupPath);
-      }
-      
-      // Create a new backup database
-      const backupDb = new Database(backupPath);
-      
-      // Perform the backup
-      sourceDb.backup(backupDb)
-        .then(() => {
-          console.log('Database backup completed successfully using better-sqlite3');
-        })
-        .catch(err => {
-          console.error('Error during better-sqlite3 backup:', err);
-        })
-        .finally(() => {
-          // Close both database connections
-          sourceDb.close();
-          backupDb.close();
-        });
-    } catch (backupError) {
-      console.error('Error during better-sqlite3 backup:', backupError);
-      // Fall back to file copy if the better-sqlite3 backup fails
-      console.log('Falling back to file copy method...');
-      fs.copyFileSync(dbPath, backupPath);
+    
+    // Force the database connection to close to ensure all data is flushed
+    resetDb();
+    
+    // Simple file copy method - most reliable across all environments
+    console.log('Creating backup using file copy method...');
+    
+    // Make sure the source database exists
+    if (!fs.existsSync(dbPath)) {
+      throw new Error('Source database does not exist');
+    }
+    
+    // Remove any existing backup file
+    if (fs.existsSync(backupPath)) {
+      fs.unlinkSync(backupPath);
+    }
+    
+    // Copy the database file
+    fs.copyFileSync(dbPath, backupPath);
+    console.log('Database backup completed successfully using file copy');
+    
+    // Also copy any WAL and SHM files if they exist
+    const walPath = `${dbPath}-wal`;
+    const shmPath = `${dbPath}-shm`;
+    const backupWalPath = `${backupPath}-wal`;
+    const backupShmPath = `${backupPath}-shm`;
+    
+    if (fs.existsSync(walPath)) {
+      fs.copyFileSync(walPath, backupWalPath);
+      console.log('WAL file copied successfully');
+    }
+    
+    if (fs.existsSync(shmPath)) {
+      fs.copyFileSync(shmPath, backupShmPath);
+      console.log('SHM file copied successfully');
     }
     
     // Get file sizes to verify backup
@@ -285,35 +277,39 @@ async function handleDownload() {
       // Force the database connection to close to ensure all data is flushed
       resetDb();
       
-      // Create a proper SQLite backup using better-sqlite3 library
+      // Simple file copy method - most reliable across all environments
       const dbPath = path.join(process.cwd(), 'cannabis-workshop.db');
-      console.log('Creating backup using better-sqlite3...');
-      const sourceDb = new Database(dbPath, { readonly: true });
+      console.log('Creating backup using file copy method...');
       
-      // Make sure the source database is in a consistent state
-      sourceDb.pragma('wal_checkpoint(FULL)');
+      // Make sure the source database exists
+      if (!fs.existsSync(dbPath)) {
+        throw new Error('Source database does not exist');
+      }
       
       // Remove any existing backup file
       if (fs.existsSync(backupPath)) {
         fs.unlinkSync(backupPath);
       }
       
-      // Create a new backup database
-      const backupDb = new Database(backupPath);
+      // Copy the database file
+      fs.copyFileSync(dbPath, backupPath);
+      console.log('Fresh backup created successfully using file copy');
       
-      // Perform the backup
-      sourceDb.backup(backupDb)
-        .then(() => {
-          console.log('Fresh backup created successfully using better-sqlite3');
-        })
-        .catch(err => {
-          console.error('Error during better-sqlite3 backup:', err);
-        })
-        .finally(() => {
-          // Close both database connections
-          sourceDb.close();
-          backupDb.close();
-        });
+      // Also copy any WAL and SHM files if they exist
+      const walPath = `${dbPath}-wal`;
+      const shmPath = `${dbPath}-shm`;
+      const backupWalPath = `${backupPath}-wal`;
+      const backupShmPath = `${backupPath}-shm`;
+      
+      if (fs.existsSync(walPath)) {
+        fs.copyFileSync(walPath, backupWalPath);
+        console.log('WAL file copied successfully');
+      }
+      
+      if (fs.existsSync(shmPath)) {
+        fs.copyFileSync(shmPath, backupShmPath);
+        console.log('SHM file copied successfully');
+      }
     } catch (freshBackupError) {
       console.error('Error creating fresh backup before download:', freshBackupError);
       // Continue with the existing backup file
