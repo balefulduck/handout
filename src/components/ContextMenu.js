@@ -30,7 +30,9 @@ export default function ContextMenu({
   // Setup new day entry props
   setup,
   onSaveDay,
-  submitting
+  submitting,
+  // Setup detail page props
+  onAddDayEntry
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -682,6 +684,20 @@ Ich benötige weitere Unterstützung bei diesem Problem.
                 <span className="text-xs text-white font-semibold">
                   {submitting ? 'Speichern...' : 'Tageseintrag speichern'}
                 </span>
+              </button>
+            </div>
+          )}
+
+          {pathname.startsWith('/setups/') && !pathname.endsWith('/new-day') && setup && (
+            <div className="grid grid-cols-1 py-2 px-2">
+              <button
+                onClick={onAddDayEntry}
+                className="flex flex-col items-center gap-2 transition-colors"
+              >
+                <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-olive-green">
+                  <FaPlus className="text-lg" />
+                </div>
+                <span className="text-xs text-white font-semibold">Tageseintrag hinzufügen</span>
               </button>
             </div>
           )}
