@@ -166,46 +166,6 @@ export default function PlantDetailPage() {
     return diffDays;
   };
   
-  /* Quick Entry Feature - Commented out for later implementation
-  // Fetch the most recent day entry for quick entry feature
-  const fetchMostRecentEntry = async () => {
-    if (!params.id || days.length === 0) return null;
-    
-    try {
-      setLoadingLastEntry(true);
-      
-      // Sort days by date (newest first)
-      const sortedDays = [...days].sort((a, b) => new Date(b.date) - new Date(a.date));
-      
-      // If we have any days, return the most recent one
-      if (sortedDays.length > 0) {
-        setLastDayEntry(sortedDays[0]);
-        return sortedDays[0];
-      }
-      
-      return null;
-    } catch (err) {
-      console.error('Error preparing most recent entry:', err);
-      return null;
-    } finally {
-      setLoadingLastEntry(false);
-    }
-  };
-  
-  // Use the most recent day entry data for quick entry
-  const useLastEntryData = () => {
-    if (!lastDayEntry) return;
-    
-    // Create a new day entry based on the last entry's data
-    // but with today's date
-    setNewDay({
-      ...lastDayEntry,
-      id: undefined, // Remove the ID as this is a new entry
-      day_number: undefined, // Remove day number as it will be calculated by the API
-      date: new Date().toISOString().split('T')[0], // Set today's date
-    });
-  };
-  */
   
   // Handle adding a new day entry
   const handleAddDayEntry = async (e) => {
@@ -1331,8 +1291,7 @@ export default function PlantDetailPage() {
                 {days.sort((a, b) => new Date(b.date) - new Date(a.date)).map((day) => (
                   <div
                     key={day.id}
-                    onClick={() => router.push(`/plants/${params.id}/days/${day.id}`)}
-                    className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                    className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow"
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
