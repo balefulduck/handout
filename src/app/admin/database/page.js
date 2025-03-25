@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { FaDatabase, FaDownload, FaUpload, FaExclamationTriangle } from 'react-icons/fa';
+import { FaDatabase, FaDownload, FaUpload, FaExclamationTriangle, FaFileUpload } from 'react-icons/fa';
 import ContextMenu from '@/components/ContextMenu';
 import Link from 'next/link';
 
@@ -13,6 +13,8 @@ export default function DatabaseManagementPage() {
   const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [lastBackup, setLastBackup] = useState(null);
+  const [uploadFile, setUploadFile] = useState(null);
+  const fileInputRef = useRef(null);
 
   // Debug session state
   useEffect(() => {
@@ -113,6 +115,81 @@ export default function DatabaseManagementPage() {
   const handleDownload = () => {
     window.location.href = '/api/admin/database?action=download';
   };
+  
+  // Handle file selection
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.name.endsWith('.db')) {
+        setMessage({
+          type: 'error',
+          text: 'Ungültiger Dateityp. Nur .db Dateien sind erlaubt.'
+        });
+        return;
+      }
+      setUploadFile(file);
+      setMessage({
+        type: 'info',
+        text: 'Datei ausgewählt',
+        details: `${file.name} (${formatBytes(file.size)})`
+      });
+    }
+  };
+  
+  // Handle file upload
+  const handleUpload = async () => {
+    if (!uploadFile) {
+      setMessage({
+        type: 'error',
+        text: 'Bitte wählen Sie zuerst eine Datei aus.'
+      });
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      
+      const formData = new FormData();
+      formData.append('file', uploadFile);
+      
+      const response = await fetch('/api/admin/database?action=upload', {
+        method: 'POST',
+        body: formData
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setMessage({
+          type: 'success',
+          text: data.message,
+          details: `Originaldatei: ${data.originalName} (${formatBytes(data.size)})`
+        });
+        setUploadFile(null);
+        // Reset file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      } else {
+        setMessage({
+          type: 'error',
+          text: data.error || 'Fehler beim Hochladen der Datei'
+        });
+      }
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text: error.message || 'Ein Fehler ist aufgetreten'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Trigger file input click
+  const triggerFileInput = () => {
+    fileInputRef.current.click();
+  };
 
   // Format bytes to human-readable format
   const formatBytes = (bytes, decimals = 2) => {
@@ -203,7 +280,7 @@ export default function DatabaseManagementPage() {
                 </div>
               )}
               
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="bg-gray-50 overflow-hidden shadow rounded-lg">
                   <div className="px-4 py-5 sm:p-6">
                     <h3 className="text-lg leading-6 font-medium text-gray-900">Backup erstellen</h3>
@@ -267,6 +344,49 @@ export default function DatabaseManagementPage() {
                     </div>
                   </div>
                 </div>
+                
+                <div className="bg-gray-50 overflow-hidden shadow rounded-lg">
+                  <div className="px-4 py-5 sm:p-6">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">Datenbank hochladen</h3>
+                    <div className="mt-2 max-w-xl text-sm text-gray-500">
+                      <p>Lokale Datenbank-Datei hochladen</p>
+                      {uploadFile && (
+                        <p className="mt-1 text-xs text-gray-700">
+                          Ausgewählt: {uploadFile.name} ({formatBytes(uploadFile.size)})
+                        </p>
+                      )}
+                    </div>
+                    <div className="mt-5">
+                      <input
+                        type="file"
+                        accept=".db"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={triggerFileInput}
+                        disabled={loading}
+                        className="mb-2 w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        <FaFileUpload className="-ml-1 mr-2 h-5 w-5" />
+                        Datei auswählen
+                      </button>
+                      {uploadFile && (
+                        <button
+                          type="button"
+                          onClick={handleUpload}
+                          disabled={loading}
+                          className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                        >
+                          <FaUpload className="-ml-1 mr-2 h-5 w-5" />
+                          Hochladen & Installieren
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
               
               <div className="mt-8 bg-yellow-50 p-4 rounded-md">
@@ -281,6 +401,11 @@ export default function DatabaseManagementPage() {
                         Diese Funktionen sind nur für Administratoren verfügbar. Das Backup wird im App-Verzeichnis 
                         gespeichert und bleibt bis zum nächsten Deployment erhalten. Für langfristige Sicherungen 
                         sollten Sie regelmäßig ein Backup herunterladen.
+                      </p>
+                      <p className="mt-2">
+                        <strong>Datenbank hochladen:</strong> Mit dieser Funktion können Sie eine lokale Datenbank-Datei 
+                        direkt auf den Server hochladen. Dies ist besonders nützlich nach Deployments, um Ihre Daten 
+                        wiederherzustellen. Stellen Sie sicher, dass die hochgeladene Datei ein gültiges SQLite-Datenbankformat hat.
                       </p>
                     </div>
                   </div>
