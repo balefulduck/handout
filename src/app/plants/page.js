@@ -845,7 +845,7 @@ export default function PlantsPage() {
                           >
                             <FaCopy className="text-gray-500" />
                             <div className="flex flex-col items-start">
-                              <span className="text-sm font-medium text-gray-700">Kopien</span>
+                              <span className="text-sm font-medium text-gray-700">Anzahl Pflanzen</span>
                               <span className="text-xs text-gray-500">{newPlant.copies}</span>
                             </div>
                             <svg className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${showCopiesOptions ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">

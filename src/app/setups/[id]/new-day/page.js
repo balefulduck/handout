@@ -271,6 +271,11 @@ export default function NewSetupDayEntryPage() {
       const data = await response.json();
       console.log('Created day entry:', data);
       
+      // If flowering is set to true, start flowering phase for all plants in the setup
+      if (formData.flowering && setup?.plants?.length > 0) {
+        await startFloweringForAllPlants();
+      }
+      
       // Redirect to setup detail page
       router.push(`/setups/${params.id}`);
     } catch (err) {
@@ -279,6 +284,27 @@ export default function NewSetupDayEntryPage() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const startFloweringForAllPlants = async () => {
+    if (!setup || !setup.id) return;
+    
+    try {
+      const response = await fetch(`/api/plant-setups/${setup.id}/start-flowering`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to start flowering for all plants:', await response.text());
+      } else {
+        console.log('Flowering started for all plants in the setup.');
+      }
+    } catch (error) {
+      console.error('Error starting flowering for all plants:', error);
     }
   };
 
@@ -629,7 +655,7 @@ export default function NewSetupDayEntryPage() {
                           </button>
                         </div>
                         
-                        <div className="bg-white/60 rounded-lg p-3 border border-brand-primary/10">
+                        <div className="bg-white rounded-lg p-3 border border-gray-200 hover:border-brand-primary/30 transition-colors">
                           {fertilizers.map((fertilizer, index) => (
                             <div 
                               key={index}

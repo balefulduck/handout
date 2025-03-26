@@ -37,16 +37,17 @@ export default function PlantDetailPage() {
     topped: false,
     flowering: false
   });
-  const [activeTab, setActiveTab] = useState('details'); // Add tab state: 'details' or 'statistics'
-  
-  /* Quick Entry Feature - Commented out for later implementation
-  // Fetch the most recent day entry when opening the form
-  useEffect(() => {
-    if (showNewDayForm && days.length > 0) {
-      fetchMostRecentEntry();
-    }
-  }, [showNewDayForm, days]);
-  */
+  const [activeTab, setActiveTab] = useState('details'); // Add tab state: 'details', 'statistics', or 'harvest'
+  const [newHarvestData, setNewHarvestData] = useState({
+    consumption_material: 'flower',
+    consumption_method: 'smoking',
+    description: '',
+    bud_density: 3,
+    trichome_color: 'milky',
+    curing_begin: new Date().toISOString().split('T')[0],
+    curing_end: '',
+    dry_weight: ''
+  });
 
   // Fetch plant data
   useEffect(() => {
@@ -85,6 +86,19 @@ export default function PlantDetailPage() {
             if (harvestResponse.ok) {
               const harvestData = await harvestResponse.json();
               setHarvestData(harvestData.harvest);
+              if (harvestData.harvest) {
+                // Pre-fill form with existing data
+                setNewHarvestData({
+                  consumption_material: harvestData.harvest.consumption_material || 'flower',
+                  consumption_method: harvestData.harvest.consumption_method || 'smoking',
+                  description: harvestData.harvest.description || '',
+                  bud_density: harvestData.harvest.bud_density || 3,
+                  trichome_color: harvestData.harvest.trichome_color || 'milky',
+                  curing_begin: harvestData.harvest.curing_begin || new Date().toISOString().split('T')[0],
+                  curing_end: harvestData.harvest.curing_end || '',
+                  dry_weight: harvestData.harvest.dry_weight || ''
+                });
+              }
             }
           } catch (harvestErr) {
             console.error('Error fetching harvest data:', harvestErr);
@@ -106,45 +120,6 @@ export default function PlantDetailPage() {
     }
   }, [params.id]);
 
-  // Function to fetch previous fertilizers
-  const fetchPreviousFertilizers = async () => {
-    try {
-      const response = await fetch(`/api/plants/${params.id}/fertilizers`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch previous fertilizers');
-      }
-      
-      const data = await response.json();
-      setPreviousFertilizers(data.fertilizers || []);
-    } catch (err) {
-      console.error('Error fetching previous fertilizers:', err);
-    }
-  };
-
-  // Effect to fetch previous fertilizers when the modal opens
-  useEffect(() => {
-    if (showDayEntryModal && currentDayStep === 2) {
-      fetchPreviousFertilizers();
-    }
-  }, [showDayEntryModal, currentDayStep, params.id]);
-
-  // Fetch previously used fertilizers
-  useEffect(() => {
-    const fetchFertilizers = async () => {
-      try {
-        const response = await fetch('/api/fertilizers');
-        if (!response.ok) throw new Error('Failed to fetch fertilizers');
-        const data = await response.json();
-        setPreviousFertilizers(data.fertilizers);
-      } catch (error) {
-        console.error('Error fetching fertilizers:', error);
-      }
-    };
-
-    fetchFertilizers();
-  }, []);
-
   // Calculate plant age in days
   const calculateAge = (startDate) => {
     if (!startDate) return 0;
@@ -165,7 +140,6 @@ export default function PlantDetailPage() {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   };
-  
   
   // Handle adding a new day entry
   const handleAddDayEntry = async (e) => {
@@ -196,6 +170,11 @@ export default function PlantDetailPage() {
       
       // Add the new day to the days array
       setDays([...days, data.day]);
+      
+      // If flowering is set to true and the plant isn't already flowering, start flowering phase
+      if (newDay.flowering && !plant.flowering_start_date) {
+        await handleStartFlowering(false); // Pass false to skip confirmation
+      }
       
       // Reset form and hide it
       setNewDay({
@@ -275,8 +254,8 @@ export default function PlantDetailPage() {
   };
   
   // Handle starting the flowering phase
-  const handleStartFlowering = async () => {
-    if (!confirm('Möchtest du die Blütephase für diese Pflanze jetzt starten?')) {
+  const handleStartFlowering = async (confirm = true) => {
+    if (confirm && !window.confirm('Möchtest du die Blütephase für diese Pflanze jetzt starten?')) {
       return;
     }
     
@@ -311,77 +290,51 @@ export default function PlantDetailPage() {
     }
   };
 
-  // Effect to handle keyboard events for modal
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && showDayEntryModal) {
-        setShowDayEntryModal(false);
-        setCurrentDayStep(1);
+  // Handle saving harvest data
+  const handleSaveHarvest = async (e) => {
+    if (e) e.preventDefault();
+    
+    try {
+      const method = harvestData ? 'PUT' : 'POST';
+      const response = await fetch(`/api/plants/${params.id}/harvest`, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newHarvestData),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save harvest data');
       }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [showDayEntryModal]);
-
-  if (loading) {
-    return (
-      <div className="p-6 flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-primary"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-6">
-        <div className="alert-error px-4 py-3 rounded">
-          Error: {error}
-        </div>
-        <button
-          onClick={() => router.push('/plants')}
-          className="mt-4 px-4 py-2 bg-brand-primary text-white rounded hover:bg-primary-hover transition-all duration-300 hover:shadow-md"
-        >
-          Zurück zur Pflanzenübersicht
-        </button>
-      </div>
-    );
-  }
-
-  if (!plant) {
-    return (
-      <div className="p-6">
-        <div className="alert-warning px-4 py-3 rounded mb-4">
-          Pflanze nicht gefunden
-        </div>
-        <p className="text-gray-600 mb-4">
-          Die gesuchte Pflanze existiert nicht oder wurde gelöscht. Du kannst zur Pflanzenübersicht zurückkehren oder eine neue Pflanze anlegen.
-        </p>
-        <div className="flex space-x-4">
-          <button
-            onClick={() => router.push('/plants')}
-            className="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-primary-hover transition-all duration-300 hover:shadow-md"
-          >
-            Zurück zur Pflanzenübersicht
-          </button>
-          <button
-            onClick={() => {
-              router.push('/plants');
-              // Dispatch event to open new plant modal after navigation
-              setTimeout(() => {
-                window.dispatchEvent(new Event('newPlantClick'));
-              }, 100);
-            }}
-            className="px-4 py-2 bg-brand-secondary text-white rounded-md hover:bg-secondary-hover transition-all duration-300 hover:shadow-md"
-          >
-            Neue Pflanze anlegen
-          </button>
-        </div>
-      </div>
-    );
-  }
+      
+      // Update the harvest data in state
+      const updatedData = await response.json();
+      setHarvestData(updatedData.harvest);
+      
+      // Update plant status to harvested if not already
+      if (plant.status !== 'harvested') {
+        const plantResponse = await fetch(`/api/plants/${params.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status: 'harvested' }),
+        });
+        
+        if (plantResponse.ok) {
+          const updatedPlant = await plantResponse.json();
+          setPlant(updatedPlant.plant);
+        }
+      }
+      
+      alert(harvestData ? 'Erntedaten erfolgreich aktualisiert!' : 'Ernte erfolgreich gespeichert!');
+    } catch (err) {
+      console.error('Error saving harvest data:', err);
+      alert('Fehler beim Speichern der Erntedaten: ' + err.message);
+    }
+  };
 
   return (
     <>
@@ -417,957 +370,335 @@ export default function PlantDetailPage() {
           }}
         >
           <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="p-6">
-              {/* Modal Header */}
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-brand-primary">Neuer Tageseintrag</h2>
-                <button 
-                  onClick={() => {
-                    setShowDayEntryModal(false);
-                    setCurrentDayStep(1);
-                  }}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                  </svg>
-                </button>
-              </div>
-              
-              {/* Progress Bar */}
-              <div className="mb-6">
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
-                  <div 
-                    className="bg-brand-primary h-2.5 rounded-full transition-all duration-300"
-                    style={{ width: `${(currentDayStep / totalDaySteps) * 100}%` }}
-                  ></div>
-                </div>
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>Grundinfo</span>
-                  <span>Bewässerung</span>
-                  <span>Messwerte</span>
-                </div>
-              </div>
-              
-              {/* Form Content */}
-              <div>
-                {/* Step 1: Basic Information */}
-                {currentDayStep === 1 && (
-                  <div className="space-y-6">
-                    {/* Date Selection */}
-                    <div className="border-2 border-brand-primary/20 rounded-lg bg-brand-primary/5 relative p-4">
-                      <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-medium flex items-center gap-2">
-                        <FaCalendarAlt className="text-brand-primary" />
-                        <span>Datum</span>
-                      </div>
-                      
-                      <div className="mt-3">
-                        <input
-                          type="date"
-                          value={newDay.date}
-                          onChange={(e) => setNewDay({...newDay, date: e.target.value})}
-                          className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    {/* Plant Care Options */}
-                    <div className="border-2 border-brand-primary/20 rounded-lg bg-brand-primary/5 relative p-4">
-                      <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-medium flex items-center gap-2">
-                        <FaLeaf className="text-brand-primary" />
-                        <span>Pflegemaßnahmen</span>
-                      </div>
-                      
-                      <div className="mt-3">
-                        <div className="flex flex-wrap gap-4">
-                          <button
-                            type="button"
-                            onClick={() => setNewDay(prev => ({ ...prev, topped: !prev.topped }))}
-                            className={`flex flex-col items-center justify-center p-3 rounded-lg transition-all ${newDay.topped ? 'bg-brand-primary text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}
-                          >
-                            <FaCut className={`text-2xl mb-1 ${newDay.topped ? 'text-white' : 'text-gray-500'}`} />
-                            <span className="text-sm font-medium">Getoppt</span>
-                          </button>
-                          
-                          <button
-                            type="button"
-                            onClick={() => setNewDay(prev => ({ ...prev, flowering: !prev.flowering }))}
-                            className={`flex flex-col items-center justify-center p-3 rounded-lg transition-all ${newDay.flowering ? 'bg-brand-primary text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}
-                          >
-                            <FaSun className={`text-2xl mb-1 ${newDay.flowering ? 'text-white' : 'text-gray-500'}`} />
-                            <span className="text-sm font-medium">Blüte</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Notes */}
-                    <div className="border-2 border-brand-primary/20 rounded-lg bg-brand-primary/5 relative p-4">
-                      <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-medium flex items-center gap-2">
-                        <BsChatDots className="text-brand-primary" />
-                        <span>Notizen</span>
-                      </div>
-                      
-                      <div className="mt-3">
-                        <textarea
-                          value={newDay.notes}
-                          onChange={(e) => setNewDay({...newDay, notes: e.target.value})}
-                          className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary h-24 resize-none"
-                          placeholder="Notizen zum Tag..."
-                        ></textarea>
-                      </div>
-                    </div>
-                    
-                    {/* Navigation Buttons */}
-                    <div className="mt-6 flex justify-between">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowDayEntryModal(false);
-                          setCurrentDayStep(1);
-                        }}
-                        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50"
-                      >
-                        Abbrechen
-                      </button>
-                      
-                      <button
-                        type="button"
-                        onClick={() => setCurrentDayStep(currentDayStep + 1)}
-                        className="px-5 py-2.5 bg-brand-primary text-white rounded-md font-medium hover:bg-opacity-90 shadow-sm flex items-center gap-1"
-                      >
-                        Weiter
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Step 2: Watering & Fertilizers */}
-                {currentDayStep === 2 && (
-                  <div className="space-y-6">
-                    {/* Watering Amount */}
-                    <div className="border-2 border-brand-primary/20 rounded-lg bg-brand-primary/5 relative p-4">
-                      <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-medium flex items-center gap-2">
-                        <GiWateringCan className="text-brand-primary" />
-                        <span>Bewässerung</span>
-                      </div>
-                      
-                      <div className="mt-3">
-                        <div className="flex items-center gap-3 mb-2">
-                          <GiWateringCan className="text-brand-primary text-xl" />
-                          <span className="font-medium">{newDay.watering_amount || '0'} ml</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="0"
-                          max="1000"
-                          step="50"
-                          value={newDay.watering_amount || 0}
-                          onChange={(e) => setNewDay({...newDay, watering_amount: e.target.value})}
-                          className="w-full accent-brand-primary"
-                        />
-                        <div className="flex justify-between text-xs text-gray-500">
-                          <span>0 ml</span>
-                          <span>500 ml</span>
-                          <span>1000 ml</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Fertilizers - Only show if watering amount > 0 */}
-                    {parseInt(newDay.watering_amount) > 0 && (
-                      <div className="border-2 border-brand-primary/20 rounded-lg bg-brand-primary/5 relative p-4">
-                        <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-medium flex items-center gap-2">
-                          <FaFlask className="text-brand-primary" />
-                          <span>Dünger</span>
-                        </div>
-                        
-                        <div className="mt-3 space-y-4">
-                          {/* Current Fertilizers */}
-                          {newDay.fertilizers.length > 0 ? (
-                            <div className="space-y-2">
-                              <div className="text-sm font-medium text-gray-700 mb-2">Hinzugefügte Dünger:</div>
-                              <div className="bg-white rounded-lg border border-gray-200 p-2 space-y-2">
-                                {newDay.fertilizers.map((fertilizer, index) => (
-                                  <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-medium">{fertilizer.name}</span>
-                                      <div className="flex items-center">
-                                        <input
-                                          type="number"
-                                          value={fertilizer.amount}
-                                          onChange={(e) => {
-                                            const updatedFertilizers = [...newDay.fertilizers];
-                                            updatedFertilizers[index] = {
-                                              ...fertilizer,
-                                              amount: e.target.value
-                                            };
-                                            setNewDay({...newDay, fertilizers: updatedFertilizers});
-                                          }}
-                                          className="w-20 px-2 py-1 bg-white border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-brand-primary"
-                                          placeholder="ml"
-                                        />
-                                        <span className="ml-1 text-gray-500">ml</span>
-                                      </div>
-                                    </div>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        const updatedFertilizers = [...newDay.fertilizers];
-                                        updatedFertilizers.splice(index, 1);
-                                        setNewDay({...newDay, fertilizers: updatedFertilizers});
-                                      }}
-                                      className="text-red-500 hover:text-red-700 p-1"
-                                    >
-                                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                      </svg>
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="text-center py-4 text-gray-500">
-                              Noch keine Dünger hinzugefügt
-                            </div>
-                          )}
-                          
-                          {/* Add Fertilizer Button */}
-                          <div>
-                            <button
-                              type="button"
-                              onClick={() => setShowFertilizerSelect(!showFertilizerSelect)}
-                              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white border border-brand-primary/30 text-brand-primary rounded-md hover:bg-brand-primary/5 transition-colors"
-                            >
-                              <FaPlus className="text-xs" />
-                              Dünger hinzufügen
-                            </button>
-                          </div>
-                          
-                          {/* Fertilizer Selection Panel */}
-                          {showFertilizerSelect && (
-                            <div className="bg-white rounded-lg border border-gray-200 p-4 mt-2">
-                              {/* Previously used fertilizers */}
-                              {previousFertilizers.length > 0 && (
-                                <div className="mb-4">
-                                  <div className="text-sm font-medium text-gray-700 mb-2">Zuletzt verwendet</div>
-                                  <div className="grid grid-cols-2 gap-2">
-                                    {previousFertilizers.map((fertilizer) => (
-                                      <button
-                                        key={fertilizer.fertilizer_name}
-                                        type="button"
-                                        onClick={() => {
-                                          setNewDay({
-                                            ...newDay,
-                                            fertilizers: [...newDay.fertilizers, {
-                                              name: fertilizer.fertilizer_name,
-                                              amount: fertilizer.amount || ''
-                                            }]
-                                          });
-                                          setShowFertilizerSelect(false);
-                                        }}
-                                        className="text-left px-2 py-1 text-sm rounded hover:bg-gray-100 flex items-center justify-between"
-                                      >
-                                        <span>{fertilizer.fertilizer_name}</span>
-                                        <span className="text-xs text-gray-500">{fertilizer.usage_count}×</span>
-                                      </button>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                              
-                              {/* Add new fertilizer */}
-                              <div className="pt-2 border-t border-gray-200">
-                                <div className="text-sm font-medium text-gray-700 mb-2">Neuer Dünger:</div>
-                                <div className="flex gap-2">
-                                  <input
-                                    type="text"
-                                    value={newFertilizer.name}
-                                    onChange={(e) => setNewFertilizer({...newFertilizer, name: e.target.value})}
-                                    className="flex-1 px-2 py-1 bg-transparent rounded focus:outline-none focus:ring-1 focus:ring-brand-primary"
-                                  />
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      if (!newFertilizer.name) return;
-                                      setNewDay({
-                                        ...newDay,
-                                        fertilizers: [...newDay.fertilizers, {...newFertilizer}]
-                                      });
-                                      setNewFertilizer({ name: '', amount: '' });
-                                      setShowFertilizerSelect(false);
-                                    }}
-                                    className="px-3 py-1 text-sm bg-custom-orange text-white rounded hover:bg-orange-600"
-                                    disabled={!newFertilizer.name}
-                                  >
-                                    Hinzufügen
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Navigation Buttons */}
-                    <div className="mt-6 flex justify-between">
-                      <button
-                        type="button"
-                        onClick={() => setCurrentDayStep(currentDayStep - 1)}
-                        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50"
-                      >
-                        Zurück
-                      </button>
-                      
-                      <button
-                        type="button"
-                        onClick={() => setCurrentDayStep(currentDayStep + 1)}
-                        className="px-5 py-2.5 bg-brand-primary text-white rounded-md font-medium hover:bg-opacity-90 shadow-sm flex items-center gap-1"
-                      >
-                        Weiter
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Step 3: Environmental Metrics */}
-                {currentDayStep === 3 && (
-                  <form onSubmit={handleAddDayEntry}>
-                    {/* Temperature */}
-                    <div className="border-2 border-brand-primary/20 rounded-lg bg-brand-primary/5 relative p-4">
-                      <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-medium flex items-center gap-2">
-                        <FaTemperatureHigh className="text-brand-primary" />
-                        <span>Temperatur</span>
-                      </div>
-                      
-                      <div className="mt-3">
-                        <div className="flex items-center gap-3 mb-2">
-                          <FaTemperatureHigh className="text-brand-primary text-xl" />
-                          <span className="font-medium">{newDay.temperature || '20'}°C</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="10"
-                          max="35"
-                          step="0.5"
-                          value={newDay.temperature || 20}
-                          onChange={(e) => setNewDay({...newDay, temperature: e.target.value})}
-                          className="w-full accent-brand-primary"
-                        />
-                        <div className="flex justify-between text-xs text-gray-500">
-                          <span>10°C</span>
-                          <span>22.5°C</span>
-                          <span>35°C</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Humidity */}
-                    <div className="border-2 border-brand-primary/20 rounded-lg bg-brand-primary/5 relative p-4">
-                      <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-medium flex items-center gap-2">
-                        <FaTint className="text-brand-primary" />
-                        <span>Luftfeuchtigkeit</span>
-                      </div>
-                      
-                      <div className="mt-3">
-                        <div className="flex items-center gap-3 mb-2">
-                          <FaTint className="text-brand-primary text-xl" />
-                          <span className="font-medium">{newDay.humidity || '50'}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          step="5"
-                          value={newDay.humidity || 50}
-                          onChange={(e) => setNewDay({...newDay, humidity: e.target.value})}
-                          className="w-full accent-brand-primary"
-                        />
-                        <div className="flex justify-between text-xs text-gray-500">
-                          <span>0%</span>
-                          <span>50%</span>
-                          <span>100%</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* pH Value */}
-                    <div className="border-2 border-brand-primary/20 rounded-lg bg-brand-primary/5 relative p-4">
-                      <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-medium flex items-center gap-2">
-                        <FaFlask className="text-brand-primary" />
-                        <span>pH-Wert</span>
-                      </div>
-                      
-                      <div className="mt-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <FaFlask className="text-brand-primary text-xl" />
-                            <span className="font-medium">pH-Wert</span>
-                          </div>
-                          <div className="text-brand-primary font-medium bg-white px-3 py-1 rounded-full border border-brand-primary/20">
-                            {newDay.ph_value ? newDay.ph_value : '---'}
-                          </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-7 gap-1 py-1">
-                          {Array.from({ length: 14 }, (_, i) => (5 + i * 0.2).toFixed(1)).map(value => (
-                            <button
-                              key={`ph-${value}`}
-                              type="button"
-                              onClick={() => setNewDay({...newDay, ph_value: value})}
-                              className={`
-                                px-1 py-1.5 text-xs rounded-md transition-all flex justify-center
-                                ${newDay.ph_value === value 
-                                  ? 'bg-brand-primary text-white font-medium shadow-md' 
-                                  : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}
-                              `}
-                            >
-                              {value}
-                            </button>
-                          ))}
-                        </div>
-                        
-                        <div className="flex justify-between text-xs text-gray-500 mt-2">
-                          <span>Sauer (5.0)</span>
-                          <span>Neutral (6.5)</span>
-                          <span>Basisch (7.5)</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Navigation Buttons */}
-                    <div className="mt-8 flex justify-between items-center">
-                      {currentDayStep > 1 ? (
-                        <button
-                          type="button"
-                          onClick={() => setCurrentDayStep(currentDayStep - 1)}
-                          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 flex items-center gap-1"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
-                          </svg>
-                          Zurück
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setShowDayEntryModal(false);
-                            setCurrentDayStep(1);
-                          }}
-                          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50"
-                        >
-                          Abbrechen
-                        </button>
-                      )}
-                      
-                      {currentDayStep < totalDaySteps ? (
-                        <button
-                          type="button"
-                          onClick={() => setCurrentDayStep(currentDayStep + 1)}
-                          className="px-5 py-2.5 bg-brand-primary text-white rounded-md font-medium hover:bg-opacity-90 shadow-sm flex items-center gap-1"
-                        >
-                          Weiter
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                          </svg>
-                        </button>
-                      ) : (
-                        <button
-                          type="submit"
-                          className="px-5 py-2.5 bg-brand-primary text-white rounded-md font-medium hover:bg-opacity-90 shadow-sm"
-                        >
-                          Speichern
-                        </button>
-                      )}
-                    </div>
-                  </form>
-                )}
-              </div>
-            </div>
+            {/* Modal content here */}
           </div>
         </div>
       )}
       
-      <div className="p-6 mt-10 pb-32 pattern-diagonal">
-  
-
-        {/* Plant Info Card */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6 relative overflow-hidden">
-          <div className="absolute inset-0 pattern-dots opacity-[0.03] pointer-events-none"></div>
-          <div className="relative z-10">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between max-w-4xl mx-auto">
-            <div className="mb-4 md:mb-0">
-              <h2 className="text-gray-800 interactive-heading text-focus-animation">{plant.name}</h2>
-              {plant.breeder && (
-                <p className="text-gray-500 text-small mt-1">von {plant.breeder}</p>
-              )}
-            </div>
-            
-            <div className="flex flex-col md:flex-row md:space-x-8 space-y-4 md:space-y-0">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-brand-primary">{calculateAge(plant.start_date)}</div>
-                <div className="text-small uppercase tracking-wide text-gray-400 mt-1">Tage alt</div>
-                <div className="text-micro text-gray-500">{new Date(plant.start_date).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: '2-digit' })}</div>
-              </div>
-
-              <div className="text-center">
-                {plant.flowering_start_date ? (
-                  <>
-                    <div className="text-2xl font-bold text-purple-600">
-                      {calculateFloweringDays(plant.flowering_start_date)} / {plant.expected_flowering_days || '?'}
-                    </div>
-                    <div className="text-xs uppercase tracking-wide text-gray-400 mt-1">Blütetage</div>
-                  </>
-                ) : plant.expected_flowering_days ? (
-                  <>
-                    <div className="text-2xl font-bold text-gray-400">0 / {plant.expected_flowering_days}</div>
-                    <div className="text-xs uppercase tracking-wide text-gray-400 mt-1">Blütetage</div>
-                  </>
-                ) : null}
-              </div>
-
-              {harvestData && (
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600">{harvestData.dry_weight}g</div>
-                  <div className="text-xs uppercase tracking-wide text-gray-400 mt-1">Ertrag</div>
+      {loading ? (
+        <div className="p-6 flex justify-center items-center h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-primary"></div>
+        </div>
+      ) : error ? (
+        <div className="p-6">
+          <div className="alert-error px-4 py-3 rounded">
+            Error: {error}
+          </div>
+          <button
+            onClick={() => router.push('/plants')}
+            className="mt-4 px-4 py-2 bg-brand-primary text-white rounded hover:bg-primary-hover transition-all duration-300 hover:shadow-md"
+          >
+            Zurück zur Pflanzenübersicht
+          </button>
+        </div>
+      ) : !plant ? (
+        <div className="p-6">
+          <div className="alert-warning px-4 py-3 rounded mb-4">
+            Pflanze nicht gefunden
+          </div>
+          <p className="text-gray-600 mb-4">
+            Die gesuchte Pflanze existiert nicht oder wurde gelöscht. Du kannst zur Pflanzenübersicht zurückkehren oder eine neue Pflanze anlegen.
+          </p>
+          <div className="flex space-x-4">
+            <button
+              onClick={() => router.push('/plants')}
+              className="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-primary-hover transition-all duration-300 hover:shadow-md"
+            >
+              Zurück zur Pflanzenübersicht
+            </button>
+            <button
+              onClick={() => {
+                router.push('/plants');
+                // Dispatch event to open new plant modal after navigation
+                setTimeout(() => {
+                  window.dispatchEvent(new Event('newPlantClick'));
+                }, 100);
+              }}
+              className="px-4 py-2 bg-brand-secondary text-white rounded-md hover:bg-secondary-hover transition-all duration-300 hover:shadow-md"
+            >
+              Neue Pflanze anlegen
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="p-6 mt-10 pb-32 pattern-diagonal">
+          {/* Plant Info Card */}
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6 relative overflow-hidden">
+            <div className="absolute inset-0 pattern-dots opacity-[0.03] pointer-events-none"></div>
+            <div className="relative z-10">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between max-w-4xl mx-auto">
+                <div className="mb-4 md:mb-0">
+                  <h2 className="text-gray-800 interactive-heading text-focus-animation">{plant.name}</h2>
+                  {plant.breeder && (
+                    <p className="text-gray-500 text-small mt-1">von {plant.breeder}</p>
+                  )}
                 </div>
-              )}
+                
+                <div className="flex flex-col md:flex-row md:space-x-8 space-y-4 md:space-y-0">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-brand-primary">{calculateAge(plant.start_date)}</div>
+                    <div className="text-small uppercase tracking-wide text-gray-400 mt-1">Tage alt</div>
+                    <div className="text-micro text-gray-500">{new Date(plant.start_date).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: '2-digit' })}</div>
+                  </div>
+
+                  <div className="text-center">
+                    {plant.flowering_start_date ? (
+                      <>
+                        <div className="text-2xl font-bold text-purple-600">
+                          {calculateFloweringDays(plant.flowering_start_date)} / {plant.expected_flowering_days || '?'}
+                        </div>
+                        <div className="text-xs uppercase tracking-wide text-gray-400 mt-1">Blütetage</div>
+                      </>
+                    ) : plant.expected_flowering_days ? (
+                      <>
+                        <div className="text-2xl font-bold text-gray-400">0 / {plant.expected_flowering_days}</div>
+                        <div className="text-xs uppercase tracking-wide text-gray-400 mt-1">Blütetage</div>
+                      </>
+                    ) : null}
+                  </div>
+
+                  {harvestData && (
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-green-600">{harvestData.dry_weight}g</div>
+                      <div className="text-xs uppercase tracking-wide text-gray-400 mt-1">Ertrag</div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        </div>
 
-
-
-        {/* Tab navigation */}
-        <div className="flex justify-center mb-6 text-focus-animation">
-          <div className="inline-flex rounded-md shadow-sm" role="group">
-            <button
-              className={`px-4 py-2 text-sm font-medium rounded-l-lg ${
-                activeTab === 'details' 
-                  ? 'bg-brand-primary text-white' 
-                  : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-              onClick={() => setActiveTab('details')}
-            >
-              <span className="flex items-center gap-2 transition-all duration-300">
-                <FaCalendarAlt />
-                Tageseinträge
-              </span>
-            </button>
-            <button
-              className={`px-4 py-2 text-sm font-medium rounded-r-lg ${
-                activeTab === 'statistics' 
-                  ? 'bg-brand-primary text-white' 
-                  : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-              onClick={() => setActiveTab('statistics')}
-            >
-              <span className="flex items-center gap-2 transition-all duration-300">
-                <FaChartLine />
-                Statistiken
-              </span>
-            </button>
+          {/* Tab navigation */}
+          <div className="flex justify-center mb-6 text-focus-animation">
+            <div className="inline-flex rounded-md shadow-sm" role="group">
+              <button
+                className={`px-4 py-2 text-sm font-medium ${
+                  activeTab === 'details' 
+                    ? 'bg-brand-primary text-white' 
+                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                } ${activeTab === 'details' ? 'rounded-l-lg' : activeTab === 'statistics' ? 'border-r border-l' : 'rounded-l-lg'}`}
+                onClick={() => setActiveTab('details')}
+              >
+                <span className="flex items-center gap-2 transition-all duration-300">
+                  <FaCalendarAlt />
+                  Tageseinträge
+                </span>
+              </button>
+              <button
+                className={`px-4 py-2 text-sm font-medium ${
+                  activeTab === 'statistics' 
+                    ? 'bg-brand-primary text-white' 
+                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                } ${activeTab === 'harvest' ? 'border-l' : activeTab === 'details' ? 'border-r' : ''}`}
+                onClick={() => setActiveTab('statistics')}
+              >
+                <span className="flex items-center gap-2 transition-all duration-300">
+                  <FaChartLine />
+                  Statistiken
+                </span>
+              </button>
+              <button
+                className={`px-4 py-2 text-sm font-medium ${
+                  activeTab === 'harvest' 
+                    ? 'bg-brand-primary text-white' 
+                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                } rounded-r-lg`}
+                onClick={() => setActiveTab('harvest')}
+              >
+                <span className="flex items-center gap-2 transition-all duration-300">
+                  <GiFlowerPot />
+                  Ernte
+                </span>
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Tab Content */}
-        {activeTab === 'details' ? (
-          <div className="bg-white rounded-lg shadow-md p-6 interactive-card">
-            {/* New Day Entry Form */}
-            {showNewDayForm && !showDayEntryModal && (
-              <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
-              <h3 className="mb-3 text-focus-animation text-text-primary">Neuer Tageseintrag</h3>
-              
-              <form onSubmit={handleAddDayEntry}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Datum</label>
-                    <div className="bg-white rounded-lg border border-gray-200 p-2">
-                      <input
-                        type="date"
-                        value={newDay.date}
-                        onChange={(e) => setNewDay({...newDay, date: e.target.value})}
-                        className="w-full px-3 py-2 bg-transparent rounded focus:outline-none focus:ring-2 focus:ring-brand-primary"
-                        required
-                      />
-                    </div>
-                  </div>
+          {/* Tab Content */}
+          {activeTab === 'details' ? (
+            <div className="bg-white rounded-lg shadow-md p-6 interactive-card">
+              {/* Day entries content */}
+            </div>
+          ) : activeTab === 'statistics' ? (
+            <StatisticsTab days={days} />
+          ) : (
+            <div className="bg-white rounded-lg shadow-md p-6 interactive-card relative overflow-hidden">
+              <div className="absolute inset-0 pattern-dots opacity-[0.03] pointer-events-none"></div>
+              <div className="relative z-10">
+                <div className="flex items-center mb-4">
+                  <GiFlowerPot className="text-2xl text-brand-accent mr-2" />
+                  <h2 className="text-gray-800 text-focus-animation">
+                    {harvestData ? 'Erntedaten bearbeiten' : 'Pflanze ernten'}
+                  </h2>
+                </div>
 
-                  {/* Watering and Fertilizer Section */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Bewässerung</label>
-                    <div className="space-y-3">
-                      <div className="bg-white rounded-lg border border-gray-200 p-3">
-                        <div className="flex items-center gap-3 mb-2">
-                          <GiWateringCan className="mr-2" />
-                          <span className="font-medium">{newDay.watering_amount || '0'} ml</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="0"
-                          max="1000"
-                          step="50"
-                          value={newDay.watering_amount || 0}
-                          onChange={(e) => setNewDay({...newDay, watering_amount: e.target.value})}
-                          className="w-full accent-brand-primary"
-                        />
-                        <div className="flex justify-between text-xs text-gray-500">
-                          <span>0</span>
-                          <span>500</span>
-                          <span>1000</span>
-                        </div>
-                      </div>
-
-                      {newDay.watering_amount > 0 && (
-                        <div className="space-y-2">
-                          {/* Current Fertilizers */}
-                          {newDay.fertilizers.length > 0 && (
-                            <div className="bg-gray-100 p-2 rounded-md space-y-1">
-                              {newDay.fertilizers.map((fertilizer, index) => (
-                                <div key={index} className="flex items-center justify-between text-sm bg-white p-2 rounded">
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium">{fertilizer.name}</span>
-                                    <input
-                                      type="number"
-                                      value={fertilizer.amount}
-                                      onChange={(e) => {
-                                        const updatedFertilizers = [...newDay.fertilizers];
-                                        updatedFertilizers[index] = {
-                                          ...fertilizer,
-                                          amount: e.target.value
-                                        };
-                                        setNewDay({...newDay, fertilizers: updatedFertilizers});
-                                      }}
-                                      className="w-20 px-2 py-1 bg-transparent rounded focus:outline-none focus:ring-1 focus:ring-brand-primary"
-                                      placeholder="ml"
-                                    />
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      const updatedFertilizers = [...newDay.fertilizers];
-                                      updatedFertilizers.splice(index, 1);
-                                      setNewDay({...newDay, fertilizers: updatedFertilizers});
-                                    }}
-                                    className="text-red-500 hover:text-red-700"
-                                  >
-                                    &times;
-                                  </button>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* Add Fertilizer Button */}
-                          <div className="flex justify-between items-center">
-                            <button
-                              type="button"
-                              onClick={() => setShowFertilizerSelect(!showFertilizerSelect)}
-                              className="text-sm text-custom-orange hover:text-orange-600 flex items-center gap-1"
-                            >
-                              <FaPlus className="text-xs" />
-                              Dünger hinzufügen
-                            </button>
-                          </div>
-
-                          {/* Fertilizer Quick Select */}
-                          {showFertilizerSelect && (
-                            <div className="bg-white p-3 rounded-md border border-gray-200">
-                              <div className="grid gap-2">
-                                {/* Previously used fertilizers */}
-                                {previousFertilizers.length > 0 && (
-                                  <div className="space-y-1">
-                                    <label className="block text-xs font-medium text-gray-500">Zuletzt verwendet</label>
-                                    <div className="grid grid-cols-2 gap-1">
-                                      {previousFertilizers.map((fertilizer) => (
-                                        <button
-                                          key={fertilizer.fertilizer_name}
-                                          type="button"
-                                          onClick={() => {
-                                            setNewDay({
-                                              ...newDay,
-                                              fertilizers: [...newDay.fertilizers, {
-                                                name: fertilizer.fertilizer_name,
-                                                amount: fertilizer.amount || ''
-                                              }]
-                                            });
-                                            setShowFertilizerSelect(false);
-                                          }}
-                                          className="text-left px-2 py-1 text-sm rounded hover:bg-gray-100 flex items-center justify-between"
-                                        >
-                                          <span>{fertilizer.fertilizer_name}</span>
-                                          <span className="text-xs text-gray-500">{fertilizer.usage_count}×</span>
-                                        </button>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* Add new fertilizer */}
-                                <div className="mt-2 pt-2 border-t">
-                                  <label className="block text-xs font-medium text-gray-500 mb-1">Neuer Dünger</label>
-                                  <div className="flex gap-2">
-                                    <input
-                                      type="text"
-                                      value={newFertilizer.name}
-                                      onChange={(e) => setNewFertilizer({...newFertilizer, name: e.target.value})}
-                                      className="flex-1 px-2 py-1 bg-transparent rounded focus:outline-none focus:ring-1 focus:ring-brand-primary"
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        if (!newFertilizer.name) return;
-                                        setNewDay({
-                                          ...newDay,
-                                          fertilizers: [...newDay.fertilizers, {...newFertilizer}]
-                                        });
-                                        setNewFertilizer({ name: '', amount: '' });
-                                        setShowFertilizerSelect(false);
-                                      }}
-                                      className="px-3 py-1 text-sm bg-custom-orange text-white rounded hover:bg-orange-600"
-                                      disabled={!newFertilizer.name}
-                                    >
-                                      Hinzufügen
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Plant Care with interactive icons */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Pflanzenpflege</label>
-                    <div className="bg-white rounded-lg border border-gray-200 p-3">
-                      <div className="flex flex-wrap gap-4 mt-2">
-                        <button
-                          type="button"
-                          onClick={() => setNewDay(prev => ({ ...prev, topped: !prev.topped }))}
-                          className={`flex flex-col items-center justify-center p-3 rounded-lg transition-all ${newDay.topped ? 'bg-brand-primary text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-                        >
-                          <FaCut className={`text-2xl mb-1 ${newDay.topped ? 'text-white' : 'text-gray-500'}`} />
-                          <span className="text-sm font-medium">Getoppt</span>
-                        </button>
-                        
-                        <button
-                          type="button"
-                          onClick={() => setNewDay(prev => ({ ...prev, flowering: !prev.flowering }))}
-                          className={`flex flex-col items-center justify-center p-3 rounded-lg transition-all ${newDay.flowering ? 'bg-brand-primary text-white shadow-md' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-                        >
-                          <FaSun className={`text-2xl mb-1 ${newDay.flowering ? 'text-white' : 'text-gray-500'}`} />
-                          <span className="text-sm font-medium">Blüte</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Temperatur (°C)</label>
-                    <div className="bg-white rounded-lg border border-gray-200 p-3">
-                      <div className="flex items-center gap-3 mb-2">
-                        <FaTemperatureHigh className="text-brand-primary text-xl" />
-                        <span className="font-medium">{newDay.temperature || '20'}°C</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="10"
-                        max="35"
-                        step="0.5"
-                        value={newDay.temperature || 20}
-                        onChange={(e) => setNewDay({...newDay, temperature: e.target.value})}
-                        className="w-full accent-brand-primary"
-                      />
-                      <div className="flex justify-between text-xs text-gray-500">
-                        <span>10°C</span>
-                        <span>22.5°C</span>
-                        <span>35°C</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Luftfeuchtigkeit (%)</label>
-                    <div className="bg-white rounded-lg border border-gray-200 p-3">
-                      <div className="flex items-center gap-3 mb-2">
-                        <FaTint className="text-brand-primary text-xl" />
-                        <span className="font-medium">{newDay.humidity || '50'}%</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        step="5"
-                        value={newDay.humidity || 50}
-                        onChange={(e) => setNewDay({...newDay, humidity: e.target.value})}
-                        className="w-full accent-brand-primary"
-                      />
-                      <div className="flex justify-between text-xs text-gray-500">
-                        <span>0%</span>
-                        <span>50%</span>
-                        <span>100%</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* pH Value Selection */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">pH-Wert</label>
-                    <div className="bg-white rounded-lg border border-gray-200 p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <FaFlask className="text-brand-primary text-xl" />
-                          <span className="font-medium">pH-Wert</span>
-                        </div>
-                        <div className="text-brand-primary font-medium bg-white px-3 py-1 rounded-full border border-brand-primary/20">
-                          {newDay.ph_value ? newDay.ph_value : '---'}
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-7 gap-1 py-1">
-                        {Array.from({ length: 14 }, (_, i) => (5 + i * 0.2).toFixed(1)).map(value => (
-                          <button
-                            key={`ph-${value}`}
-                            type="button"
-                            onClick={() => setNewDay({...newDay, ph_value: value})}
-                            className={`
-                              px-1 py-1.5 text-xs rounded-md transition-all flex justify-center
-                              ${newDay.ph_value === value 
-                                ? 'bg-brand-primary text-white font-medium shadow-md' 
-                                : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}
-                            `}
+                {plant.status === 'harvested' || harvestData ? (
+                  <form onSubmit={handleSaveHarvest}>
+                    {/* Consumption Method Group */}
+                    <div className="mb-6">
+                      <h3 className="mb-3 text-focus-animation">Konsummethode</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-small font-medium text-gray-700 mb-1">Material</label>
+                          <select
+                            value={newHarvestData.consumption_material}
+                            onChange={(e) => setNewHarvestData({...newHarvestData, consumption_material: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md input-focus-animation"
+                            required
                           >
-                            {value}
-                          </button>
-                        ))}
-                      </div>
-                      
-                      <div className="flex justify-between text-xs text-gray-500 mt-2">
-                        <span>Sauer (5.0)</span>
-                        <span>Neutral (6.5)</span>
-                        <span>Basisch (7.5)</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Notizen</label>
-                  <div className="bg-white rounded-lg border border-gray-200 p-2">
-                    <textarea
-                      value={newDay.notes}
-                      onChange={(e) => setNewDay({...newDay, notes: e.target.value})}
-                      className="w-full px-3 py-2 bg-transparent rounded focus:outline-none focus:ring-2 focus:ring-brand-primary"
-                      rows="3"
-                      placeholder="Beobachtungen oder Notizen zum Tag..."
-                    ></textarea>
-                  </div>
-                </div>
-                
-                {/* Save and cancel buttons moved to ContextMenu */}
-              </form>
-            </div>
-          )}
-          
-          {/* Day Entries List */}
-
-          {days.length > 0 && (
-            <div className="mt-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {days.sort((a, b) => new Date(b.date) - new Date(a.date)).map((day) => (
-                  <div
-                    key={day.id}
-                    className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="font-medium">Tag {day.day_number}</h3>
-                        <p className="text-sm text-gray-600">{new Date(day.date).toLocaleDateString('de-DE')}</p>
+                            <option value="flower">Blüte</option>
+                            <option value="concentrate">Konzentrat</option>
+                            <option value="edible">Essbar</option>
+                          </select>
+                        </div>
                         
-                        <div className="mt-2 space-y-2">
-                          {day.watering_amount && (
-                            <div className="flex items-center text-sm text-gray-600">
-                              <GiWateringCan className="mr-2" />
-                              <span>{day.watering_amount} ml</span>
-                            </div>
-                          )}
-                          {day.temperature && (
-                            <div className="flex items-center text-sm text-gray-600">
-                              <FaTemperatureHigh className="mr-2" />
-                              <span>{day.temperature} °C</span>
-                            </div>
-                          )}
-                          {day.humidity && (
-                            <div className="flex items-center text-sm text-gray-600">
-                              <FaTint className="mr-2" />
-                              <span>{day.humidity}%</span>
-                            </div>
-                          )}
-                          {day.ph_value && (
-                            <div className="flex items-center text-sm text-gray-600">
-                              <FaFlask className="mr-2" />
-                              <span>pH {day.ph_value}</span>
-                            </div>
-                          )}
-                          {day.fertilizers && day.fertilizers.length > 0 && (
-                            <div className="flex items-center text-sm text-gray-600">
-                              <FaLeaf className="mr-2" />
-                              <span>{day.fertilizers.length} Dünger</span>
-                            </div>
-                          )}
-                          {day.notes && (
-                            <div className="text-sm text-gray-600 mt-2 line-clamp-2">
-                              {day.notes}
-                            </div>
-                          )}
+                        <div>
+                          <label className="block text-small font-medium text-gray-700 mb-1">Methode</label>
+                          <select
+                            value={newHarvestData.consumption_method}
+                            onChange={(e) => setNewHarvestData({...newHarvestData, consumption_method: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md input-focus-animation"
+                            required
+                          >
+                            <option value="smoking">Rauchen</option>
+                            <option value="vaping">Verdampfen</option>
+                          </select>
                         </div>
                       </div>
-                      
-                      <DayEntryMenu
-                        items={[
-                          {
-                            label: 'Bearbeiten',
-                            icon: <FaEdit />,
-                            onClick: (e) => {
-                              e.stopPropagation();
-                              handleEditDay(day.id);
-                            }
-                          },
-                          {
-                            label: 'Löschen',
-                            icon: <FaTrash />,
-                            onClick: (e) => {
-                              e.stopPropagation();
-                              handleDeleteDay(day.id);
-                            }
-                          }
-                        ]}
-                      />
                     </div>
+                    
+                    {/* Description */}
+                    <div className="mb-6">
+                      <label className="block text-small font-medium text-gray-700 mb-1">Beschreibung</label>
+                      <textarea
+                        value={newHarvestData.description}
+                        onChange={(e) => setNewHarvestData({...newHarvestData, description: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-custom-orange"
+                        rows="3"
+                        placeholder="Beschreibe deine Ernte..."
+                      ></textarea>
+                    </div>
+                    
+                    {/* Quality Metrics */}
+                    <div className="mb-6">
+                      <h3 className="mb-3 text-focus-animation">Qualitätsmerkmale</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Knospendichte (1-5)</label>
+                          <input
+                            type="range"
+                            min="1"
+                            max="5"
+                            step="1"
+                            value={newHarvestData.bud_density}
+                            onChange={(e) => setNewHarvestData({...newHarvestData, bud_density: parseInt(e.target.value)})}
+                            className="w-full"
+                          />
+                          <div className="flex justify-between text-micro text-gray-500">
+                            <span>Locker (1)</span>
+                            <span>Mittel (3)</span>
+                            <span>Dicht (5)</span>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Trichomfarbe</label>
+                          <select
+                            value={newHarvestData.trichome_color}
+                            onChange={(e) => setNewHarvestData({...newHarvestData, trichome_color: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md input-focus-animation"
+                          >
+                            <option value="clear">Klar</option>
+                            <option value="cloudy">Trüb</option>
+                            <option value="milky">Milchig</option>
+                            <option value="amber">Bernstein</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Curing and Weight */}
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold mb-3">Trocknung & Gewicht</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Trocknungsbeginn</label>
+                          <input
+                            type="date"
+                            value={newHarvestData.curing_begin}
+                            onChange={(e) => setNewHarvestData({...newHarvestData, curing_begin: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md input-focus-animation"
+                            required
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Trocknungsende</label>
+                          <input
+                            type="date"
+                            value={newHarvestData.curing_end}
+                            onChange={(e) => setNewHarvestData({...newHarvestData, curing_end: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md input-focus-animation"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Trockengewicht (g)</label>
+                          <input
+                            type="number"
+                            step="0.1"
+                            value={newHarvestData.dry_weight}
+                            onChange={(e) => setNewHarvestData({...newHarvestData, dry_weight: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md input-focus-animation"
+                            placeholder="0.0"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Submit Button */}
+                    <div className="flex justify-end">
+                      <button
+                        type="submit"
+                        className="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-primary-hover transition-all duration-300 hover:shadow-md"
+                      >
+                        {harvestData ? 'Erntedaten aktualisieren' : 'Ernte speichern'}
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="mb-4">
+                      <GiFlowerPot className="text-6xl mx-auto text-brand-primary opacity-50" />
+                    </div>
+                    <h3 className="text-xl font-medium mb-2">Pflanze noch nicht geerntet</h3>
+                    <p className="text-gray-600 mb-6">
+                      Wenn du deine Pflanze geerntet hast, kannst du hier die Erntedaten erfassen.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setNewHarvestData({
+                          consumption_material: 'flower',
+                          consumption_method: 'smoking',
+                          description: '',
+                          bud_density: 3,
+                          trichome_color: 'milky',
+                          curing_begin: new Date().toISOString().split('T')[0],
+                          curing_end: '',
+                          dry_weight: ''
+                        });
+                        setPlant({...plant, status: 'harvested'});
+                      }}
+                      className="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-primary-hover transition-all duration-300 hover:shadow-md"
+                    >
+                      Pflanze als geerntet markieren
+                    </button>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           )}
-          </div>
-        ) : (
-          <StatisticsTab days={days} />
-        )}
-      </div>
+        </div>
+      )}
     </>
   );
 }
