@@ -367,7 +367,307 @@ export default function PlantDetailPage() {
           }}
         >
           <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            {/* Modal content here */}
+            <div className="p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-800">Neuer Tageseintrag</h2>
+              
+              {/* Progress indicator */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between">
+                  {Array.from({ length: totalDaySteps }).map((_, index) => (
+                    <div 
+                      key={index}
+                      className={`flex items-center ${index > 0 ? 'flex-1' : ''}`}
+                    >
+                      <div 
+                        className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          currentDayStep > index 
+                            ? 'bg-brand-primary text-white' 
+                            : currentDayStep === index + 1 
+                              ? 'bg-brand-primary text-white' 
+                              : 'bg-gray-200 text-gray-600'
+                        }`}
+                      >
+                        {index + 1}
+                      </div>
+                      {index < totalDaySteps - 1 && (
+                        <div 
+                          className={`flex-1 h-1 mx-2 ${
+                            currentDayStep > index + 1 ? 'bg-brand-primary' : 'bg-gray-200'
+                          }`}
+                        ></div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-between mt-2 text-xs text-gray-500">
+                  <span>Grunddaten</span>
+                  <span>Bewässerung & Düngung</span>
+                  <span>Notizen</span>
+                </div>
+              </div>
+              
+              <form onSubmit={(e) => e.preventDefault()}>
+                {/* Step 1: Basic Data */}
+                {currentDayStep === 1 && (
+                  <div>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Datum</label>
+                      <input
+                        type="date"
+                        value={newDay.date}
+                        onChange={(e) => setNewDay({...newDay, date: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                        required
+                      />
+                    </div>
+                    
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Temperatur (°C)</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={newDay.temperature}
+                        onChange={(e) => setNewDay({...newDay, temperature: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                        placeholder="z.B. 24.5"
+                      />
+                    </div>
+                    
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Luftfeuchtigkeit (%)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={newDay.humidity}
+                        onChange={(e) => setNewDay({...newDay, humidity: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                        placeholder="z.B. 65"
+                      />
+                    </div>
+                    
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">pH-Wert</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        max="14"
+                        value={newDay.ph_value}
+                        onChange={(e) => setNewDay({...newDay, ph_value: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                        placeholder="z.B. 6.5"
+                      />
+                    </div>
+                    
+                    <div className="flex justify-between mt-6">
+                      <button
+                        type="button"
+                        onClick={() => setShowDayEntryModal(false)}
+                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                      >
+                        Abbrechen
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCurrentDayStep(2)}
+                        className="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-primary-hover"
+                      >
+                        Weiter
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Step 2: Watering & Fertilization */}
+                {currentDayStep === 2 && (
+                  <div>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Bewässerungsmenge (ml)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={newDay.watering_amount}
+                        onChange={(e) => setNewDay({...newDay, watering_amount: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                        placeholder="z.B. 500"
+                      />
+                    </div>
+                    
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Dünger</label>
+                      
+                      {newDay.fertilizers.length > 0 && (
+                        <div className="mb-3">
+                          <div className="text-xs text-gray-500 mb-1">Hinzugefügte Dünger:</div>
+                          <div className="space-y-2">
+                            {newDay.fertilizers.map((fert, index) => (
+                              <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-md">
+                                <div>
+                                  <span className="font-medium">{fert.name}</span>
+                                  {fert.amount && <span className="text-gray-500 text-sm ml-2">{fert.amount} ml</span>}
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updatedFertilizers = [...newDay.fertilizers];
+                                    updatedFertilizers.splice(index, 1);
+                                    setNewDay({...newDay, fertilizers: updatedFertilizers});
+                                  }}
+                                  className="text-red-500 hover:text-red-700"
+                                >
+                                  <FaTrash className="h-4 w-4" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      <button
+                        type="button"
+                        onClick={() => setShowFertilizerSelect(!showFertilizerSelect)}
+                        className="px-3 py-1.5 border border-gray-300 rounded-md text-sm flex items-center gap-1 hover:bg-gray-50"
+                      >
+                        <FaPlus className="h-3 w-3" />
+                        Dünger hinzufügen
+                      </button>
+                      
+                      {showFertilizerSelect && (
+                        <div className="mt-2 p-3 border border-gray-200 rounded-md bg-gray-50">
+                          <div className="mb-3">
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Düngername</label>
+                            <input
+                              type="text"
+                              value={newFertilizer.name}
+                              onChange={(e) => setNewFertilizer({...newFertilizer, name: e.target.value})}
+                              className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                              placeholder="z.B. BioBizz Grow"
+                            />
+                          </div>
+                          
+                          <div className="mb-3">
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Menge (ml)</label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={newFertilizer.amount}
+                              onChange={(e) => setNewFertilizer({...newFertilizer, amount: e.target.value})}
+                              className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                              placeholder="z.B. 5"
+                            />
+                          </div>
+                          
+                          <div className="flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (newFertilizer.name.trim()) {
+                                  setNewDay({
+                                    ...newDay, 
+                                    fertilizers: [...newDay.fertilizers, {...newFertilizer}]
+                                  });
+                                  setNewFertilizer({ name: '', amount: '' });
+                                  setShowFertilizerSelect(false);
+                                  
+                                  // Save to previous fertilizers for future use
+                                  if (!previousFertilizers.some(f => f.name === newFertilizer.name)) {
+                                    setPreviousFertilizers([...previousFertilizers, {...newFertilizer}]);
+                                  }
+                                }
+                              }}
+                              className="px-3 py-1 bg-brand-primary text-white text-sm rounded-md hover:bg-primary-hover"
+                            >
+                              Hinzufügen
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex justify-between mt-6">
+                      <button
+                        type="button"
+                        onClick={() => setCurrentDayStep(1)}
+                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                      >
+                        Zurück
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCurrentDayStep(3)}
+                        className="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-primary-hover"
+                      >
+                        Weiter
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Step 3: Notes and Additional Info */}
+                {currentDayStep === 3 && (
+                  <div>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Notizen</label>
+                      <textarea
+                        value={newDay.notes}
+                        onChange={(e) => setNewDay({...newDay, notes: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                        rows="4"
+                        placeholder="Notizen zum Tag..."
+                      ></textarea>
+                    </div>
+                    
+                    <div className="mb-4">
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="topped"
+                          checked={newDay.topped}
+                          onChange={(e) => setNewDay({...newDay, topped: e.target.checked})}
+                          className="h-4 w-4 text-brand-primary focus:ring-brand-primary border-gray-300 rounded"
+                        />
+                        <label htmlFor="topped" className="ml-2 block text-sm text-gray-700">
+                          Getoppt
+                        </label>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-6">
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="flowering"
+                          checked={newDay.flowering}
+                          onChange={(e) => setNewDay({...newDay, flowering: e.target.checked})}
+                          className="h-4 w-4 text-brand-primary focus:ring-brand-primary border-gray-300 rounded"
+                        />
+                        <label htmlFor="flowering" className="ml-2 block text-sm text-gray-700">
+                          Blütephase beginnt
+                        </label>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between mt-6">
+                      <button
+                        type="button"
+                        onClick={() => setCurrentDayStep(2)}
+                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                      >
+                        Zurück
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleAddDayEntry}
+                        className="px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-primary-hover"
+                      >
+                        Speichern
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </form>
+            </div>
           </div>
         </div>
       )}
@@ -530,7 +830,129 @@ export default function PlantDetailPage() {
           {/* Tab Content */}
           {activeTab === 'details' ? (
             <div className="bg-white rounded-lg shadow-md p-6 interactive-card">
-              {/* Day entries content */}
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-800">Tageseinträge</h2>
+                <button
+                  onClick={() => {
+                    setShowDayEntryModal(true);
+                    setCurrentDayStep(1);
+                  }}
+                  className="px-3 py-1.5 bg-brand-primary text-white rounded-md hover:bg-primary-hover transition-all duration-300 flex items-center gap-1.5"
+                >
+                  <FaPlus className="h-3 w-3" />
+                  Neuer Eintrag
+                </button>
+              </div>
+              
+              {days.length === 0 ? (
+                <div className="text-center py-10 border-2 border-dashed border-gray-200 rounded-lg">
+                  <div className="mb-3">
+                    <FaCalendarAlt className="h-10 w-10 mx-auto text-gray-300" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-500 mb-2">Keine Tageseinträge</h3>
+                  <p className="text-gray-400 max-w-md mx-auto">
+                    Füge deinen ersten Tageseintrag hinzu, um wichtige Informationen über deine Pflanze zu dokumentieren.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setShowDayEntryModal(true);
+                      setCurrentDayStep(1);
+                    }}
+                    className="mt-4 px-4 py-2 bg-brand-primary text-white rounded-md hover:bg-primary-hover transition-all duration-300"
+                  >
+                    Ersten Eintrag erstellen
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {days.sort((a, b) => new Date(b.date) - new Date(a.date)).map((day) => (
+                    <div key={day.id} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-300">
+                      <div className="flex items-center justify-between bg-gray-50 p-3 border-b border-gray-200">
+                        <div className="flex items-center gap-2">
+                          <FaCalendarAlt className="text-brand-primary" />
+                          <span className="font-medium">{new Date(day.date).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
+                          {day.topped && (
+                            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">Getoppt</span>
+                          )}
+                          {day.flowering && (
+                            <span className="bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">Blütebeginn</span>
+                          )}
+                        </div>
+                        <DayEntryMenu 
+                          items={[
+                            { 
+                              label: 'Details anzeigen', 
+                              icon: <FaInfoCircle />, 
+                              onClick: () => router.push(`/plants/${params.id}/days/${day.id}`) 
+                            },
+                            { 
+                              label: 'Bearbeiten', 
+                              icon: <FaEdit />, 
+                              onClick: () => handleEditDay(day.id) 
+                            },
+                            { 
+                              label: 'Löschen', 
+                              icon: <FaTrash />, 
+                              onClick: () => handleDeleteDay(day.id) 
+                            }
+                          ]} 
+                        />
+                      </div>
+                      <div className="p-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+                          {day.watering_amount && (
+                            <div className="flex items-center gap-2">
+                              <FaTint className="text-blue-500" />
+                              <span className="text-sm">{day.watering_amount} ml</span>
+                            </div>
+                          )}
+                          {day.temperature && (
+                            <div className="flex items-center gap-2">
+                              <FaTemperatureHigh className="text-red-500" />
+                              <span className="text-sm">{day.temperature} °C</span>
+                            </div>
+                          )}
+                          {day.humidity && (
+                            <div className="flex items-center gap-2">
+                              <FaTint className="text-blue-300" />
+                              <span className="text-sm">{day.humidity} %</span>
+                            </div>
+                          )}
+                          {day.ph_value && (
+                            <div className="flex items-center gap-2">
+                              <FaFlask className="text-purple-500" />
+                              <span className="text-sm">pH {day.ph_value}</span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {day.fertilizers && day.fertilizers.length > 0 && (
+                          <div className="mb-3">
+                            <div className="text-xs text-gray-500 mb-1">Dünger:</div>
+                            <div className="flex flex-wrap gap-2">
+                              {JSON.parse(day.fertilizers).map((fert, idx) => (
+                                <span key={idx} className="bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full">
+                                  {fert.name} {fert.amount && `(${fert.amount} ml)`}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {day.notes && (
+                          <div className="mt-3">
+                            <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
+                              <BsChatDots />
+                              <span>Notizen:</span>
+                            </div>
+                            <p className="text-sm text-gray-700">{day.notes}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ) : activeTab === 'statistics' ? (
             <StatisticsTab days={days} />
