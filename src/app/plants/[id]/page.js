@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import ContextMenu from '@/components/ContextMenu';
 import DayEntryMenu from '@/components/DayEntryMenu';
-import { FaSeedling, FaCalendarAlt, FaEdit, FaTrash, FaPlus, FaTint, FaTemperatureHigh, FaLeaf, FaChartLine, FaCut, FaSun, FaFlask } from 'react-icons/fa';
-import { GiFlowerPot, GiWateringCan } from 'react-icons/gi';
+import { FaSeedling, FaCalendarAlt, FaEdit, FaTrash, FaPlus, FaTint, FaTemperatureHigh, FaInfoCircle, FaLeaf, FaChartLine, FaCut, FaSun, FaFlask } from 'react-icons/fa';
+import { GiFlowerPot, GiWateringCan, GiMedicines } from 'react-icons/gi';
 import { BsChatDots } from 'react-icons/bs';
 import StatisticsTab from '@/components/StatisticsTab';
 import { addToRecentlyViewed } from '@/utils/recentlyViewedPlants';
+import DrcInfoTag from '@/components/DrcInfoTag';
 
 export default function PlantDetailPage() {
   const params = useParams();
@@ -39,8 +40,6 @@ export default function PlantDetailPage() {
   });
   const [activeTab, setActiveTab] = useState('details'); // Add tab state: 'details', 'statistics', or 'harvest'
   const [newHarvestData, setNewHarvestData] = useState({
-    consumption_material: 'flower',
-    consumption_method: 'smoking',
     description: '',
     bud_density: 3,
     trichome_color: 'milky',
@@ -89,8 +88,6 @@ export default function PlantDetailPage() {
               if (harvestData.harvest) {
                 // Pre-fill form with existing data
                 setNewHarvestData({
-                  consumption_material: harvestData.harvest.consumption_material || 'flower',
-                  consumption_method: harvestData.harvest.consumption_method || 'smoking',
                   description: harvestData.harvest.description || '',
                   bud_density: harvestData.harvest.bud_density || 3,
                   trichome_color: harvestData.harvest.trichome_color || 'milky',
@@ -470,13 +467,13 @@ export default function PlantDetailPage() {
 
           {/* Tab navigation */}
           <div className="flex justify-center mb-6 text-focus-animation">
-            <div className="inline-flex rounded-md shadow-sm" role="group">
+            <div className="inline-flex rounded-md shadow-sm overflow-hidden" role="group">
               <button
                 className={`px-4 py-2 text-sm font-medium ${
                   activeTab === 'details' 
                     ? 'bg-brand-primary text-white' 
                     : 'bg-white text-gray-700 hover:bg-gray-100'
-                } ${activeTab === 'details' ? 'rounded-l-lg' : activeTab === 'statistics' ? 'border-r border-l' : 'rounded-l-lg'}`}
+                } rounded-l-lg`}
                 onClick={() => setActiveTab('details')}
               >
                 <span className="flex items-center gap-2 transition-all duration-300">
@@ -489,7 +486,7 @@ export default function PlantDetailPage() {
                   activeTab === 'statistics' 
                     ? 'bg-brand-primary text-white' 
                     : 'bg-white text-gray-700 hover:bg-gray-100'
-                } ${activeTab === 'harvest' ? 'border-l' : activeTab === 'details' ? 'border-r' : ''}`}
+                }`}
                 onClick={() => setActiveTab('statistics')}
               >
                 <span className="flex items-center gap-2 transition-all duration-300">
@@ -502,7 +499,7 @@ export default function PlantDetailPage() {
                   activeTab === 'harvest' 
                     ? 'bg-brand-primary text-white' 
                     : 'bg-white text-gray-700 hover:bg-gray-100'
-                } rounded-r-lg`}
+                }`}
                 onClick={() => setActiveTab('harvest')}
               >
                 <span className="flex items-center gap-2 transition-all duration-300">
@@ -510,6 +507,23 @@ export default function PlantDetailPage() {
                   Ernte
                 </span>
               </button>
+              <div className="relative">
+                <DrcInfoTag
+                  term="Studienteilnahme"
+                  tooltipContent="Hilf uns, indem du anonym an unserer Studie teilnimmst."
+                  color="brand-primary"
+                >
+                  <button
+                    className={`px-4 py-2 text-sm font-medium rounded-r-lg bg-white text-gray-400 cursor-not-allowed`}
+                    disabled
+                  >
+                    <span className="flex items-center gap-2 transition-all duration-300">
+                      <GiMedicines />
+                      Studienteilnahme
+                    </span>
+                  </button>
+                </DrcInfoTag>
+              </div>
             </div>
           </div>
 
@@ -533,39 +547,6 @@ export default function PlantDetailPage() {
 
                 {plant.status === 'harvested' || harvestData ? (
                   <form onSubmit={handleSaveHarvest}>
-                    {/* Consumption Method Group */}
-                    <div className="mb-6">
-                      <h3 className="mb-3 text-focus-animation">Konsummethode</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-small font-medium text-gray-700 mb-1">Material</label>
-                          <select
-                            value={newHarvestData.consumption_material}
-                            onChange={(e) => setNewHarvestData({...newHarvestData, consumption_material: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md input-focus-animation"
-                            required
-                          >
-                            <option value="flower">Blüte</option>
-                            <option value="concentrate">Konzentrat</option>
-                            <option value="edible">Essbar</option>
-                          </select>
-                        </div>
-                        
-                        <div>
-                          <label className="block text-small font-medium text-gray-700 mb-1">Methode</label>
-                          <select
-                            value={newHarvestData.consumption_method}
-                            onChange={(e) => setNewHarvestData({...newHarvestData, consumption_method: e.target.value})}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md input-focus-animation"
-                            required
-                          >
-                            <option value="smoking">Rauchen</option>
-                            <option value="vaping">Verdampfen</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                    
                     {/* Description */}
                     <div className="mb-6">
                       <label className="block text-small font-medium text-gray-700 mb-1">Beschreibung</label>
@@ -677,8 +658,6 @@ export default function PlantDetailPage() {
                     <button
                       onClick={() => {
                         setNewHarvestData({
-                          consumption_material: 'flower',
-                          consumption_method: 'smoking',
                           description: '',
                           bud_density: 3,
                           trichome_color: 'milky',
