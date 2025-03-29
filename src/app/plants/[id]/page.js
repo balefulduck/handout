@@ -930,7 +930,7 @@ export default function PlantDetailPage() {
                           <div className="mb-3">
                             <div className="text-xs text-gray-500 mb-1">Dünger:</div>
                             <div className="flex flex-wrap gap-2">
-                              {JSON.parse(day.fertilizers).map((fert, idx) => (
+                              {day.fertilizers.map((fert, idx) => (
                                 <span key={idx} className="bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full">
                                   {fert.name} {fert.amount && `(${fert.amount} ml)`}
                                 </span>
