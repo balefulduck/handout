@@ -12,31 +12,44 @@ if (typeof window === 'undefined') {
 
 // Helper function to save uploaded files
 async function saveFile(file, userId) {
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-  
-  // Create unique filename
-  const fileName = `${uuidv4()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;  
-  
-  // Create upload directory path
-  // Using /app/public for DigitalOcean persistent storage
-  const uploadDir = join(process.cwd(), 'public', 'uploads', 'help-requests', userId.toString());
-  
-  // Create directory if it doesn't exist
-  const { mkdir } = await import('fs/promises');
   try {
-    await mkdir(uploadDir, { recursive: true });
+    console.log(`Starting to save file: ${file.name}, size: ${file.size} bytes, type: ${file.type}`);
+    
+    // Get file content as buffer
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    
+    // Create unique filename
+    const fileName = `${uuidv4()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;  
+    console.log(`Generated unique filename: ${fileName}`);
+    
+    // Create upload directory path
+    // Using public directory for DigitalOcean persistent storage
+    const uploadDir = join(process.cwd(), 'public', 'uploads', 'help-requests', userId.toString());
+    console.log(`Upload directory: ${uploadDir}`);
+    
+    // Create directory if it doesn't exist
+    const { mkdir } = await import('fs/promises');
+    try {
+      await mkdir(uploadDir, { recursive: true });
+      console.log(`Created directory: ${uploadDir}`);
+    } catch (error) {
+      console.error(`Error creating directory ${uploadDir}:`, error);
+      // Continue even if directory already exists
+    }
+    
+    // Save the file
+    const filePath = join(uploadDir, fileName);
+    console.log(`Writing file to: ${filePath}`);
+    await writeFile(filePath, buffer);
+    
+    // Return the public URL path
+    const publicPath = `/uploads/help-requests/${userId}/${fileName}`;
+    console.log(`File saved successfully. Public path: ${publicPath}`);
+    return publicPath;
   } catch (error) {
-    console.error('Error creating directory:', error);
-    // Continue even if directory already exists
-  }
-  
-  try {
-    await writeFile(join(uploadDir, fileName), buffer);
-    return `/uploads/help-requests/${userId}/${fileName}`;
-  } catch (error) {
-    console.error('Error saving file:', error);
-    throw new Error('Failed to save uploaded file');
+    console.error('Error in saveFile function:', error);
+    throw new Error(`Failed to save uploaded file: ${error.message}`);
   }
 }
 
@@ -68,19 +81,44 @@ export async function POST(request) {
     }
 
     // Process the form data
-    const formData = await request.formData();
+    let formData;
+    try {
+      formData = await request.formData();
+      console.log('Successfully parsed form data');
+    } catch (formError) {
+      console.error('Error parsing form data:', formError);
+      return new Response(JSON.stringify({ error: `Fehler beim Verarbeiten der Formulardaten: ${formError.message}` }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Get the form fields
     const name = formData.get('name');
-    const email = formData.get('email');
+    const email = formData.get('email') || ''; // Make email optional
     const subject = formData.get('subject');
     const message = formData.get('message');
     const plantDataJSON = formData.get('plantData');
     const selectedPlantIdsJSON = formData.get('selectedPlantIds');
     
-    // Get all files
-    const files = formData.getAll('files');
+    // Get all files using the file-{index} naming pattern
+    const files = [];
+    const fileCount = formData.get('fileCount');
+    
+    if (fileCount) {
+      const count = parseInt(fileCount, 10);
+      console.log(`Processing ${count} uploaded files`);
+      for (let i = 0; i < count; i++) {
+        const file = formData.get(`file-${i}`);
+        if (file && file instanceof Blob) {
+          files.push(file);
+          console.log(`Found file ${i}: ${file.name}, size: ${file.size} bytes, type: ${file.type}`);
+        }
+      }
+    }
     
     // Validate required fields
-    if (!name || !email || !subject || !message) {
+    if (!name || !subject || !message) {
       return new Response(JSON.stringify({ 
         error: "Bitte füllen Sie alle erforderlichen Felder aus" 
       }), {
@@ -109,10 +147,11 @@ export async function POST(request) {
     
     // Now enabled for DigitalOcean which supports file system operations
     if (files && files.length > 0) {
-      console.log(`Processing ${files.length} uploaded files`);
+      console.log(`Processing ${files.length} uploaded files for saving`);
       for (const file of files) {
         if (file && file.name) {
           try {
+            console.log(`Attempting to save file: ${file.name}`);
             const fileUrl = await saveFile(file, user.id);
             if (fileUrl) {
               fileUrls.push(fileUrl);
@@ -122,8 +161,12 @@ export async function POST(request) {
             console.error('Error processing file:', fileError);
             // Continue with other files even if one fails
           }
+        } else {
+          console.log('Invalid file object encountered');
         }
       }
+    } else {
+      console.log('No files to process');
     }
 
     // Create the help request in database
@@ -207,8 +250,11 @@ export async function POST(request) {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error creating help request:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('Error in help request API route:', error);
+    return new Response(JSON.stringify({ 
+      error: `Fehler beim Senden der Nachricht: ${error.message}`,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
