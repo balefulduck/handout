@@ -12,11 +12,21 @@ export default function Home() {
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="mb-8 md:mb-0 md:mr-8">
             <h1 className="text-4xl font-bold font-aptos mt-4 text-center md:text-left">
-              Dr. Cannabis GrowGuide
+              <span>Dr. Cannabis </span>
+              <span style={{color: '#888320'}}>GrowGuide</span>
             </h1>
             <p className="text-xl font-light text-white/90 mt-2 text-center md:text-left">
-              Digitales Pflanzenmonitoring für einen optimalen Anbau
+              Digitales Pflanzenmonitoring für einen optimalen Anbau.
             </p>
+            <p className="text-xl font-light text-white/90 mt-2 text-center md:text-left">
+              Je mehr Daten du sammelst, desto besser ist die Qualität der Empfehlungen. Dein Dr. Cannabis GrowCoach 
+              kann deine Pflanze auslesen und so einen schnellen Überblick über mögliche Probleme geben.
+            </p>
+            <div className="bg-white/40 p-4 rounded-lg shadow-sm mt-6">
+              <p className="text-lg font-bold text-center">
+                Gemeinsam können wir deinen Anbau optimieren und deine Pflanzen zu Höchstleistungen bringen.
+              </p>
+            </div>
             
             <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
               <Link 
