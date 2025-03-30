@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { open } from 'sqlite';
-import sqlite3 from 'sqlite3';
+import Database from 'better-sqlite3';
 import path from 'path';
 
 export async function POST(request, { params }) {
@@ -15,19 +14,17 @@ export async function POST(request, { params }) {
 
     const setupId = params.id;
     
-    // Open database connection
-    const db = await open({
-      filename: path.join(process.cwd(), 'growguide.db'),
-      driver: sqlite3.Database
-    });
+    // Open database connection using better-sqlite3
+    const dbPath = path.join(process.cwd(), 'growguide.db');
+    const db = new Database(dbPath);
     
     // Get all plants in the setup
-    const plants = await db.all(
-      'SELECT p.* FROM plants p JOIN setup_plants sp ON p.id = sp.plant_id WHERE sp.setup_id = ? AND p.user_id = ?',
-      [setupId, session.user.id]
-    );
+    const plants = db.prepare(
+      'SELECT p.* FROM plants p JOIN setup_plants sp ON p.id = sp.plant_id WHERE sp.setup_id = ? AND p.user_id = ?'
+    ).all(setupId, session.user.id);
     
     if (plants.length === 0) {
+      db.close();
       return NextResponse.json({ error: 'No plants found in this setup' }, { status: 404 });
     }
     
@@ -35,22 +32,24 @@ export async function POST(request, { params }) {
     const floweringStartDate = new Date().toISOString().split('T')[0];
     
     // Start a transaction
-    await db.run('BEGIN TRANSACTION');
-    
-    try {
+    const transaction = db.transaction(() => {
       // Update each plant to start flowering
       for (const plant of plants) {
         // Only update plants that haven't started flowering yet
         if (!plant.flowering_start_date) {
-          await db.run(
-            'UPDATE plants SET flowering_start_date = ? WHERE id = ? AND user_id = ?',
-            [floweringStartDate, plant.id, session.user.id]
-          );
+          db.prepare(
+            'UPDATE plants SET flowering_start_date = ? WHERE id = ? AND user_id = ?'
+          ).run(floweringStartDate, plant.id, session.user.id);
         }
       }
+    });
+    
+    // Execute the transaction
+    try {
+      transaction();
       
-      // Commit the transaction
-      await db.run('COMMIT');
+      // Close the database connection
+      db.close();
       
       return NextResponse.json({ 
         success: true, 
@@ -58,12 +57,9 @@ export async function POST(request, { params }) {
         floweringStartDate
       });
     } catch (error) {
-      // Rollback the transaction in case of error
-      await db.run('ROLLBACK');
-      throw error;
-    } finally {
       // Close the database connection
-      await db.close();
+      db.close();
+      throw error;
     }
   } catch (error) {
     console.error('Error starting flowering for plants in setup:', error);
