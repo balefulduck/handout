@@ -22,7 +22,7 @@ export async function GET(request, { params }) {
       });
     }
 
-    const plantId = params.id;
+    const plantId = await params.id;
 
     // Get user ID from username
     const user = db.prepare(
@@ -81,7 +81,7 @@ export async function POST(request, { params }) {
       });
     }
 
-    const plantId = params.id;
+    const plantId = await params.id;
     const data = await request.json();
 
     // Get user ID from username
@@ -186,7 +186,7 @@ export async function PUT(request, { params }) {
       });
     }
 
-    const plantId = params.id;
+    const plantId = await params.id;
     const data = await request.json();
 
     // Get user ID from username

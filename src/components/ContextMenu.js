@@ -593,18 +593,6 @@ Ich benötige weitere Unterstützung bei diesem Problem.
                     <span className="text-xs text-white font-semibold">Neuer Tageseintrag</span>
                   </button>
 
-                  {!plant.flowering_start_date && (
-                    <button
-                      onClick={onStartFlowering}
-                      className="flex flex-col items-center gap-2 transition-colors"
-                    >
-                      <div className="p-2 rounded-lg bg-gray-50/95 text-gray-600 hover:text-purple">
-                        <GiFlowerPot className="text-lg" />
-                      </div>
-                      <span className="text-xs text-white font-semibold">Blüte starten</span>
-                    </button>
-                  )}
-
                   {plant.flowering_start_date && !harvestData && (
                     <button
                       onClick={() => router.push(`/plants/${params.id}/harvest`)}
