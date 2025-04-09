@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { WiHumidity } from "react-icons/wi";
 import { PiThermometerSimple, PiPlantBold, PiTestTubeFill } from "react-icons/pi";
 import { LuSunMedium } from "react-icons/lu";
