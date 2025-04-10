@@ -14,15 +14,14 @@ export default function VegetationPhase() {
           {/* Temperature Card */}
           <div className="rounded-xl shadow overflow-hidden col-span-1">
             <div className="bg-yellow-green p-3">
-              <div className="flex items-center gap-2">
-                <PiThermometerSimple className="text-base text-white" />
+              <div>
                 <DrcInfoTag 
                   term="temperatur" 
                   color="yellow-green" 
                   bgMode="dark"
                   tooltipContent="Bei zu hohen Temperaturschwankungen kann das Wachstum der Pflanze gehemmt werden."
                 >
-                  Temperatur
+                  <span className="break-words w-full">Temperatur</span>
                 </DrcInfoTag>
               </div>
             </div>
@@ -41,15 +40,14 @@ export default function VegetationPhase() {
           {/* Humidity Card */}
           <div className="rounded-xl shadow overflow-hidden col-span-1">
             <div className="bg-yellow-green p-3">
-              <div className="flex items-center gap-2">
-                <WiHumidity className="text-base text-white" />
+              <div>
                 <DrcInfoTag 
                   term="luftfeuchtigkeit" 
                   color="yellow-green" 
                   bgMode="dark"
                   tooltipContent="Etablierte Pflanzen können ausreichend Wasser über die Wurzeln aufnehmen. Eine geringere Luftfeuchtigkeit als während der Keimlingsphase kann das Schädlingsrisiko verringern."
                 >
-                  Luftfeuchtigkeit
+                  <span className="break-words w-full">Luftfeuchtigkeit</span>
                 </DrcInfoTag>
               </div>
             </div>
@@ -63,15 +61,14 @@ export default function VegetationPhase() {
           {/* Light Schedule Card */}
           <div className="rounded-xl shadow overflow-hidden">
             <div className="bg-yellow-green p-3">
-              <div className="flex items-center gap-2">
-                <LuSunMedium className="text-base text-white" />
+              <div>
                 <DrcInfoTag 
                   term="lichtzyklus" 
                   color="yellow-green" 
                   bgMode="dark"
                   tooltipContent="Bei photoperiodischen Sorten bestimmt der Lichtzyklus die Wachstumsphasen."
                 >
-                  Lichtzyklus
+                  <span className="break-words w-full">Lichtzyklus</span>
                 </DrcInfoTag>
               </div>
             </div>
@@ -85,15 +82,14 @@ export default function VegetationPhase() {
           {/* pH Value Card */}
           <div className="rounded-xl shadow overflow-hidden">
             <div className="bg-yellow-green p-3">
-              <div className="flex items-center gap-2">
-                <PiTestTubeFill className="text-base text-white" />
+              <div>
                 <DrcInfoTag 
                   term="pH" 
                   color="yellow-green"
                   bgMode="dark" 
                   tooltipContent="Der pH-Wert beeinflusst die Nährstoffaufnahme, Wurzelgesundheit und Pflanzengesundheit. Ein falscher Wert kann Mangelerscheinungen und Wachstumsprobleme verursachen."
                 >
-                  pH Wert
+                  <span className="break-words w-full">pH Wert</span>
                 </DrcInfoTag>
               </div>
             </div>
@@ -107,9 +103,8 @@ export default function VegetationPhase() {
           {/* Info Card */}
           <div className="rounded-xl shadow overflow-hidden col-span-1 sm:col-span-2 md:col-span-3">
             <div className="bg-yellow-green p-3">
-              <div className="flex items-center gap-2">
-                <PiPlantBold className="text-base text-white" />
-                <span className="text-base font-bold text-white">Wachstumsphase</span>
+              <div>
+                <span className="text-base font-bold text-white break-words w-full">Wachstumsphase</span>
               </div>
             </div>
             <div className="p-4 border-x border-b border-yellow-green/20 rounded-b-xl bg-white">

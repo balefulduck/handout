@@ -12,9 +12,8 @@ export default function HarvestPhase() {
           {/* Temperature Card */}
           <div className="rounded-xl shadow overflow-hidden col-span-1">
             <div className="bg-turquoise p-3">
-              <div className="flex items-center gap-2">
-                <PiThermometerSimple className="text-base text-white" />
-                <span className="text-base font-bold text-white">Temperatur</span>
+              <div>
+                <span className="text-base font-bold text-white break-words w-full">Temperatur</span>
               </div>
             </div>
             <div className="p-4 border-x border-b border-turquoise/20 rounded-b-xl bg-white">
@@ -32,9 +31,8 @@ export default function HarvestPhase() {
           {/* Humidity Card */}
           <div className="rounded-xl shadow overflow-hidden col-span-1">
             <div className="bg-turquoise p-3">
-              <div className="flex items-center gap-2">
-                <WiHumidity className="text-base text-white" />
-                <span className="text-base font-bold text-white">Luftfeuchtigkeit</span>
+              <div>
+                <span className="text-base font-bold text-white break-words w-full">Luftfeuchtigkeit</span>
               </div>
             </div>
             <div className="p-4 border-x border-b border-turquoise/20 rounded-b-xl bg-white">
@@ -47,9 +45,8 @@ export default function HarvestPhase() {
           {/* Drying Time Card */}
           <div className="rounded-xl shadow overflow-hidden">
             <div className="bg-turquoise p-3">
-              <div className="flex items-center gap-2">
-                <PiPlantBold className="text-base text-white" />
-                <span className="text-base font-bold text-white">Trocknungszeit</span>
+              <div>
+                <span className="text-base font-bold text-white break-words w-full">Trocknungszeit</span>
               </div>
             </div>
             <div className="p-4 border-x border-b border-turquoise/20 rounded-b-xl bg-white">
@@ -62,9 +59,8 @@ export default function HarvestPhase() {
           {/* Process Card */}
           <div className="rounded-xl shadow overflow-hidden col-span-1 sm:col-span-2 md:col-span-3">
             <div className="bg-turquoise p-3">
-              <div className="flex items-center gap-2">
-                <PiPlantBold className="text-base text-white" />
-                <span className="text-base font-bold text-white">Ernteprozess</span>
+              <div>
+                <span className="text-base font-bold text-white break-words w-full">Ernteprozess</span>
               </div>
             </div>
             <div className="p-4 border-x border-b border-turquoise/20 rounded-b-xl bg-white">
