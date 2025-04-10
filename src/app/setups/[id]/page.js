@@ -2,10 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { FaCalendarAlt, FaEdit, FaTrash, FaPlus, FaTint, FaTemperatureHigh, FaLeaf } from 'react-icons/fa';
+import { FaCalendarAlt, FaEdit, FaTrash, FaPlus, FaTint, FaTemperatureHigh, FaLeaf, FaInfoCircle } from 'react-icons/fa';
 import { useSession } from 'next-auth/react';
 import SetupModal from '@/components/SetupModal';
 import DayEntryMenu from '@/components/DayEntryMenu';
+import ContextMenu from '@/components/ContextMenu';
+import { GiGreenhouse, GiWateringCan } from 'react-icons/gi';
+import { WiHumidity } from 'react-icons/wi';
 
 export default function SetupDetailPage() {
   const { data: session, status } = useSession();
@@ -194,50 +197,44 @@ export default function SetupDetailPage() {
   }
 
   return (
-    <div className="p-6 pb-32">
+    <div className="pb-24">
       <div className="max-w-6xl mx-auto">
         {/* Setup header */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">{setup.name}</h1>
-              {setup.description && (
-                <p className="text-gray-600 mt-1">{setup.description}</p>
-              )}
-              <p className="text-sm text-gray-500 mt-2">
-                <span className="font-medium">{setup.plants.length}</span> Pflanzen in diesem Setup
-              </p>
+        <div className="bg-gradient-to-b from-brand-primary/90 to-brand-primary/70 text-white p-6 shadow-md">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2 mb-2">
+              <GiGreenhouse className="text-2xl" />
+              <h1 className="text-2xl font-bold">{setup.name}</h1>
             </div>
+            {setup.description && (
+              <p className="text-white/80 mt-1">{setup.description}</p>
+            )}
+            <p className="text-sm text-white/80 mt-2">
+              <span className="font-medium">{setup.plants.length}</span> Pflanzen in diesem Setup
+            </p>
             
-            <div className="flex space-x-2 mt-4 md:mt-0">
+            <div className="flex space-x-2 mt-4">
               <button
                 onClick={() => setShowEditModal(true)}
-                className="bg-white text-gray-700 border border-gray-300 px-3 py-1 rounded flex items-center gap-1 hover:bg-gray-50"
+                className="bg-white/20 text-white px-3 py-1 rounded-full flex items-center gap-1 hover:bg-white/30 transition-colors text-sm"
               >
-                <FaEdit className="text-gray-500" />
+                <FaEdit className="text-xs" />
                 <span>Bearbeiten</span>
               </button>
               <button
                 onClick={handleDeleteSetup}
-                className="bg-white text-red-600 border border-red-300 px-3 py-1 rounded flex items-center gap-1 hover:bg-red-50"
+                className="bg-white/20 text-white px-3 py-1 rounded-full flex items-center gap-1 hover:bg-red-500/70 transition-colors text-sm"
               >
-                <FaTrash className="text-red-500" />
+                <FaTrash className="text-xs" />
                 <span>Löschen</span>
-              </button>
-              <button
-                onClick={handleAddDayEntry}
-                className="bg-brand-primary text-white px-3 py-1 rounded flex items-center gap-1 hover:bg-primary-hover"
-              >
-                <FaPlus />
-                <span>Tageseintrag</span>
               </button>
             </div>
           </div>
         </div>
         
         {/* Tab navigation */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-          <div className="flex border-b">
+        <div className="bg-white shadow-sm">
+          <div className="flex">
             <button
               onClick={() => setActiveTab('plants')}
               className={`px-4 py-3 text-sm font-medium flex-1 text-center ${
@@ -266,11 +263,12 @@ export default function SetupDetailPage() {
           {activeTab === 'plants' && (
             <div className="p-4">
               {setup.plants.length === 0 ? (
-                <div className="text-center py-6">
-                  <p className="text-gray-500">Keine Pflanzen in diesem Setup</p>
+                <div className="text-center py-10 bg-gray-50 rounded-lg border border-gray-200">
+                  <GiGreenhouse className="mx-auto text-4xl text-gray-400 mb-3" />
+                  <p className="text-gray-500 mb-3">Keine Pflanzen in diesem Setup</p>
                   <button
                     onClick={() => setShowEditModal(true)}
-                    className="mt-3 px-4 py-2 bg-brand-primary text-white rounded hover:bg-primary-hover inline-flex items-center gap-2"
+                    className="px-4 py-2 bg-brand-primary text-white rounded-full hover:bg-primary-hover inline-flex items-center gap-2"
                   >
                     <FaPlus className="text-sm" />
                     Pflanzen hinzufügen
@@ -281,21 +279,31 @@ export default function SetupDetailPage() {
                   {setup.plants.map(plant => (
                     <div 
                       key={plant.id}
-                      className="border rounded-md overflow-hidden hover:shadow-md transition-shadow duration-300 cursor-pointer"
+                      className="bg-white border rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-300 cursor-pointer"
                       onClick={() => navigateToPlant(plant.id)}
                     >
-                      <div className="p-3 border-b bg-gray-50">
+                      <div className="p-3 border-b bg-gray-50 flex justify-between items-center">
                         <h3 className="font-medium text-gray-800">{plant.name}</h3>
+                        <span className="px-2 py-0.5 bg-brand-primary/10 text-brand-primary rounded-full text-xs">
+                          {plant.genetic_type || plant.strain_type || 'Unbekannt'}
+                        </span>
                       </div>
-                      <div className="p-3">
-                        <p className="text-sm text-gray-600 flex items-center gap-1">
-                          <span className="text-xs">🌱</span> Start: {new Date(plant.start_date).toLocaleDateString('de-DE')}
-                        </p>
-                        {plant.flowering_start_date && (
-                          <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
-                            <span className="text-xs">🌸</span> Blüte: {new Date(plant.flowering_start_date).toLocaleDateString('de-DE')}
-                          </p>
-                        )}
+                      <div className="p-4">
+                        <div className="flex flex-wrap gap-3 mb-3">
+                          <div className="flex items-center text-gray-600 text-sm">
+                            <span className="text-xs mr-1">🌱</span> 
+                            {new Date(plant.start_date).toLocaleDateString('de-DE')}
+                          </div>
+                          {plant.flowering_start_date && (
+                            <div className="flex items-center text-gray-600 text-sm">
+                              <span className="text-xs mr-1">🌸</span> 
+                              {new Date(plant.flowering_start_date).toLocaleDateString('de-DE')}
+                            </div>
+                          )}
+                        </div>
+                        <div className="mt-2 pt-2 border-t border-gray-100">
+                          <div className="text-xs text-gray-500">Klicken für Details</div>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -308,85 +316,83 @@ export default function SetupDetailPage() {
           {activeTab === 'days' && (
             <div className="p-4">
               {dayEntries.length === 0 ? (
-                <div className="text-center py-6">
-                  <p className="text-gray-500">Keine Tageseinträge für dieses Setup</p>
+                <div className="text-center py-10 bg-gray-50 rounded-lg border border-gray-200">
+                  <FaCalendarAlt className="mx-auto text-4xl text-gray-400 mb-3" />
+                  <p className="text-gray-500 mb-3">Keine Tageseinträge für dieses Setup</p>
                   <button
                     onClick={handleAddDayEntry}
-                    className="mt-3 px-4 py-2 bg-brand-primary text-white rounded hover:bg-primary-hover inline-flex items-center gap-2"
+                    className="px-4 py-2 bg-brand-primary text-white rounded-full hover:bg-primary-hover inline-flex items-center gap-2"
                   >
                     <FaPlus className="text-sm" />
                     Tageseintrag hinzufügen
                   </button>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gray-50 text-left">
-                        <th className="px-4 py-2 text-gray-600 font-medium">Datum</th>
-                        <th className="px-4 py-2 text-gray-600 font-medium">Details</th>
-                        <th className="px-4 py-2 text-gray-600 font-medium text-right">Aktionen</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {dayEntries.map(entry => (
-                        <tr key={entry.id} className="border-t">
-                          <td className="px-4 py-3">
-                            <div className="font-medium">
-                              {new Date(entry.date).toLocaleDateString('de-DE', { 
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric'
-                              })}
+                <div className="space-y-4">
+                  {dayEntries.sort((a, b) => new Date(b.date) - new Date(a.date)).map(entry => (
+                    <div key={entry.id} className="bg-white border rounded-lg overflow-hidden hover:shadow-sm transition-shadow">
+                      <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
+                        <div className="font-medium text-gray-800">
+                          {new Date(entry.date).toLocaleDateString('de-DE', { 
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                          })}
+                        </div>
+                        <DayEntryMenu
+                          items={[
+                            {
+                              label: 'Löschen',
+                              icon: <FaTrash />,
+                              onClick: () => handleDeleteDayEntry(entry.id)
+                            }
+                          ]}
+                        />
+                      </div>
+                      <div className="p-4">
+                        <div className="flex flex-wrap gap-4">
+                          {entry.watering_amount && (
+                            <div className="flex items-center text-gray-700 bg-blue-50 px-3 py-1.5 rounded-full">
+                              <GiWateringCan className="mr-2 text-blue-500" />
+                              <span>{entry.watering_amount} ml</span>
                             </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="flex flex-wrap gap-3">
-                              {entry.watering_amount && (
-                                <div className="flex items-center text-gray-600 text-sm">
-                                  <FaTint className="mr-1 text-blue-500" />
-                                  {entry.watering_amount} ml
-                                </div>
-                              )}
-                              {entry.temperature && (
-                                <div className="flex items-center text-gray-600 text-sm">
-                                  <FaTemperatureHigh className="mr-1 text-red-500" />
-                                  {entry.temperature}°C
-                                </div>
-                              )}
-                              {entry.humidity && (
-                                <div className="flex items-center text-gray-600 text-sm">
-                                  <span className="mr-1">💧</span>
-                                  {entry.humidity}%
-                                </div>
-                              )}
+                          )}
+                          {entry.temperature && (
+                            <div className="flex items-center text-gray-700 bg-red-50 px-3 py-1.5 rounded-full">
+                              <FaTemperatureHigh className="mr-2 text-red-500" />
+                              <span>{entry.temperature}°C</span>
                             </div>
-                            {entry.notes && (
-                              <div className="text-sm text-gray-600 mt-1">
-                                <span className="font-medium">Notizen:</span> {entry.notes}
-                              </div>
-                            )}
-                            {entry.fertilizers && entry.fertilizers.length > 0 && (
-                              <div className="text-sm text-gray-600 mt-1">
-                                <span className="font-medium">Dünger:</span> {entry.fertilizers.map(f => `${f.fertilizer_name} (${f.amount})`).join(', ')}
-                              </div>
-                            )}
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            <DayEntryMenu
-                              items={[
-                                {
-                                  label: 'Löschen',
-                                  icon: <FaTrash />,
-                                  onClick: () => handleDeleteDayEntry(entry.id)
-                                }
-                              ]}
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                          )}
+                          {entry.humidity && (
+                            <div className="flex items-center text-gray-700 bg-teal-50 px-3 py-1.5 rounded-full">
+                              <WiHumidity className="mr-1 text-xl text-teal-500" />
+                              <span>{entry.humidity}%</span>
+                            </div>
+                          )}
+                        </div>
+                        {entry.notes && (
+                          <div className="mt-3 p-3 bg-gray-50 rounded-md">
+                            <div className="text-sm text-gray-700">
+                              <FaInfoCircle className="inline-block mr-2 text-gray-500" />
+                              {entry.notes}
+                            </div>
+                          </div>
+                        )}
+                        {entry.fertilizers && entry.fertilizers.length > 0 && (
+                          <div className="mt-3">
+                            <div className="font-medium text-sm text-gray-700 mb-2">Dünger:</div>
+                            <div className="flex flex-wrap gap-2">
+                              {entry.fertilizers.map((f, idx) => (
+                                <span key={idx} className="bg-green-50 text-green-700 px-2 py-1 rounded-md text-xs">
+                                  {f.fertilizer_name} ({f.amount})
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -403,6 +409,12 @@ export default function SetupDetailPage() {
           isNew={false}
         />
       )}
+      
+      {/* Context Menu for navigation with bottom action menu */}
+      <ContextMenu 
+        setup={setup} 
+        onAddDayEntry={handleAddDayEntry}
+      />
     </div>
   );
 }

@@ -206,6 +206,10 @@ export async function POST(request, { params }) {
     const plantDays = [];
     const skippedPlants = [];
     
+    // Calculate equal distribution amount if needed
+    const totalPlants = plants.length;
+    const equalWaterAmount = totalPlants > 0 ? Math.floor(parseInt(data.watering_amount || 0) / totalPlants) : 0;
+    
     for (const plant of plants) {
       // Calculate day number for this plant (for reference only)
       const dayNumber = db.prepare(`
@@ -221,6 +225,23 @@ export async function POST(request, { params }) {
         console.log(`Plant ${plant.id} already has an entry for ${data.date}, skipping`);
         skippedPlants.push(plant.id);
         continue;
+      }
+
+      // Determine the correct watering amount for this plant
+      let plantWateringAmount;
+      
+      // If custom distribution is provided, use the specific amount for this plant
+      if (data.plantWaterDistribution && Array.isArray(data.plantWaterDistribution) && data.plantWaterDistribution.length > 0) {
+        const plantDistribution = data.plantWaterDistribution.find(p => p.plantId == plant.id);
+        if (plantDistribution) {
+          plantWateringAmount = plantDistribution.amount;
+        } else {
+          // Fallback to equal distribution if this plant is not in the custom distribution
+          plantWateringAmount = equalWaterAmount.toString();
+        }
+      } else {
+        // No custom distribution, use equal distribution
+        plantWateringAmount = equalWaterAmount.toString();
       }
 
       // Create plant day entry with proper day number calculation
@@ -247,7 +268,7 @@ export async function POST(request, { params }) {
         plantDayData.watered,
         plantDayData.topped,
         plantDayData.ph_value,
-        plantDayData.watering_amount,
+        plantWateringAmount, // Use the plant-specific watering amount
         plantDayData.temperature,
         plantDayData.humidity,
         plantDayData.notes,

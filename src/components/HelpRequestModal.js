@@ -22,6 +22,8 @@ export default function HelpRequestModal({ onClose }) {
     files: []
   });
 
+  const [dragActive, setDragActive] = useState(false);
+
   // Fetch user's plants when modal opens
   useEffect(() => {
     fetchUserPlants();
@@ -105,6 +107,31 @@ export default function HelpRequestModal({ onClose }) {
     }));
   };
 
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const fileList = Array.from(e.dataTransfer.files);
+      setFormData(prev => ({
+        ...prev,
+        files: [...prev.files, ...fileList]
+      }));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -118,22 +145,43 @@ export default function HelpRequestModal({ onClose }) {
       setSubmitError('');
       
       // Create FormData to send to the API
-      const formData = new FormData();
-      formData.append('name', formData.name);
-      formData.append('email', formData.email);
-      formData.append('subject', formData.subject);
-      formData.append('message', formData.message);
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('subject', formData.subject);
+      formDataToSend.append('message', formData.message);
       
       // Add selected plants and their data
       const selectedPlants = userPlants.filter(plant => formData.plantIds.includes(plant.id));
-      formData.append('plantData', JSON.stringify(selectedPlants));
-      formData.append('selectedPlantIds', JSON.stringify(formData.plantIds));
+      formDataToSend.append('plantData', JSON.stringify(selectedPlants));
+      formDataToSend.append('selectedPlantIds', JSON.stringify(formData.plantIds));
       
-      // Note: File upload is temporarily disabled as per the memory
+      // Add files to the form data
+      if (formData.files && formData.files.length > 0) {
+        console.log(`Appending ${formData.files.length} files to form data`);
+        for (let i = 0; i < formData.files.length; i++) {
+          const file = formData.files[i];
+          console.log(`Appending file ${i}: ${file.name}`);
+          formDataToSend.append(`file-${i}`, file);
+        }
+        formDataToSend.append('fileCount', formData.files.length.toString());
+      } else {
+        console.log('No files to append');
+        formDataToSend.append('fileCount', '0');
+      }
+      
+      // Log the FormData contents for debugging
+      for (const pair of formDataToSend.entries()) {
+        if (pair[0].startsWith('file-')) {
+          console.log(`FormData contains: ${pair[0]}, type: ${pair[1].type}, size: ${pair[1].size} bytes`);
+        } else {
+          console.log(`FormData contains: ${pair[0]}, value: ${pair[1]}`);
+        }
+      }
       
       const response = await fetch('/api/help-requests', {
         method: 'POST',
-        body: formData,
+        body: formDataToSend,
       });
       
       if (!response.ok) {
@@ -240,7 +288,7 @@ export default function HelpRequestModal({ onClose }) {
                         
                         <div>
                           <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                            E-Mail
+                            E-Mail <span className="text-gray-500 text-xs">(optional)</span>
                           </label>
                           <input
                             type="email"
@@ -249,9 +297,9 @@ export default function HelpRequestModal({ onClose }) {
                             placeholder="deine@email.de"
                             value={formData.email}
                             onChange={handleInputChange}
-                            required
                             className="w-full text-base py-2 px-3 border border-gray-300 rounded-md bg-white shadow-sm focus:border-brand-primary focus:ring-1 focus:ring-brand-primary"
                           />
+                          <p className="mt-1 text-xs text-gray-500">Ohne E-Mail bleibst du anonym, wir antworten Dir direkt hier in der Dr. Cannabis GrowGuide App.</p>
                         </div>
                       </div>
                     </div>
@@ -412,7 +460,13 @@ export default function HelpRequestModal({ onClose }) {
               {currentStep === 3 && (
                 <div className="space-y-5">
                   <div className="mb-6 relative pt-4">
-                    <div className="border-2 border-brand-primary/40 rounded-lg bg-brand-primary/10 relative p-4">
+                    <div 
+                      className={`border-2 border-brand-primary/40 rounded-lg bg-brand-primary/10 relative p-4 ${dragActive ? 'border-dashed border-gray-300' : ''}`}
+                      onDragEnter={handleDrag}
+                      onDragOver={handleDrag}
+                      onDragLeave={handleDrag}
+                      onDrop={handleDrop}
+                    >
                       <div className="absolute -top-3 left-4 bg-white px-2 text-brand-primary font-semibold flex items-center gap-2 z-20">
                         <FaImage className="text-brand-primary" />
                         <span>Fotos hinzufügen</span>
@@ -423,28 +477,49 @@ export default function HelpRequestModal({ onClose }) {
                           Fotos helfen uns, dein Problem besser zu verstehen. Du kannst mehrere Fotos hochladen.
                         </p>
                         
-                        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
-                          <div className="flex">
-                            <div className="flex-shrink-0">
-                              <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                              </svg>
-                            </div>
-                            <div className="ml-3">
-                              <p className="text-sm text-yellow-700">
-                                Foto-Upload ist vorübergehend deaktiviert. Bitte beschreibe dein Problem ausführlich in der Nachricht.
-                              </p>
-                            </div>
+                        {formData.files.length > 0 && (
+                          <div className="mb-4">
+                            <h4 className="text-sm font-medium text-gray-700 mb-2">Ausgewählte Dateien:</h4>
+                            <ul className="space-y-2">
+                              {formData.files.map((file, index) => (
+                                <li key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-md border border-gray-200">
+                                  <div className="flex items-center">
+                                    <svg className="h-5 w-5 text-gray-400 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                      <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                                    </svg>
+                                    <span className="text-sm truncate max-w-xs">{file.name}</span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const newFiles = [...formData.files];
+                                      newFiles.splice(index, 1);
+                                      setFormData({...formData, files: newFiles});
+                                    }}
+                                    className="text-red-500 hover:text-red-700"
+                                  >
+                                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
                           </div>
-                        </div>
+                        )}
                         
-                        <div className="mt-1 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-md p-6 bg-gray-50">
+                        <div className="mt-1 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-md p-6 bg-gray-50 hover:bg-gray-100 transition-colors"
+                          onDragEnter={handleDrag}
+                          onDragOver={handleDrag}
+                          onDragLeave={handleDrag}
+                          onDrop={handleDrop}
+                        >
                           <div className="space-y-1 text-center">
-                            <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                              <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <svg className={`mx-auto h-12 w-12 ${dragActive ? 'text-brand-primary' : 'text-gray-400'}`} stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                              <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 015.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                             <div className="flex text-sm text-gray-600">
-                              <label htmlFor="file-upload" className="relative cursor-not-allowed rounded-md bg-white font-medium text-gray-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-olive-green">
+                              <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white font-medium text-brand-primary hover:text-brand-primary/80 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-olive-green">
                                 <span>Fotos hochladen</span>
                                 <input 
                                   id="file-upload" 
@@ -453,7 +528,8 @@ export default function HelpRequestModal({ onClose }) {
                                   className="sr-only" 
                                   multiple 
                                   accept="image/*" 
-                                  disabled
+                                  onChange={handleFileChange}
+                                  ref={fileInputRef}
                                 />
                               </label>
                               <p className="pl-1">oder per Drag & Drop</p>

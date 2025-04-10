@@ -32,6 +32,9 @@ export default function PlantsPage() {
     name: '',
     description: '',
   });
+  const [selectedPlant, setSelectedPlant] = useState(null);
+  const [showSetupSelectionModal, setShowSetupSelectionModal] = useState(false);
+  const [setupActionType, setSetupActionType] = useState('add'); // 'add' or 'move'
 
   // Form state for new plant
   const [newPlant, setNewPlant] = useState({
@@ -257,6 +260,94 @@ export default function PlantsPage() {
     }
   };
   
+  // Handle adding a plant to a setup
+  const handleAddPlantToSetup = (e, plant) => {
+    e.stopPropagation(); // Prevent navigation to plant detail
+    setSelectedPlant(plant);
+    setSetupActionType('add');
+    setShowSetupSelectionModal(true);
+  };
+  
+  // Handle moving a plant to another setup
+  const handleMovePlantToSetup = (e, plant) => {
+    e.stopPropagation(); // Prevent navigation to plant detail
+    setSelectedPlant(plant);
+    setSetupActionType('move');
+    setShowSetupSelectionModal(true);
+  };
+  
+  // Process the plant addition/move to a setup
+  const processPlantSetupAction = async (setupId) => {
+    if (!selectedPlant || !setupId) return;
+    
+    try {
+      setLoading(true);
+      
+      // If we're moving a plant, we need to first remove it from any existing setup
+      if (setupActionType === 'move') {
+        // Find all setups that contain this plant
+        const setupsWithPlant = setups.filter(setup => 
+          setup.plants.some(p => p.id === selectedPlant.id)
+        );
+        
+        // Remove the plant from all those setups
+        for (const setup of setupsWithPlant) {
+          const updatedPlantIds = setup.plants
+            .filter(p => p.id !== selectedPlant.id)
+            .map(p => p.id);
+          
+          await fetch(`/api/plant-setups/${setup.id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: setup.name,
+              description: setup.description,
+              plantIds: updatedPlantIds
+            }),
+          });
+        }
+      }
+      
+      // Now add the plant to the selected setup
+      const targetSetup = setups.find(s => s.id === setupId);
+      if (!targetSetup) throw new Error('Setup nicht gefunden');
+      
+      const updatedPlantIds = [
+        ...targetSetup.plants.map(p => p.id),
+        selectedPlant.id
+      ];
+      
+      const response = await fetch(`/api/plant-setups/${setupId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: targetSetup.name,
+          description: targetSetup.description,
+          plantIds: updatedPlantIds
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update setup');
+      }
+      
+      // Refresh data and close modal
+      fetchData();
+      setShowSetupSelectionModal(false);
+      setSelectedPlant(null);
+      
+    } catch (err) {
+      console.error('Error updating setup:', err);
+      setError(`Fehler beim Aktualisieren des Setups: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Plant Options Modal Component
   const PlantOptionsMenu = ({ plant, onClose }) => {
     return (
@@ -287,14 +378,14 @@ export default function PlantsPage() {
               <FaTrash className="mr-3 text-sm" /> <span>Löschen</span>
             </button>
             <button 
-              disabled
-              className="w-full text-left px-4 py-3 text-gray-400 flex items-center cursor-not-allowed"
+              onClick={(e) => handleAddPlantToSetup(e, plant)}
+              className="w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 flex items-center"
             >
               <FaPlus className="mr-3 text-sm" /> <span>Zu Setup hinzufügen</span>
             </button>
             <button 
-              disabled
-              className="w-full text-left px-4 py-3 text-gray-400 flex items-center cursor-not-allowed"
+              onClick={(e) => handleMovePlantToSetup(e, plant)}
+              className="w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 flex items-center"
             >
               <FaExchangeAlt className="mr-3 text-sm" /> <span>Zu anderem Setup verschieben</span>
             </button>
@@ -754,7 +845,7 @@ export default function PlantsPage() {
                           >
                             <FaCopy className="text-gray-500" />
                             <div className="flex flex-col items-start">
-                              <span className="text-sm font-medium text-gray-700">Kopien</span>
+                              <span className="text-sm font-medium text-gray-700">Anzahl Pflanzen</span>
                               <span className="text-xs text-gray-500">{newPlant.copies}</span>
                             </div>
                             <svg className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${showCopiesOptions ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -799,7 +890,7 @@ export default function PlantsPage() {
                                   onClick={() => setNewPlant({...newPlant, copies: num})}
                                   className={`py-2 px-0 rounded-md border ${newPlant.copies === num 
                                     ? 'bg-brand-primary text-white border-brand-primary' 
-                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'} 
+                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'} 
                                     transition-colors duration-200 text-center font-medium`}
                                 >
                                   {num}
@@ -815,7 +906,7 @@ export default function PlantsPage() {
                                   onClick={() => setNewPlant({...newPlant, copies: num})}
                                   className={`py-2 px-0 rounded-md border ${newPlant.copies === num 
                                     ? 'bg-brand-primary text-white border-brand-primary' 
-                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'} 
+                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'} 
                                     transition-colors duration-200 text-center font-medium`}
                                 >
                                   {num}
@@ -1016,6 +1107,48 @@ export default function PlantsPage() {
           setup={editingSetup}
           isNew={false}
         />
+      )}
+
+      {showSetupSelectionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-md h-full md:h-auto md:max-h-[90vh] md:rounded-lg shadow-lg overflow-y-auto relative">
+            <div className="absolute inset-0 pattern-grid opacity-5 pointer-events-none"></div>
+            <div className="relative z-10 p-4 md:p-6">
+              <div className="flex items-center justify-between mb-2">
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setShowSetupSelectionModal(false);
+                  }}
+                  className="rounded-full p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </div>
+              
+              <h3 className="text-lg font-bold text-gray-800 mb-4">{setupActionType === 'add' ? 'Pflanze zu Setup hinzufügen' : 'Pflanze zu anderem Setup verschieben'}</h3>
+              
+              <div className="space-y-4">
+                {setups.map((setup) => (
+                  <button
+                    key={setup.id}
+                    type="button"
+                    onClick={() => processPlantSetupAction(setup.id)}
+                    className="flex items-center gap-2 py-2 px-3 rounded-md hover:bg-gray-100 transition-colors"
+                  >
+                    <GiGreenhouse className="text-gray-500" />
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-medium text-gray-700">{setup.name}</span>
+                      <span className="text-xs text-gray-500">{setup.plants.length} Pflanzen</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       <ContextMenu />

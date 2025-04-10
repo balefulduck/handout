@@ -8,6 +8,14 @@ if (typeof window === 'undefined') {
   console.log('Initializing auth route on server side');
 }
 
+// Define default error messages for authentication
+const AUTH_ERRORS = {
+  DEFAULT: 'Ein Fehler ist aufgetreten!',
+  USER_NOT_FOUND: 'Benutzer nicht gefunden',
+  INVALID_PASSWORD: 'Falsches Passwort',
+  MISSING_CREDENTIALS: 'Bitte Benutzername und Passwort eingeben'
+};
+
 export const authOptions = {
   providers: [
     CredentialsProvider({
@@ -21,42 +29,46 @@ export const authOptions = {
           throw new Error('Cannot authenticate on client side');
         }
 
-        console.log('Auth attempt:', { username: credentials?.username });
+        console.log('Auth attempt for:', credentials?.username);
 
         if (!credentials?.username || !credentials?.password) {
           console.log('Missing credentials');
-          throw new Error("Bitte Benutzername und Passwort eingeben");
+          return Promise.reject(new Error(AUTH_ERRORS.MISSING_CREDENTIALS));
         }
 
         try {
+          // Find user with exact username match
           const user = db.prepare(
-            "SELECT * FROM users WHERE username = ?"
+            "SELECT * FROM users WHERE username = ? COLLATE NOCASE"
           ).get(credentials.username);
 
-          console.log('Found user:', user ? 'yes' : 'no');
-
           if (!user) {
-            throw new Error("Benutzer nicht gefunden");
+            console.log('User not found:', credentials.username);
+            return Promise.reject(new Error(AUTH_ERRORS.USER_NOT_FOUND));
           }
 
-          console.log('Comparing passwords...');
           const isValid = await bcrypt.compare(
             credentials.password,
             user.password_hash
           );
-          console.log('Password valid:', isValid);
-
+          
           if (!isValid) {
-            throw new Error("Falsches Passwort");
+            console.log('Invalid password for user:', credentials.username);
+            return Promise.reject(new Error(AUTH_ERRORS.INVALID_PASSWORD));
           }
 
+          console.log('Authentication successful for:', credentials.username);
+          
+          // Return a user object with explicit id, name and admin status
           return {
             id: user.id,
-            name: user.username
+            name: user.username,
+            email: user.email || null,
+            isAdmin: user.is_admin === 1 || false // Ensure boolean value with fallback
           };
         } catch (error) {
-          console.error('Auth error:', error);
-          throw error;
+          console.error('Auth error:', error.message);
+          return Promise.reject(new Error(AUTH_ERRORS.DEFAULT));
         }
       },
     }),
@@ -65,58 +77,50 @@ export const authOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.isAdmin = user.isAdmin;
       }
       return token;
     },
     async session({ session, token }) {
       session.user.id = token.id;
+      session.user.isAdmin = token.isAdmin;
       return session;
     },
-    async redirect({ url, baseUrl }) {
-      console.log('Redirect callback called with:', { url, baseUrl });
-      
-      // Get the actual base URL from config to ensure consistency
-      const configBaseUrl = authOptions.baseUrl;
-      console.log('Using config baseUrl:', configBaseUrl);
-      
-      // Handle sign-in redirects
-      if (url.includes('/api/auth/signin') || url.includes('/api/auth/callback') || url.includes('/login')) {
-        console.log('Auth callback - redirecting to /growguide');
-        return `${configBaseUrl}/growguide`;
-      }
-      
-      // Handle sign-out redirects
-      if (url.includes('/api/auth/signout') || url.includes('/logout')) {
-        console.log('Logout detected - redirecting to /login');
-        return `${configBaseUrl}/login`;
-      }
-      
-      // Default redirect behavior using the configured base URL
-      return url.startsWith(configBaseUrl) ? url : configBaseUrl;
+    async redirect() {
+      // Extremely simplified redirect handler
+      // Let the client-side code handle all redirects
+      // This effectively disables NextAuth's redirect handling
+      return '/growguide';
     }
   },
   pages: {
     signIn: '/login'
   },
-  // Properly configure URLs for different environments
-  // This prevents incorrect redirects after logout
-  useSecureCookies: process.env.NODE_ENV === "production",
+  // Session configuration - simplified
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
   
-  // Set the base URL for NextAuth
-  ...(process.env.NEXTAUTH_URL
-    ? {
-        // If NEXTAUTH_URL is set in environment, use it
-        url: process.env.NEXTAUTH_URL,
-      }
-    : {}),
-      
-  // Define base URL for redirects and other operations
-  baseUrl: process.env.NEXTAUTH_URL || 
-    (process.env.NODE_ENV === "production" 
-      ? process.env.VERCEL_URL || "https://drc420.team" 
-      : "http://localhost:3000"),
-      
-  // Configure cookies with more permissive settings for cross-domain issues
+  // Pages configuration
+  pages: {
+    signIn: '/login',
+    signOut: '/login',
+    error: '/login', // Error messages will be displayed on the login page
+  },
+  
+  // Debug mode in development only
+  debug: process.env.NODE_ENV !== "production",
+  
+  // Security settings
+  secret: process.env.NEXTAUTH_SECRET,
+  
+  // URLs - only set in production if NEXTAUTH_URL is available
+  ...(process.env.NEXTAUTH_URL && process.env.NODE_ENV === "production" ? {
+    url: process.env.NEXTAUTH_URL,
+  } : {}),
+  
+  // Simplified cookie settings to work with DigitalOcean's deployment
   cookies: {
     sessionToken: {
       name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.session-token`,
@@ -125,27 +129,6 @@ export const authOptions = {
         sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",
-        // Don't set domain in production to use the default top-level domain
-        domain: undefined,
-      },
-    },
-    callbackUrl: {
-      name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.callback-url`,
-      options: {
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-        domain: undefined,
-      },
-    },
-    csrfToken: {
-      name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.csrf-token`,
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-        domain: undefined,
       },
     },
   },

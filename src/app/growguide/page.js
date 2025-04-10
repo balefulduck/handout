@@ -2,27 +2,14 @@
 
 import { useSession } from 'next-auth/react';
 import React, { useEffect, useState, Suspense } from 'react';
-import { Transition } from '@headlessui/react';
 import dynamic from 'next/dynamic';
 
 import ContextMenu from '@/components/ContextMenu';
 
-// Use dynamic imports with SSR disabled for components that might cause hydration issues
-const SeedlingPhase = dynamic(() => import('@/components/phases/SeedlingPhase'), {
+// Use dynamic import with SSR disabled for the PhaseContent component to prevent hydration issues
+const PhaseContent = dynamic(() => import('@/components/phases/PhaseContent'), {
   ssr: false,
-  loading: () => <div className="animate-pulse p-4 bg-gray-100 rounded">Loading seedling phase...</div>
-});
-const VegetationPhase = dynamic(() => import('@/components/phases/VegetationPhase'), {
-  ssr: false,
-  loading: () => <div className="animate-pulse p-4 bg-gray-100 rounded">Loading vegetation phase...</div>
-});
-const FlowerPhase = dynamic(() => import('@/components/phases/FlowerPhase'), {
-  ssr: false,
-  loading: () => <div className="animate-pulse p-4 bg-gray-100 rounded">Loading flower phase...</div>
-});
-const HarvestPhase = dynamic(() => import('@/components/phases/HarvestPhase'), {
-  ssr: false,
-  loading: () => <div className="animate-pulse p-4 bg-gray-100 rounded">Loading harvest phase...</div>
+  loading: () => <div className="animate-pulse p-4 bg-gray-100 rounded">Loading phase content...</div>
 });
 
 // Create an error boundary fallback component
@@ -71,17 +58,24 @@ export default function GrowGuidePage() {
   const [activePhase, setActivePhase] = useState('seedling');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [clientReady, setClientReady] = useState(false);
+
+  // Handle client-side mounting to prevent hydration issues
+  useEffect(() => {
+    // Set client ready after hydration is complete
+    setClientReady(true);
+  }, []);
 
   // Safely fetch data with proper error handling
   useEffect(() => {
-    let isMounted = true;
+    let isComponentMounted = true;
     
     const fetchStrains = async () => {
       try {
         setIsLoading(true);
         const response = await fetch('/api/strains/selected');
         
-        if (!isMounted) return;
+        if (!isComponentMounted) return;
         
         if (response.ok) {
           const data = await response.json();
@@ -91,12 +85,12 @@ export default function GrowGuidePage() {
           // Fail gracefully - don't set error state as this isn't critical
         }
       } catch (err) {
-        if (isMounted) {
+        if (isComponentMounted) {
           console.error('Error fetching strains:', err);
           // Again, fail gracefully for this non-critical data
         }
       } finally {
-        if (isMounted) {
+        if (isComponentMounted) {
           setIsLoading(false);
         }
       }
@@ -105,7 +99,7 @@ export default function GrowGuidePage() {
     fetchStrains();
     
     return () => {
-      isMounted = false;
+      isComponentMounted = false;
     };
   }, []);
 
@@ -133,47 +127,40 @@ export default function GrowGuidePage() {
       return <ErrorFallback error={error} />;
     }
     
-    switch (activePhase) {
-      case 'seedling':
-        return (
-          <Suspense fallback={<div className="animate-pulse p-4 bg-gray-100 rounded">Loading seedling phase...</div>}>
-            <SeedlingPhase />
-          </Suspense>
-        );
-      case 'vegetation':
-        return (
-          <Suspense fallback={<div className="animate-pulse p-4 bg-gray-100 rounded">Loading vegetation phase...</div>}>
-            <VegetationPhase />
-          </Suspense>
-        );
-      case 'flower':
-        return (
-          <Suspense fallback={<div className="animate-pulse p-4 bg-gray-100 rounded">Loading flower phase...</div>}>
-            <FlowerPhase />
-          </Suspense>
-        );
-      case 'harvest':
-        return (
-          <Suspense fallback={<div className="animate-pulse p-4 bg-gray-100 rounded">Loading harvest phase...</div>}>
-            <HarvestPhase />
-          </Suspense>
-        );
-      default:
-        return null;
+    if (!activePhase) {
+      return null;
     }
+    
+    return (
+      <Suspense fallback={<div className="animate-pulse p-4 bg-gray-100 rounded">Loading phase content...</div>}>
+        {/* Only render PhaseContent component when on client */}
+        {clientReady && <PhaseContent phaseName={activePhase} />}
+      </Suspense>
+    );
   };
 
   return (
-    <div className="min-h-screen mt-10 pt-7 bg-gray-50" suppressHydrationWarning={true}>
+    <div className="min-h-screen mt-10 pt-7 bg-gray-50">
+      {/* Render ContextMenu always - it's client-side only via 'use client' directive */}
       <ContextMenu activePhase={activePhase} onPhaseSelect={handlePhaseSelect} />
 
       <main className="max-w-7xl mx-auto px-6 py-10 pb-24">
         {/* Page Header */}
-        <div className="mb-8 text-center">
-          <h2 className="text-medium-blue mb-2">Grow Guide</h2>
-          <p className="max-w-2xl mx-auto text-gray-600 text-base">
-            Wähle eine Wachstumsphase im Kontextmenü am unteren Bildschirmrand um detaillierte Informationen zu den wichtigsten Parametern deines Grows zu erhalten.
-          </p>
+        <div className="mb-8 md:flex md:justify-between">
+          <div className="md:w-1/2">
+            <h2 className="text-medium-blue mb-2 text-left">Grow Guide</h2>
+          </div>
+          <div className="md:w-1/2 mt-4 md:mt-0 text-left">
+            <p className="text-gray-600 text-base font-dosis">
+              Wähle eine Wachstumsphase im Kontextmenü am unteren Bildschirmrand um detaillierte Informationen zu den wichtigsten Parametern deines Grows zu erhalten.
+            </p>
+            <p className="text-gray-600 text-base mt-2 font-dosis">
+              Tippe auf <span className="drc-info-tag-style rounded-md px-2 py-0.5 font-bold shadow-md bg-olive-green/15 text-olive-green border border-olive-green/30">markierte</span> Begriffe um weitere Informationen und Tipps zu erhalten. <br />
+            </p>
+            <p className="text-gray-600 text-base mt-2 font-dosis">
+              Schau Dir auch unser Dr. Cannabis Lexikon an! (Derzeit in der Aufbauphase.)
+            </p>
+          </div>
         </div>
         
         {/* Phase Content */}
@@ -184,19 +171,10 @@ export default function GrowGuidePage() {
               <div className="h-1 w-24 bg-gradient-to-r from-purple to-medium-blue rounded transition-all duration-500 hover:w-32"></div>
             </div>
           )}
-          <Transition
-            show={activePhase !== null}
-            enter="transition-opacity duration-200"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="transition-opacity duration-200"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="transition-all duration-300 text-focus-animation">
-              {renderPhaseContent()}
-            </div>
-          </Transition>
+          {/* Simpler fade animation implemented with CSS for better hydration */}
+          <div className={`transition-opacity duration-300 ${activePhase !== null ? 'opacity-100' : 'opacity-0'}`}>
+            {renderPhaseContent()}
+          </div>
         </div>
       </main>
     </div>
