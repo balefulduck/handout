@@ -9,7 +9,8 @@ import RelatedTerms from '../components/RelatedTerms';
 export default function PhInfoPage() {
   const [selectedSubstrate, setSelectedSubstrate] = useState('soil');
   
-  // Product ad data
+  // Product ad data - temporarily disabled
+  /*
   const productAd = {
     name: 'Digital pH Meter Pro',
     image: '/aci.png',
@@ -17,6 +18,8 @@ export default function PhInfoPage() {
     regularPrice: '39,99 €',
     salePrice: '35,99 €'
   };
+  */
+  const productAd = null;
   
   // Related terms
   const relatedTerms = ['nährstoffe', 'ec-wert', 'bewässerung', 'lichtplan'];
@@ -140,8 +143,8 @@ export default function PhInfoPage() {
             </div>
           </InfoBox>
           
-          {/* Product Ad */}
-          <ProductAd product={productAd} />
+          {/* Product Ad - temporarily disabled */}
+          {/* <ProductAd product={productAd} /> */}
           
           {/* Related Terms */}
           <RelatedTerms terms={relatedTerms} />

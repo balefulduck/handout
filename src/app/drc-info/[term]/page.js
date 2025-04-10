@@ -15,6 +15,8 @@ const termDetails = {
     icon: '/1.webp',
     description: 'Grundlegende Informationen zu Pflanzennährstoffen und ihrer Bedeutung für das Wachstum.',
     relatedTerms: ['ph', 'ec-wert', 'bewässerung', 'lichtplan'],
+    productAd: null
+    /* Temporarily disabled
     productAd: {
       name: 'Dünger-Komplett-Set',
       image: '/aci.png',
@@ -22,12 +24,15 @@ const termDetails = {
       regularPrice: '49,99 €',
       salePrice: '42,99 €'
     }
+    */
   },
   'ec-wert': {
     title: 'EC-Wert',
     icon: '/1.webp',
     description: 'Der EC-Wert (Electrical Conductivity) misst die elektrische Leitfähigkeit einer Nährlösung und zeigt die Konzentration gelöster Salze an.',
     relatedTerms: ['ph', 'nährstoffe', 'bewässerung'],
+    productAd: null
+    /* Temporarily disabled
     productAd: {
       name: 'Digital EC Messgerät',
       image: '/aci.png',
@@ -35,6 +40,7 @@ const termDetails = {
       regularPrice: '29,99 €',
       salePrice: '24,99 €'
     }
+    */
   },
   // Add more basic terms here as needed
 };
@@ -76,8 +82,8 @@ export default function DrcInfoPage() {
             </div>
           </InfoBox>
           
-          {/* Product Ad */}
-          {details.productAd && <ProductAd product={details.productAd} />}
+          {/* Product Ad - temporarily disabled */}
+          {/* {details.productAd && <ProductAd product={details.productAd} />} */}
           
           {/* Related Terms */}
           <RelatedTerms terms={details.relatedTerms} />

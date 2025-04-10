@@ -9,7 +9,8 @@ import RelatedTerms from '../components/RelatedTerms';
 export default function LichtplanInfoPage() {
   const [selectedGrowType, setSelectedGrowType] = useState('photo');
   
-  // Product ad data
+  // Product ad data - temporarily disabled
+  /*
   const productAd = {
     name: 'LED Grow Lampe Pro Serie',
     image: '/aci.png',
@@ -17,9 +18,11 @@ export default function LichtplanInfoPage() {
     regularPrice: '129,99 €',
     salePrice: '109,99 €'
   };
+  */
+  const productAd = null;
   
   // Related terms
-  const relatedTerms = ['nährstoffe', 'ph', 'temperatur', 'luftfeuchtigkeit'];
+  const relatedTerms = ['nährstoffe', 'temperatur', 'luftfeuchtigkeit', 'ec-wert'];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -149,8 +152,8 @@ export default function LichtplanInfoPage() {
             </ul>
           </InfoBox>
           
-          {/* Product Ad */}
-          <ProductAd product={productAd} />
+          {/* Product Ad - temporarily disabled */}
+          {/* <ProductAd product={productAd} /> */}
           
           {/* Related Terms */}
           <RelatedTerms terms={relatedTerms} />

@@ -9,7 +9,8 @@ import RelatedTerms from '../components/RelatedTerms';
 export default function LuftfeuchtigkeitInfoPage() {
   const [selectedGrowPhase, setSelectedGrowPhase] = useState('seedling');
   
-  // Product ad data
+  // Product ad data - temporarily disabled
+  /*
   const productAd = {
     name: 'Digitaler Luftbefeuchter mit Hygrometer',
     image: '/aci.png',
@@ -17,9 +18,11 @@ export default function LuftfeuchtigkeitInfoPage() {
     regularPrice: '59,99 €',
     salePrice: '49,99 €'
   };
+  */
+  const productAd = null;
   
   // Related terms
-  const relatedTerms = ['lichtzyklus', 'ph', 'temperatur', 'nährstoffe'];
+  const relatedTerms = ['lichtplan', 'temperatur', 'nährstoffe', 'ec-wert'];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -157,8 +160,8 @@ export default function LuftfeuchtigkeitInfoPage() {
             </div>
           </InfoBox>
           
-          {/* Product Ad */}
-          <ProductAd product={productAd} />
+          {/* Product Ad - temporarily disabled */}
+          {/* <ProductAd product={productAd} /> */}
           
           {/* Related Terms */}
           <RelatedTerms terms={relatedTerms} />
