@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import React, { useEffect, useState, Suspense } from 'react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 
 import ContextMenu from '@/components/ContextMenu';
 
@@ -146,20 +147,64 @@ export default function GrowGuidePage() {
 
       <main className="max-w-7xl mx-auto px-6 py-10 pb-24">
         {/* Page Header */}
-        <div className="mb-8 md:flex md:justify-between">
-          <div className="md:w-1/2">
-            <h2 className="text-medium-blue mb-2 text-left">Grow Guide</h2>
-          </div>
-          <div className="md:w-1/2 mt-4 md:mt-0 text-left">
-            <p className="text-gray-600 text-base font-dosis">
-              Wähle eine Wachstumsphase im Kontextmenü am unteren Bildschirmrand um detaillierte Informationen zu den wichtigsten Parametern deines Grows zu erhalten.
-            </p>
-            <p className="text-gray-600 text-base mt-2 font-dosis">
-              Tippe auf <span className="drc-info-tag-style rounded-md px-2 py-0.5 font-bold shadow-md bg-olive-green/15 text-olive-green border border-olive-green/30">markierte</span> Begriffe um weitere Informationen und Tipps zu erhalten. <br />
-            </p>
-            <p className="text-gray-600 text-base mt-2 font-dosis">
-              Schau Dir auch unser Dr. Cannabis Lexikon an! (Derzeit in der Aufbauphase.)
-            </p>
+        <div className="mb-8">
+          <h2 className="text-medium-blue mb-4 text-left">Grow Guide</h2>
+          
+          {/* Info Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            {/* Card 1: Phase Selection */}
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="bg-medium-blue/10 p-3 flex items-center gap-3">
+                <div className="bg-medium-blue rounded-full p-2 text-white">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+                <h3 className="font-bold text-medium-blue">Phasen erkunden</h3>
+              </div>
+              <div className="p-4">
+                <p className="text-gray-600 text-sm font-dosis">
+                  Wähle eine Wachstumsphase im Kontextmenü am unteren Bildschirmrand für detaillierte Informationen zu den wichtigsten Parametern.
+                </p>
+              </div>
+            </div>
+            
+            {/* Card 2: DRC Info Tags */}
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="bg-olive-green/10 p-3 flex items-center gap-3">
+                <div className="bg-olive-green rounded-full p-2 text-white">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="font-bold text-olive-green">Fachbegriffe</h3>
+              </div>
+              <div className="p-4">
+                <p className="text-gray-600 text-sm font-dosis">
+                  Tippe auf <span className="drc-info-tag-style rounded-md px-2 py-0.5 font-bold shadow-sm bg-olive-green/15 text-olive-green border border-olive-green/30">markierte</span> Begriffe für weitere Informationen und praktische Tipps.
+                </p>
+              </div>
+            </div>
+            
+            {/* Card 3: Dr. Cannabis Lexikon */}
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="bg-purple/10 p-3 flex items-center gap-3">
+                <div className="bg-purple rounded-full p-2 text-white">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </div>
+                <h3 className="font-bold text-purple">Dr. Cannabis Lexikon</h3>
+              </div>
+              <div className="p-4">
+                <p className="text-gray-600 text-sm font-dosis mb-3">
+                  Schau Dir unser Dr. Cannabis Lexikon an für umfassende Erklärungen und Hintergrundwissen. <span className="text-xs text-gray-500">(Derzeit in der Aufbauphase)</span>
+                </p>
+                <Link href="/drc-info" className="block w-full py-2 px-4 bg-purple text-white text-center rounded-md hover:bg-purple/90 transition-colors text-sm font-medium">
+                  Zum Lexikon
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
         

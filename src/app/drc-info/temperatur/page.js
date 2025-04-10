@@ -9,7 +9,8 @@ import RelatedTerms from '../components/RelatedTerms';
 export default function TemperaturInfoPage() {
   const [selectedGrowPhase, setSelectedGrowPhase] = useState('seedling');
   
-  // Product ad data
+  // Product ad data - temporarily disabled
+  /*
   const productAd = {
     name: 'Digitales Thermo-Hygrometer Pro',
     image: '/aci.png',
@@ -17,9 +18,11 @@ export default function TemperaturInfoPage() {
     regularPrice: '44,99 €',
     salePrice: '39,99 €'
   };
+  */
+  const productAd = null;
   
   // Related terms
-  const relatedTerms = ['lichtzyklus', 'ph', 'luftfeuchtigkeit', 'nährstoffe'];
+  const relatedTerms = ['lichtplan', 'luftfeuchtigkeit', 'nährstoffe', 'ec-wert'];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -167,8 +170,8 @@ export default function TemperaturInfoPage() {
             </div>
           </InfoBox>
           
-          {/* Product Ad */}
-          <ProductAd product={productAd} />
+          {/* Product Ad - temporarily disabled */}
+          {/* <ProductAd product={productAd} /> */}
           
           {/* Related Terms */}
           <RelatedTerms terms={relatedTerms} />

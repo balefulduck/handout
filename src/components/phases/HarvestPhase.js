@@ -1,8 +1,6 @@
 'use client';
 
-import { WiHumidity } from "react-icons/wi";
-import { PiThermometerSimple, PiPlantBold, PiTestTubeFill } from "react-icons/pi";
-import { LuSunMedium } from "react-icons/lu";
+// Icon imports removed
 
 export default function HarvestPhase() {
   return (

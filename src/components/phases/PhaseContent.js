@@ -1,25 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { WiHumidity } from "react-icons/wi";
-import { PiThermometerSimple, PiPlantBold, PiTestTubeFill } from "react-icons/pi";
-import { LuSunMedium } from "react-icons/lu";
 import DrcInfoTag from '../DrcInfoTag';
 
-// Icon mapping based on content type
-const contentTypeIcons = {
-  temperature: PiThermometerSimple,
-  humidity: WiHumidity,
-  light: LuSunMedium,
-  ph: PiTestTubeFill,
-  pots: PiPlantBold,
-  info: PiPlantBold,
-  ready: PiPlantBold,
-  methods: PiPlantBold,
-  drying: PiPlantBold,
-  curing: PiPlantBold,
-  default: PiPlantBold
-};
+// Icon mapping removed - no longer using icons
 
 // Color mapping based on content type for consistent theming
 const contentTypeColors = {
@@ -138,11 +122,10 @@ export default function PhaseContent({ phaseName }) {
               className="bg-white rounded-lg border border-gray-200 p-4 mb-4 shadow-sm"
             >
               <div className="flex items-center gap-2 mb-2">
-                {contentTypeIcons[item.content_type] && (
-                  <span className={`p-2 rounded-full ${contentTypeColors[item.content_type] || contentTypeColors.default}`}>
-                    {React.createElement(contentTypeIcons[item.content_type], { className: "text-lg" })}
-                  </span>
-                )}
+                <span className={`p-2 rounded-full ${contentTypeColors[item.content_type] || contentTypeColors.default}`}>
+                  {/* Icon placeholder - using a simple circle instead */}
+                  <div className="w-4 h-4 rounded-full bg-current"></div>
+                </span>
                 {item.tooltip ? (
                   <DrcInfoTag 
                     term={item.content_type}
@@ -171,7 +154,7 @@ export default function PhaseContent({ phaseName }) {
           <h4 className="text-sm uppercase text-gray-500 font-semibold mb-3">Umgebungsparameter</h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {groupedData.environmental.map((item) => {
-              const Icon = contentTypeIcons[item.content_type] || contentTypeIcons.default;
+              // Icon reference removed
               const colorClasses = contentTypeColors[item.content_type] || contentTypeColors.default;
               const centerContent = shouldCenterContent(item.values);
               
@@ -180,21 +163,20 @@ export default function PhaseContent({ phaseName }) {
                   key={`${item.phase}-${item.content_type}`}
                   className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm hover:shadow-md transition-shadow"
                 >
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <Icon className={`text-lg ${colorClasses.split(' ')[0]}`} />
+                  <div className="mb-1.5">
                     {item.tooltip ? (
                       <DrcInfoTag 
                         term={item.content_type}
                         color={item.color_theme}
                         tooltipContent={item.tooltip}
                       >
-                        <span className="text-sm font-bold text-gray-800">{item.title}</span>
+                        <span className="text-sm font-bold text-gray-800 break-words w-full">{item.title}</span>
                       </DrcInfoTag>
                     ) : (
-                      <span className="text-sm font-bold text-gray-800">{item.title}</span>
+                      <span className="text-sm font-bold text-gray-800 break-words w-full">{item.title}</span>
                     )}
                   </div>
-                  <div className={`font-dosis pl-6 space-y-0.5 ${centerContent ? 'text-center pl-0' : ''}`}>
+                  <div className={`font-dosis space-y-0.5 ${centerContent ? 'text-center' : ''}`}>
                     {item.values.map((value, valueIndex) => (
                       <p key={valueIndex} className="text-sm text-gray-700">{value}</p>
                     ))}
@@ -212,7 +194,7 @@ export default function PhaseContent({ phaseName }) {
           <h4 className="text-sm uppercase text-gray-500 font-semibold mb-3">Anbautechniken</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {groupedData.growing.map((item) => {
-              const Icon = contentTypeIcons[item.content_type] || contentTypeIcons.default;
+              // Icon reference removed
               const colorClasses = contentTypeColors[item.content_type] || contentTypeColors.default;
               const centerContent = shouldCenterContent(item.values);
               
@@ -252,7 +234,7 @@ export default function PhaseContent({ phaseName }) {
           <h4 className="text-sm uppercase text-gray-500 font-semibold mb-3">Erntetechniken</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {groupedData.harvest.map((item) => {
-              const Icon = contentTypeIcons[item.content_type] || contentTypeIcons.default;
+              // Icon reference removed
               const colorClasses = contentTypeColors[item.content_type] || contentTypeColors.default;
               const centerContent = shouldCenterContent(item.values);
               

@@ -1,8 +1,6 @@
 'use client';
 
-import { WiHumidity } from "react-icons/wi";
-import { PiThermometerSimple, PiPlantBold, PiTestTubeFill } from "react-icons/pi";
-import { LuSunMedium } from "react-icons/lu";
+// Phase icon imports removed
 import { FaPrint } from "react-icons/fa";
 import Image from 'next/image';
 import DrcInfoTag from '../DrcInfoTag';
