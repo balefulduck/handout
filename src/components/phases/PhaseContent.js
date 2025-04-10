@@ -221,23 +221,20 @@ export default function PhaseContent({ phaseName }) {
                   key={`${item.phase}-${item.content_type}`}
                   className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm hover:shadow-md transition-shadow"
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`p-1.5 rounded-full ${colorClasses}`}>
-                      <Icon className="text-lg" />
-                    </span>
+                  <div className="mb-2">
                     {item.tooltip ? (
                       <DrcInfoTag 
                         term={item.content_type}
                         color={item.color_theme}
                         tooltipContent={item.tooltip}
                       >
-                        <span className="font-bold text-gray-800">{item.title}</span>
+                        <span className="font-bold text-gray-800 break-words w-full">{item.title}</span>
                       </DrcInfoTag>
                     ) : (
-                      <span className="font-bold text-gray-800">{item.title}</span>
+                      <span className="font-bold text-gray-800 break-words w-full">{item.title}</span>
                     )}
                   </div>
-                  <div className={`font-dosis space-y-1 ${centerContent ? 'text-center' : 'pl-8'}`}>
+                  <div className={`font-dosis space-y-1 ${centerContent ? 'text-center' : ''}`}>
                     {item.values.map((value, valueIndex) => (
                       <p key={valueIndex} className="text-sm text-gray-700">{value}</p>
                     ))}
@@ -264,23 +261,20 @@ export default function PhaseContent({ phaseName }) {
                   key={`${item.phase}-${item.content_type}`}
                   className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm hover:shadow-md transition-shadow"
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`p-1.5 rounded-full ${colorClasses}`}>
-                      <Icon className="text-lg" />
-                    </span>
+                  <div className="mb-2">
                     {item.tooltip ? (
                       <DrcInfoTag 
                         term={item.content_type}
                         color={item.color_theme}
                         tooltipContent={item.tooltip}
                       >
-                        <span className="font-bold text-gray-800">{item.title}</span>
+                        <span className="font-bold text-gray-800 break-words w-full">{item.title}</span>
                       </DrcInfoTag>
                     ) : (
-                      <span className="font-bold text-gray-800">{item.title}</span>
+                      <span className="font-bold text-gray-800 break-words w-full">{item.title}</span>
                     )}
                   </div>
-                  <div className={`font-dosis space-y-1 ${centerContent ? 'text-center' : 'pl-8'}`}>
+                  <div className={`font-dosis space-y-1 ${centerContent ? 'text-center' : ''}`}>
                     {item.values.map((value, valueIndex) => (
                       <p key={valueIndex} className="text-sm text-gray-700">{value}</p>
                     ))}
