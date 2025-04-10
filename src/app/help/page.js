@@ -93,16 +93,6 @@ export default function HelpPage() {
               </button>
             </div>
             
-            <div className="flex-shrink-0 grid grid-cols-2 gap-3">
-              <div className="p-3 bg-gray-50 rounded-lg text-center">
-                <FaLeaf className="text-3xl text-olive-green mx-auto mb-2" />
-                <p className="text-sm font-medium">Blattverfärbungen</p>
-              </div>
-              <div className="p-3 bg-gray-50 rounded-lg text-center">
-                <GiGrowth className="text-3xl text-olive-green mx-auto mb-2" />
-                <p className="text-sm font-medium">Wachstumsprobleme</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

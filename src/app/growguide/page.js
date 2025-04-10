@@ -155,7 +155,10 @@ export default function GrowGuidePage() {
               Wähle eine Wachstumsphase im Kontextmenü am unteren Bildschirmrand um detaillierte Informationen zu den wichtigsten Parametern deines Grows zu erhalten.
             </p>
             <p className="text-gray-600 text-base mt-2 font-dosis">
-              Wische über <span className="drc-info-tag-style rounded-md px-2 py-0.5 font-bold shadow-md bg-olive-green/15 text-olive-green border border-olive-green/30">markierte</span> Begriffe um weitere Informationen und Tipps zu erhalten. <br />Schau Dir auch unser Dr. Cannabis Lexikon an!
+              Tippe auf <span className="drc-info-tag-style rounded-md px-2 py-0.5 font-bold shadow-md bg-olive-green/15 text-olive-green border border-olive-green/30">markierte</span> Begriffe um weitere Informationen und Tipps zu erhalten. <br />
+            </p>
+            <p className="text-gray-600 text-base mt-2 font-dosis">
+              Schau Dir auch unser Dr. Cannabis Lexikon an! (Derzeit in der Aufbauphase.)
             </p>
           </div>
         </div>

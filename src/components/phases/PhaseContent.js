@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { WiHumidity } from "react-icons/wi";
 import { PiThermometerSimple, PiPlantBold, PiTestTubeFill } from "react-icons/pi";
 import { LuSunMedium } from "react-icons/lu";
@@ -19,6 +19,27 @@ const contentTypeIcons = {
   drying: PiPlantBold,
   curing: PiPlantBold,
   default: PiPlantBold
+};
+
+// Color mapping based on content type for consistent theming
+const contentTypeColors = {
+  temperature: 'text-orange-500 bg-orange-50 border-orange-200',
+  humidity: 'text-blue-500 bg-blue-50 border-blue-200',
+  light: 'text-yellow-600 bg-yellow-50 border-yellow-200',
+  ph: 'text-purple-500 bg-purple-50 border-purple-200',
+  pots: 'text-olive-green bg-olive-green/10 border-olive-green/30',
+  info: 'text-medium-blue bg-medium-blue/10 border-medium-blue/30',
+  ready: 'text-green-600 bg-green-50 border-green-200',
+  methods: 'text-indigo-500 bg-indigo-50 border-indigo-200',
+  drying: 'text-amber-600 bg-amber-50 border-amber-200',
+  curing: 'text-teal-600 bg-teal-50 border-teal-200',
+  default: 'text-gray-700 bg-gray-50 border-gray-200'
+};
+
+// Helper function to determine if content should be centered
+const shouldCenterContent = (values) => {
+  // Center if all values are short (less than 50 characters)
+  return values.every(value => value.length < 50);
 };
 
 export default function PhaseContent({ phaseName }) {
@@ -49,15 +70,16 @@ export default function PhaseContent({ phaseName }) {
     }
   }, [phaseName]);
 
-
-
   if (isLoading) {
     return (
-      <div className="py-6 px-4 text-center">
-        <div className="animate-pulse p-8 bg-gray-100 rounded-xl">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mx-auto mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+      <div className="py-4">
+        <div className="animate-pulse space-y-3">
+          <div className="h-6 bg-gray-200 rounded w-1/4"></div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-24 bg-gray-100 rounded-lg border border-gray-200"></div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -65,13 +87,13 @@ export default function PhaseContent({ phaseName }) {
 
   if (error) {
     return (
-      <div className="py-6 px-4 text-center">
-        <div className="bg-red-50 p-8 rounded-xl border border-red-200">
+      <div className="py-4">
+        <div className="bg-red-50 p-4 rounded-lg border border-red-200">
           <h3 className="text-red-600 font-bold">Fehler beim Laden der Daten</h3>
-          <p className="text-red-500">{error}</p>
+          <p className="text-red-500 text-sm">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+            className="mt-3 px-3 py-1 bg-red-500 text-white text-sm rounded-md hover:bg-red-600 transition-colors"
           >
             Neu laden
           </button>
@@ -83,72 +105,192 @@ export default function PhaseContent({ phaseName }) {
   // Early return if no data
   if (!phaseData.length) {
     return (
-      <div className="py-6 px-4 text-center">
-        <p>Keine Daten verfügbar für diese Phase.</p>
+      <div className="py-4">
+        <p className="text-gray-500 text-center">Keine Daten verfügbar für diese Phase.</p>
       </div>
     );
   }
 
+  // Group data by category for better organization
+  const groupedData = {
+    environmental: phaseData.filter(item => 
+      ['temperature', 'humidity', 'light', 'ph'].includes(item.content_type)
+    ),
+    growing: phaseData.filter(item => 
+      ['pots', 'ready', 'methods'].includes(item.content_type)
+    ),
+    harvest: phaseData.filter(item => 
+      ['drying', 'curing'].includes(item.content_type)
+    ),
+    info: phaseData.filter(item => 
+      ['info'].includes(item.content_type)
+    )
+  };
+
   return (
-    <div className="py-6 px-4">
-      
-      <div className="max-w-3xl mx-auto mb-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 auto-rows-fr">
-          {phaseData.map((item, itemIndex) => {
-            const Icon = contentTypeIcons[item.content_type] || contentTypeIcons.default;
-            
-            // Determine if this should be full-width
-            const isFullWidth = item.content_type === 'pots' || item.content_type === 'info';
-            
-            return (
-              <div 
-                key={`${item.phase}-${item.content_type}`} 
-                className={`rounded-xl shadow-lg overflow-hidden relative flex flex-col h-full ${isFullWidth ? 'col-span-1 sm:col-span-2 md:col-span-3' : ''}`}
-              >
-                {/* Single background image for the entire card */}
+    <div className="py-3">
+      {/* Info cards - full width and prominent if they exist */}
+      {groupedData.info.length > 0 && (
+        <div className="mb-6">
+          {groupedData.info.map((item) => (
+            <div 
+              key={`${item.phase}-${item.content_type}`}
+              className="bg-white rounded-lg border border-gray-200 p-4 mb-4 shadow-sm"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                {contentTypeIcons[item.content_type] && (
+                  <span className={`p-2 rounded-full ${contentTypeColors[item.content_type] || contentTypeColors.default}`}>
+                    {React.createElement(contentTypeIcons[item.content_type], { className: "text-lg" })}
+                  </span>
+                )}
+                {item.tooltip ? (
+                  <DrcInfoTag 
+                    term={item.content_type}
+                    color={item.color_theme}
+                    tooltipContent={item.tooltip}
+                  >
+                    <h3 className="font-bold text-gray-800">{item.title}</h3>
+                  </DrcInfoTag>
+                ) : (
+                  <h3 className="font-bold text-gray-800">{item.title}</h3>
+                )}
+              </div>
+              <div className="font-dosis space-y-1 pl-10">
+                {item.values.map((value, valueIndex) => (
+                  <p key={valueIndex} className="text-gray-700">{value}</p>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Environmental parameters - compact grid */}
+      {groupedData.environmental.length > 0 && (
+        <div className="mb-6">
+          <h4 className="text-sm uppercase text-gray-500 font-semibold mb-3">Umgebungsparameter</h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {groupedData.environmental.map((item) => {
+              const Icon = contentTypeIcons[item.content_type] || contentTypeIcons.default;
+              const colorClasses = contentTypeColors[item.content_type] || contentTypeColors.default;
+              const centerContent = shouldCenterContent(item.values);
+              
+              return (
                 <div 
-                  className="absolute inset-0 z-0" 
-                  style={{
-                    backgroundImage: `url('/cb.jpg')`,
-                    backgroundPosition: `${(itemIndex % 5) * 25}% ${(itemIndex % 3) * 33}%`,
-                    backgroundSize: 'cover',
-                    filter: 'blur(1px) brightness(0.5)',
-                    opacity: 0.85
-                  }}
-                ></div>
-                <div className="absolute inset-0 bg-black opacity-50 z-1"></div>
-                
-                <div className="bg-olive-green/80 p-3 relative overflow-hidden z-10">
-                  <div className="flex items-center gap-2 relative z-20">
-                    <Icon className="text-base text-white" />
+                  key={`${item.phase}-${item.content_type}`}
+                  className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <Icon className={`text-lg ${colorClasses.split(' ')[0]}`} />
                     {item.tooltip ? (
                       <DrcInfoTag 
-                        term={item.content_type} 
-                        color={item.color_theme} 
-                        bgMode="dark"
+                        term={item.content_type}
+                        color={item.color_theme}
                         tooltipContent={item.tooltip}
                       >
-                        {item.title}
+                        <span className="text-sm font-bold text-gray-800">{item.title}</span>
                       </DrcInfoTag>
                     ) : (
-                      <span className="text-base font-bold text-white">{item.title}</span>
+                      <span className="text-sm font-bold text-gray-800">{item.title}</span>
                     )}
                   </div>
+                  <div className={`font-dosis pl-6 space-y-0.5 ${centerContent ? 'text-center pl-0' : ''}`}>
+                    {item.values.map((value, valueIndex) => (
+                      <p key={valueIndex} className="text-sm text-gray-700">{value}</p>
+                    ))}
+                  </div>
                 </div>
-                <div className="p-4 rounded-b-xl relative overflow-hidden font-dosis z-10 flex-grow" style={{ color: 'white' }}>
-                  {/* Additional dark overlay for better text readability - fill entire card */}
-                  <div className="absolute inset-0 bg-black opacity-30 z-1"></div>
-                  {item.values.map((value, valueIndex) => (
-                    <div key={valueIndex} className={`${valueIndex > 0 ? 'mt-2' : ''} relative z-20`}>
-                      <span className="text-base text-white font-dosis tracking-wide">{value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Growing techniques - medium cards */}
+      {groupedData.growing.length > 0 && (
+        <div className="mb-6">
+          <h4 className="text-sm uppercase text-gray-500 font-semibold mb-3">Anbautechniken</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {groupedData.growing.map((item) => {
+              const Icon = contentTypeIcons[item.content_type] || contentTypeIcons.default;
+              const colorClasses = contentTypeColors[item.content_type] || contentTypeColors.default;
+              const centerContent = shouldCenterContent(item.values);
+              
+              return (
+                <div 
+                  key={`${item.phase}-${item.content_type}`}
+                  className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`p-1.5 rounded-full ${colorClasses}`}>
+                      <Icon className="text-lg" />
+                    </span>
+                    {item.tooltip ? (
+                      <DrcInfoTag 
+                        term={item.content_type}
+                        color={item.color_theme}
+                        tooltipContent={item.tooltip}
+                      >
+                        <span className="font-bold text-gray-800">{item.title}</span>
+                      </DrcInfoTag>
+                    ) : (
+                      <span className="font-bold text-gray-800">{item.title}</span>
+                    )}
+                  </div>
+                  <div className={`font-dosis space-y-1 ${centerContent ? 'text-center' : 'pl-8'}`}>
+                    {item.values.map((value, valueIndex) => (
+                      <p key={valueIndex} className="text-sm text-gray-700">{value}</p>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Harvest techniques - medium cards */}
+      {groupedData.harvest.length > 0 && (
+        <div>
+          <h4 className="text-sm uppercase text-gray-500 font-semibold mb-3">Erntetechniken</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {groupedData.harvest.map((item) => {
+              const Icon = contentTypeIcons[item.content_type] || contentTypeIcons.default;
+              const colorClasses = contentTypeColors[item.content_type] || contentTypeColors.default;
+              const centerContent = shouldCenterContent(item.values);
+              
+              return (
+                <div 
+                  key={`${item.phase}-${item.content_type}`}
+                  className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`p-1.5 rounded-full ${colorClasses}`}>
+                      <Icon className="text-lg" />
+                    </span>
+                    {item.tooltip ? (
+                      <DrcInfoTag 
+                        term={item.content_type}
+                        color={item.color_theme}
+                        tooltipContent={item.tooltip}
+                      >
+                        <span className="font-bold text-gray-800">{item.title}</span>
+                      </DrcInfoTag>
+                    ) : (
+                      <span className="font-bold text-gray-800">{item.title}</span>
+                    )}
+                  </div>
+                  <div className={`font-dosis space-y-1 ${centerContent ? 'text-center' : 'pl-8'}`}>
+                    {item.values.map((value, valueIndex) => (
+                      <p key={valueIndex} className="text-sm text-gray-700">{value}</p>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

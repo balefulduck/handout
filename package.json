@@ -4,9 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node scripts/backup-database.js",
     "build": "next build",
-    "postbuild": "node scripts/restore-database.js",
     "start": "next start",
     "lint": "next lint",
     "reset-users": "node scripts/reset-users.js",
@@ -17,7 +15,7 @@
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
     "bcryptjs": "^3.0.2",
-    "better-sqlite3": "^11.8.1",
+    "better-sqlite3": "^11.9.1",
     "chart.js": "^4.4.8",
     "framer-motion": "^12.5.0",
     "next": "15.1.7",

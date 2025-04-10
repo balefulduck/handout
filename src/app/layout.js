@@ -1,6 +1,8 @@
 import { Jura } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import Footer from "@/components/Footer";
+import CookieConsent from "@/components/CookieConsent";
 
 const jura = Jura({
   variable: "--font-jura",
@@ -20,8 +22,12 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="de">
-      <body className={`${jura.variable} font-jura min-h-screen`} style={{ background: `#f8f8f6` }}>
-        <Providers>{children}</Providers>
+      <body className={`${jura.variable} font-jura min-h-screen flex flex-col`} style={{ background: `#f8f8f6` }}>
+        <Providers>
+          <div className="flex-grow">{children}</div>
+          <Footer />
+          <CookieConsent />
+        </Providers>
       </body>
     </html>
   );

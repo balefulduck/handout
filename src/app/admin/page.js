@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname, useParams } from 'next/navigation';
+import Link from 'next/link';
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('strains'); // 'strains' or 'users' or 'feedback'
@@ -338,6 +339,17 @@ export default function AdminPage() {
         >
           Hilfe-Anfragen
         </button>
+        <Link 
+          href="/admin/database"
+          className={`px-6 py-3 font-medium ${
+            activeTab === 'database'
+              ? 'text-custom-orange border-b-2 border-custom-orange'
+              : 'text-gray-500 hover:text-custom-orange'
+          }`}
+        >
+          Datenbank
+        </Link>
+
       </div>
       
       {/* Strain Management Section */}
