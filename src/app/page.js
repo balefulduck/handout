@@ -13,7 +13,7 @@ export default function Home() {
           href="/login" 
           className="inline-flex items-center px-4 py-1.5 text-sm font-medium text-custom-orange hover:text-custom-orange/80 transition-colors duration-200"
         >
-          <span className="hidden sm:inline">Bereits registriert?</span> Jetzt einloggen <FaArrowRight className="ml-2" />
+          <span className="hidden sm:inline">Bereits registriert? </span> Jetzt einloggen <FaArrowRight className="ml-2" />
         </Link>
       </div>
       {/* Hero Section */}
